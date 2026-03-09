@@ -1,0 +1,267 @@
+{
+  "resource": "analytics",
+  "responses": {
+    "PUT /api/v1/trips/:tripId/exchange-rates": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Exchange rate upserted successfully",
+        "data": {
+          "exchangeRate": {
+            "_id": "6ae100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "baseCurrency": "EUR",
+            "quoteCurrency": "USD",
+            "rate": 1.1,
+            "source": "manual",
+            "asOf": "2026-03-08T12:50:00.000Z",
+            "createdBy": "64f100000000000000000001",
+            "createdAt": "2026-03-08T12:50:00.000Z",
+            "updatedAt": "2026-03-08T12:50:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/exchange-rates": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Exchange rates fetched successfully",
+        "data": {
+          "exchangeRates": [
+            {
+              "_id": "6ae100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "baseCurrency": "EUR",
+              "quoteCurrency": "USD",
+              "rate": 1.1,
+              "source": "manual",
+              "asOf": "2026-03-08T12:50:00.000Z",
+              "createdBy": "64f100000000000000000001",
+              "createdAt": "2026-03-08T12:50:00.000Z",
+              "updatedAt": "2026-03-08T12:50:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/currency/convert": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Currency conversion preview generated",
+        "data": {
+          "conversion": {
+            "amount": 50,
+            "fromCurrency": "EUR",
+            "toCurrency": "USD",
+            "rate": 1.1,
+            "convertedAmount": 55,
+            "source": "manual",
+            "inverseApplied": false
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/analytics/expenses": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Expense analytics generated successfully",
+        "data": {
+          "analytics": {
+            "granularity": "month",
+            "periodDays": 180,
+            "fromDate": "2025-09-09T00:00:00.000Z",
+            "toDate": "2026-03-08T00:00:00.000Z",
+            "totals": {
+              "totalSpent": 1420,
+              "averagePerPeriod": 473.33,
+              "periodCount": 3,
+              "expenseCount": 4
+            },
+            "trend": [
+              {
+                "period": "2026-01",
+                "total": 320,
+                "periodIndex": 1
+              },
+              {
+                "period": "2026-02",
+                "total": 500,
+                "periodIndex": 2
+              },
+              {
+                "period": "2026-03",
+                "total": 600,
+                "periodIndex": 3
+              }
+            ],
+            "byCategory": [
+              {
+                "category": "stay",
+                "total": 900
+              },
+              {
+                "category": "food",
+                "total": 220
+              },
+              {
+                "category": "activities",
+                "total": 300
+              }
+            ],
+            "forecast": [
+              {
+                "periodIndex": 4,
+                "projectedTotal": 740,
+                "method": "linear-regression"
+              },
+              {
+                "periodIndex": 5,
+                "projectedTotal": 880,
+                "method": "linear-regression"
+              },
+              {
+                "periodIndex": 6,
+                "projectedTotal": 1020,
+                "method": "linear-regression"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/settlement": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Settlement report generated successfully",
+        "data": {
+          "settlement": {
+            "tripId": "65a100000000000000000001",
+            "currency": "USD",
+            "participantCount": 2,
+            "expenseCount": 4,
+            "balances": [
+              {
+                "userId": "64f100000000000000000001",
+                "paid": 1220,
+                "owed": 710,
+                "net": 510
+              },
+              {
+                "userId": "64f100000000000000000002",
+                "paid": 200,
+                "owed": 710,
+                "net": -510
+              }
+            ],
+            "settlements": [
+              {
+                "fromUserId": "64f100000000000000000002",
+                "toUserId": "64f100000000000000000001",
+                "amount": 510,
+                "currency": "USD"
+              }
+            ],
+            "totals": {
+              "totalPaid": 1420,
+              "totalOwed": 1420
+            }
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/reports/snapshots": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Report snapshot created successfully",
+        "data": {
+          "snapshot": {
+            "_id": "6af100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "reportType": "settlement",
+            "format": "csv",
+            "createdBy": "64f100000000000000000001",
+            "filters": {},
+            "payload": {
+              "balancesCsv": "userId,paid,owed,net\\n64f100000000000000000001,1220,710,510",
+              "settlementsCsv": "fromUserId,toUserId,amount,currency\\n64f100000000000000000002,64f100000000000000000001,510,USD",
+              "section": "settlement"
+            },
+            "generatedAt": "2026-03-08T13:00:00.000Z",
+            "createdAt": "2026-03-08T13:00:00.000Z",
+            "updatedAt": "2026-03-08T13:00:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/reports/snapshots": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Report snapshots fetched successfully",
+        "data": {
+          "snapshots": [
+            {
+              "_id": "6af100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "reportType": "settlement",
+              "format": "csv",
+              "createdBy": "64f100000000000000000001",
+              "filters": {},
+              "payload": {
+                "balancesCsv": "userId,paid,owed,net\\n64f100000000000000000001,1220,710,510",
+                "settlementsCsv": "fromUserId,toUserId,amount,currency\\n64f100000000000000000002,64f100000000000000000001,510,USD",
+                "section": "settlement"
+              },
+              "generatedAt": "2026-03-08T13:00:00.000Z",
+              "createdAt": "2026-03-08T13:00:00.000Z",
+              "updatedAt": "2026-03-08T13:00:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/reports/snapshots/:snapshotId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Report snapshot fetched successfully",
+        "data": {
+          "snapshot": {
+            "_id": "6af100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "reportType": "settlement",
+            "format": "csv",
+            "createdBy": "64f100000000000000000001",
+            "filters": {},
+            "payload": {
+              "balancesCsv": "userId,paid,owed,net\\n64f100000000000000000001,1220,710,510",
+              "settlementsCsv": "fromUserId,toUserId,amount,currency\\n64f100000000000000000002,64f100000000000000000001,510,USD",
+              "section": "settlement"
+            },
+            "generatedAt": "2026-03-08T13:00:00.000Z",
+            "createdAt": "2026-03-08T13:00:00.000Z",
+            "updatedAt": "2026-03-08T13:00:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/reports/snapshots/:snapshotId?download=true": {
+      "status": 200,
+      "contentType": "text/csv",
+      "body": "userId,paid,owed,net\\n64f100000000000000000001,1220,710,510"
+    }
+  }
+}

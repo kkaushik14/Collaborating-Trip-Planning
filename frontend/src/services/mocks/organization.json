@@ -1,0 +1,547 @@
+{
+  "resource": "organization",
+  "responses": {
+    "POST /api/v1/trips/:tripId/checklists": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Checklist created successfully",
+        "data": {
+          "checklist": {
+            "_id": "69a100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "title": "Packing List",
+            "type": "packing",
+            "createdBy": "64f100000000000000000001",
+            "items": [],
+            "createdAt": "2026-03-08T12:10:00.000Z",
+            "updatedAt": "2026-03-08T12:10:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/checklists": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Checklists fetched successfully",
+        "data": {
+          "checklists": [
+            {
+              "_id": "69a100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "title": "Packing List",
+              "type": "packing",
+              "createdBy": "64f100000000000000000001",
+              "items": [
+                {
+                  "_id": "69a200000000000000000001",
+                  "label": "Passport",
+                  "isCompleted": true,
+                  "sortOrder": 0,
+                  "assignee": null,
+                  "dueDate": null,
+                  "completedAt": "2026-03-08T12:15:00.000Z",
+                  "completedBy": "64f100000000000000000001",
+                  "createdAt": "2026-03-08T12:12:00.000Z",
+                  "updatedAt": "2026-03-08T12:15:00.000Z"
+                }
+              ],
+              "createdAt": "2026-03-08T12:10:00.000Z",
+              "updatedAt": "2026-03-08T12:15:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/checklists/:checklistId/items": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Checklist item added successfully",
+        "data": {
+          "item": {
+            "_id": "69a200000000000000000001",
+            "label": "Passport",
+            "isCompleted": false,
+            "sortOrder": 0,
+            "assignee": null,
+            "dueDate": null,
+            "completedAt": null,
+            "completedBy": null,
+            "createdAt": "2026-03-08T12:12:00.000Z",
+            "updatedAt": "2026-03-08T12:12:00.000Z"
+          },
+          "checklist": {
+            "_id": "69a100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "title": "Packing List",
+            "type": "packing",
+            "createdBy": "64f100000000000000000001",
+            "items": [
+              {
+                "_id": "69a200000000000000000001",
+                "label": "Passport",
+                "isCompleted": false,
+                "sortOrder": 0,
+                "assignee": null,
+                "dueDate": null,
+                "completedAt": null,
+                "completedBy": null,
+                "createdAt": "2026-03-08T12:12:00.000Z",
+                "updatedAt": "2026-03-08T12:12:00.000Z"
+              }
+            ],
+            "createdAt": "2026-03-08T12:10:00.000Z",
+            "updatedAt": "2026-03-08T12:12:00.000Z"
+          }
+        }
+      }
+    },
+    "PATCH /api/v1/trips/:tripId/checklists/:checklistId/items/:itemId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Checklist item updated successfully",
+        "data": {
+          "item": {
+            "_id": "69a200000000000000000001",
+            "label": "Passport",
+            "isCompleted": true,
+            "sortOrder": 0,
+            "assignee": null,
+            "dueDate": null,
+            "completedAt": "2026-03-08T12:15:00.000Z",
+            "completedBy": "64f100000000000000000001",
+            "createdAt": "2026-03-08T12:12:00.000Z",
+            "updatedAt": "2026-03-08T12:15:00.000Z"
+          },
+          "checklist": {
+            "_id": "69a100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "title": "Packing List",
+            "type": "packing",
+            "createdBy": "64f100000000000000000001",
+            "items": [
+              {
+                "_id": "69a200000000000000000001",
+                "label": "Passport",
+                "isCompleted": true,
+                "sortOrder": 0,
+                "assignee": null,
+                "dueDate": null,
+                "completedAt": "2026-03-08T12:15:00.000Z",
+                "completedBy": "64f100000000000000000001",
+                "createdAt": "2026-03-08T12:12:00.000Z",
+                "updatedAt": "2026-03-08T12:15:00.000Z"
+              }
+            ],
+            "createdAt": "2026-03-08T12:10:00.000Z",
+            "updatedAt": "2026-03-08T12:15:00.000Z"
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/attachments": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Attachment created successfully",
+        "data": {
+          "attachment": {
+            "_id": "6aa100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "uploadedBy": "64f100000000000000000001",
+            "targetType": "trip",
+            "day": null,
+            "activity": null,
+            "reservation": null,
+            "expense": null,
+            "comment": null,
+            "fileName": "flight-ticket.pdf",
+            "mimeType": "application/pdf",
+            "sizeBytes": 244000,
+            "storageProvider": "local",
+            "storageKey": "65a100000000000000000001/1700000000000-flight-ticket.pdf",
+            "url": "/uploads/1700000000000-flight-ticket.pdf",
+            "metadata": {},
+            "createdAt": "2026-03-08T12:20:00.000Z",
+            "updatedAt": "2026-03-08T12:20:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/attachments": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Attachments fetched successfully",
+        "data": {
+          "attachments": [
+            {
+              "_id": "6aa100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "uploadedBy": "64f100000000000000000001",
+              "targetType": "trip",
+              "day": null,
+              "activity": null,
+              "reservation": null,
+              "expense": null,
+              "comment": null,
+              "fileName": "flight-ticket.pdf",
+              "mimeType": "application/pdf",
+              "sizeBytes": 244000,
+              "storageProvider": "local",
+              "storageKey": "65a100000000000000000001/1700000000000-flight-ticket.pdf",
+              "url": "/uploads/1700000000000-flight-ticket.pdf",
+              "metadata": {},
+              "createdAt": "2026-03-08T12:20:00.000Z",
+              "updatedAt": "2026-03-08T12:20:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/attachments/upload": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Attachment uploaded successfully",
+        "data": {
+          "attachment": {
+            "_id": "6aa100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "uploadedBy": "64f100000000000000000001",
+            "targetType": "trip",
+            "day": null,
+            "activity": null,
+            "reservation": null,
+            "expense": null,
+            "comment": null,
+            "fileName": "hotel-voucher.pdf",
+            "mimeType": "application/pdf",
+            "sizeBytes": 182000,
+            "storageProvider": "local",
+            "storageKey": "1700000001111-a1b2c3d4e5f6-hotel-voucher.pdf",
+            "url": "/uploads/1700000001111-a1b2c3d4e5f6-hotel-voucher.pdf",
+            "metadata": {},
+            "createdAt": "2026-03-08T12:25:00.000Z",
+            "updatedAt": "2026-03-08T12:25:00.000Z"
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/reservations": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Reservation created successfully",
+        "data": {
+          "reservation": {
+            "_id": "6ab100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "createdBy": "64f100000000000000000001",
+            "title": "Hotel Booking",
+            "reservationType": "hotel",
+            "status": "booked",
+            "providerName": "Tokyo Stay",
+            "confirmationCode": "TOKYO-1234",
+            "startDateTime": "2026-04-10T11:00:00.000Z",
+            "endDateTime": "2026-04-20T09:00:00.000Z",
+            "location": {
+              "name": "Shinjuku Hotel",
+              "address": "Shinjuku, Tokyo"
+            },
+            "amount": 900,
+            "currency": "USD",
+            "notes": "Paid in advance",
+            "attachmentIds": [
+              "6aa100000000000000000001"
+            ],
+            "createdAt": "2026-03-08T12:30:00.000Z",
+            "updatedAt": "2026-03-08T12:30:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/reservations": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Reservations fetched successfully",
+        "data": {
+          "reservations": [
+            {
+              "_id": "6ab100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "createdBy": "64f100000000000000000001",
+              "title": "Hotel Booking",
+              "reservationType": "hotel",
+              "status": "booked",
+              "providerName": "Tokyo Stay",
+              "confirmationCode": "TOKYO-1234",
+              "startDateTime": "2026-04-10T11:00:00.000Z",
+              "endDateTime": "2026-04-20T09:00:00.000Z",
+              "location": {
+                "name": "Shinjuku Hotel",
+                "address": "Shinjuku, Tokyo"
+              },
+              "amount": 900,
+              "currency": "USD",
+              "notes": "Paid in advance",
+              "attachmentIds": [
+                "6aa100000000000000000001"
+              ],
+              "createdAt": "2026-03-08T12:30:00.000Z",
+              "updatedAt": "2026-03-08T12:30:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/expenses": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Expense created successfully",
+        "data": {
+          "expense": {
+            "_id": "6ac100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "day": null,
+            "activity": null,
+            "reservation": "6ab100000000000000000001",
+            "createdBy": "64f100000000000000000001",
+            "paidBy": "64f100000000000000000001",
+            "title": "Hotel payment",
+            "category": "stay",
+            "amount": 900,
+            "normalizedAmount": 900,
+            "currency": "USD",
+            "normalizedCurrency": "USD",
+            "exchangeRateApplied": 1,
+            "expenseDate": "2026-03-08T12:40:00.000Z",
+            "splitType": "none",
+            "splitBetween": [],
+            "notes": "Settlement not shared",
+            "receiptAttachment": "6aa100000000000000000001",
+            "createdAt": "2026-03-08T12:40:00.000Z",
+            "updatedAt": "2026-03-08T12:40:00.000Z"
+          },
+          "conversion": {
+            "amount": 900,
+            "fromCurrency": "USD",
+            "toCurrency": "USD",
+            "rate": 1,
+            "convertedAmount": 900,
+            "source": "identity",
+            "inverseApplied": false
+          },
+          "budgetSummary": {
+            "expenseCount": 1,
+            "spentByCategory": {
+              "stay": 900
+            },
+            "spentTotal": 900
+          },
+          "tripBudget": {
+            "_id": "6ad100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "currency": "USD",
+            "totalBudget": 2000,
+            "categoryLimits": [
+              {
+                "category": "stay",
+                "limit": 1200
+              },
+              {
+                "category": "food",
+                "limit": 500
+              }
+            ],
+            "summary": {
+              "spentTotal": 900,
+              "remaining": 1100,
+              "spentByCategory": {
+                "stay": 900
+              },
+              "lastCalculatedAt": "2026-03-08T12:40:00.000Z"
+            },
+            "alertThresholds": {
+              "warningPercent": 80,
+              "criticalPercent": 100
+            },
+            "createdAt": "2026-03-08T12:05:00.000Z",
+            "updatedAt": "2026-03-08T12:40:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/expenses": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Expenses fetched successfully",
+        "data": {
+          "expenses": [
+            {
+              "_id": "6ac100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "day": null,
+              "activity": null,
+              "reservation": "6ab100000000000000000001",
+              "createdBy": "64f100000000000000000001",
+              "paidBy": "64f100000000000000000001",
+              "title": "Hotel payment",
+              "category": "stay",
+              "amount": 900,
+              "normalizedAmount": 900,
+              "currency": "USD",
+              "normalizedCurrency": "USD",
+              "exchangeRateApplied": 1,
+              "expenseDate": "2026-03-08T12:40:00.000Z",
+              "splitType": "none",
+              "splitBetween": [],
+              "notes": "Settlement not shared",
+              "receiptAttachment": "6aa100000000000000000001",
+              "createdAt": "2026-03-08T12:40:00.000Z",
+              "updatedAt": "2026-03-08T12:40:00.000Z"
+            }
+          ]
+        },
+        "meta": {
+          "page": 1,
+          "limit": 20,
+          "total": 1,
+          "totalPages": 1
+        }
+      }
+    },
+    "PUT /api/v1/trips/:tripId/budget": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Trip budget saved successfully",
+        "data": {
+          "budget": {
+            "_id": "6ad100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "currency": "USD",
+            "totalBudget": 2000,
+            "categoryLimits": [
+              {
+                "category": "stay",
+                "limit": 1200
+              },
+              {
+                "category": "food",
+                "limit": 500
+              }
+            ],
+            "summary": {
+              "spentTotal": 900,
+              "remaining": 1100,
+              "spentByCategory": {
+                "stay": 900
+              },
+              "lastCalculatedAt": "2026-03-08T12:40:00.000Z"
+            },
+            "alertThresholds": {
+              "warningPercent": 80,
+              "criticalPercent": 100
+            },
+            "createdAt": "2026-03-08T12:05:00.000Z",
+            "updatedAt": "2026-03-08T12:40:00.000Z"
+          },
+          "summary": {
+            "expenseCount": 1,
+            "spentByCategory": {
+              "stay": 900
+            },
+            "spentTotal": 900
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/budget/summary": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Budget summary fetched successfully",
+        "data": {
+          "budget": {
+            "_id": "6ad100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "currency": "USD",
+            "totalBudget": 2000,
+            "categoryLimits": [
+              {
+                "category": "stay",
+                "limit": 1200
+              },
+              {
+                "category": "food",
+                "limit": 500
+              }
+            ],
+            "summary": {
+              "spentTotal": 900,
+              "remaining": 1100,
+              "spentByCategory": {
+                "stay": 900
+              },
+              "lastCalculatedAt": "2026-03-08T12:40:00.000Z"
+            },
+            "alertThresholds": {
+              "warningPercent": 80,
+              "criticalPercent": 100
+            },
+            "createdAt": "2026-03-08T12:05:00.000Z",
+            "updatedAt": "2026-03-08T12:40:00.000Z"
+          },
+          "summary": {
+            "expenseCount": 1,
+            "spentByCategory": {
+              "stay": 900
+            },
+            "spentTotal": 900
+          },
+          "utilizationPercent": 45
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/organization/overview": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Organization overview fetched successfully",
+        "data": {
+          "checklists": 1,
+          "attachments": 2,
+          "reservations": 1,
+          "expenses": {
+            "expenseCount": 1,
+            "spentByCategory": {
+              "stay": 900
+            },
+            "spentTotal": 900
+          }
+        }
+      }
+    }
+  }
+}

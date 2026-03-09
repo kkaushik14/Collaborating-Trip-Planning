@@ -1,0 +1,252 @@
+{
+  "resource": "itinerary",
+  "responses": {
+    "POST /api/v1/trips/:tripId/days": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Itinerary day created successfully",
+        "data": {
+          "day": {
+            "_id": "65b100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "dayNumber": 1,
+            "date": "2026-04-10T00:00:00.000Z",
+            "title": "Arrival",
+            "notes": "Land and settle in hotel",
+            "activityOrder": [
+              "65c100000000000000000001",
+              "65c100000000000000000002"
+            ],
+            "createdAt": "2026-03-08T10:10:00.000Z",
+            "updatedAt": "2026-03-08T10:10:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/days": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Itinerary days fetched successfully",
+        "data": {
+          "days": [
+            {
+              "_id": "65b100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "dayNumber": 1,
+              "date": "2026-04-10T00:00:00.000Z",
+              "title": "Arrival",
+              "notes": "Land and settle in hotel",
+              "activityOrder": [
+                "65c100000000000000000001",
+                "65c100000000000000000002"
+              ],
+              "createdAt": "2026-03-08T10:10:00.000Z",
+              "updatedAt": "2026-03-08T10:10:00.000Z",
+              "activities": [
+                {
+                  "_id": "65c100000000000000000001",
+                  "trip": "65a100000000000000000001",
+                  "day": "65b100000000000000000001",
+                  "title": "Hotel check-in",
+                  "description": "Drop bags and refresh",
+                  "locationName": "Shinjuku Hotel",
+                  "address": "Shinjuku, Tokyo",
+                  "startTime": "2026-04-10T06:00:00.000Z",
+                  "endTime": "2026-04-10T07:00:00.000Z",
+                  "position": 0,
+                  "estimatedCost": {
+                    "amount": 0,
+                    "currency": "USD"
+                  },
+                  "createdBy": "64f100000000000000000001",
+                  "createdAt": "2026-03-08T10:15:00.000Z",
+                  "updatedAt": "2026-03-08T10:15:00.000Z"
+                },
+                {
+                  "_id": "65c100000000000000000002",
+                  "trip": "65a100000000000000000001",
+                  "day": "65b100000000000000000001",
+                  "title": "Dinner at Ginza",
+                  "description": "Sushi dinner",
+                  "locationName": "Ginza",
+                  "address": "Ginza, Tokyo",
+                  "startTime": "2026-04-10T12:00:00.000Z",
+                  "endTime": "2026-04-10T14:00:00.000Z",
+                  "position": 1,
+                  "estimatedCost": {
+                    "amount": 100,
+                    "currency": "USD"
+                  },
+                  "createdBy": "64f100000000000000000001",
+                  "createdAt": "2026-03-08T10:20:00.000Z",
+                  "updatedAt": "2026-03-08T10:20:00.000Z"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/days/:dayId/activities": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Activity card added successfully",
+        "data": {
+          "activity": {
+            "_id": "65c100000000000000000003",
+            "trip": "65a100000000000000000001",
+            "day": "65b100000000000000000001",
+            "title": "Tokyo Tower Visit",
+            "description": "Evening view",
+            "locationName": "Tokyo Tower",
+            "address": "4 Chome-2-8 Shibakoen",
+            "startTime": "2026-04-10T15:00:00.000Z",
+            "endTime": "2026-04-10T16:30:00.000Z",
+            "position": 2,
+            "estimatedCost": {
+              "amount": 35,
+              "currency": "USD"
+            },
+            "createdBy": "64f100000000000000000001",
+            "createdAt": "2026-03-08T10:30:00.000Z",
+            "updatedAt": "2026-03-08T10:30:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/days/:dayId/activities": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Activities fetched successfully",
+        "data": {
+          "day": {
+            "_id": "65b100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "dayNumber": 1,
+            "date": "2026-04-10T00:00:00.000Z",
+            "title": "Arrival",
+            "notes": "Land and settle in hotel",
+            "activityOrder": [
+              "65c100000000000000000001",
+              "65c100000000000000000002"
+            ],
+            "createdAt": "2026-03-08T10:10:00.000Z",
+            "updatedAt": "2026-03-08T10:10:00.000Z"
+          },
+          "activities": [
+            {
+              "_id": "65c100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "day": "65b100000000000000000001",
+              "title": "Hotel check-in",
+              "description": "Drop bags and refresh",
+              "locationName": "Shinjuku Hotel",
+              "address": "Shinjuku, Tokyo",
+              "startTime": "2026-04-10T06:00:00.000Z",
+              "endTime": "2026-04-10T07:00:00.000Z",
+              "position": 0,
+              "estimatedCost": {
+                "amount": 0,
+                "currency": "USD"
+              },
+              "createdBy": "64f100000000000000000001",
+              "createdAt": "2026-03-08T10:15:00.000Z",
+              "updatedAt": "2026-03-08T10:15:00.000Z"
+            },
+            {
+              "_id": "65c100000000000000000002",
+              "trip": "65a100000000000000000001",
+              "day": "65b100000000000000000001",
+              "title": "Dinner at Ginza",
+              "description": "Sushi dinner",
+              "locationName": "Ginza",
+              "address": "Ginza, Tokyo",
+              "startTime": "2026-04-10T12:00:00.000Z",
+              "endTime": "2026-04-10T14:00:00.000Z",
+              "position": 1,
+              "estimatedCost": {
+                "amount": 100,
+                "currency": "USD"
+              },
+              "createdBy": "64f100000000000000000001",
+              "createdAt": "2026-03-08T10:20:00.000Z",
+              "updatedAt": "2026-03-08T10:20:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "PATCH /api/v1/trips/:tripId/days/:dayId/activities/reorder": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Activities reordered successfully",
+        "data": {
+          "day": {
+            "_id": "65b100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "dayNumber": 1,
+            "date": "2026-04-10T00:00:00.000Z",
+            "title": "Arrival",
+            "notes": "Land and settle in hotel",
+            "activityOrder": [
+              "65c100000000000000000002",
+              "65c100000000000000000001"
+            ],
+            "createdAt": "2026-03-08T10:10:00.000Z",
+            "updatedAt": "2026-03-08T10:45:00.000Z"
+          },
+          "activities": [
+            {
+              "_id": "65c100000000000000000002",
+              "trip": "65a100000000000000000001",
+              "day": "65b100000000000000000001",
+              "title": "Dinner at Ginza",
+              "description": "Sushi dinner",
+              "locationName": "Ginza",
+              "address": "Ginza, Tokyo",
+              "startTime": "2026-04-10T12:00:00.000Z",
+              "endTime": "2026-04-10T14:00:00.000Z",
+              "position": 0,
+              "estimatedCost": {
+                "amount": 100,
+                "currency": "USD"
+              },
+              "createdBy": "64f100000000000000000001",
+              "createdAt": "2026-03-08T10:20:00.000Z",
+              "updatedAt": "2026-03-08T10:45:00.000Z"
+            },
+            {
+              "_id": "65c100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "day": "65b100000000000000000001",
+              "title": "Hotel check-in",
+              "description": "Drop bags and refresh",
+              "locationName": "Shinjuku Hotel",
+              "address": "Shinjuku, Tokyo",
+              "startTime": "2026-04-10T06:00:00.000Z",
+              "endTime": "2026-04-10T07:00:00.000Z",
+              "position": 1,
+              "estimatedCost": {
+                "amount": 0,
+                "currency": "USD"
+              },
+              "createdBy": "64f100000000000000000001",
+              "createdAt": "2026-03-08T10:15:00.000Z",
+              "updatedAt": "2026-03-08T10:45:00.000Z"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

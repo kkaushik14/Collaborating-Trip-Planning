@@ -1,0 +1,65 @@
+{
+  "resource": "system",
+  "responses": {
+    "GET /": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Collaborating Trip Planning API",
+        "data": null
+      }
+    },
+    "GET /health": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Health check successful",
+        "data": {
+          "service": "backend",
+          "database": "connected",
+          "timestamp": "2026-03-08T12:00:00.000Z"
+        }
+      }
+    },
+    "GET /api/v1/health": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Health check successful",
+        "data": {
+          "service": "backend",
+          "database": "connected",
+          "timestamp": "2026-03-08T12:00:00.000Z"
+        }
+      }
+    },
+    "GET /metrics": {
+      "status": 200,
+      "contentType": "text/plain",
+      "body": "# HELP http_request_total Total HTTP requests\\n# TYPE http_request_total counter\\nhttp_request_total{method=\"GET\",route=\"/health\",status_code=\"200\"} 42"
+    },
+    "GET /api/v1/openapi.json": {
+      "status": 200,
+      "body": {
+        "openapi": "3.0.3",
+        "info": {
+          "title": "Collaborating Trip Planning API",
+          "version": "1.0.0"
+        }
+      }
+    },
+    "GET /api/v1/docs": {
+      "status": 200,
+      "contentType": "text/html",
+      "body": "<html><body><h1>Swagger UI</h1></body></html>"
+    },
+    "GET /uploads/:fileName": {
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "body": "<binary-file-content>"
+    }
+  }
+}

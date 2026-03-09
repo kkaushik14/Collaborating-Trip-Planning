@@ -1,0 +1,99 @@
+{
+  "resource": "errors",
+  "responses": {
+    "400 Validation failed": {
+      "status": 400,
+      "body": {
+        "success": false,
+        "statusCode": 400,
+        "message": "Validation failed",
+        "data": null,
+        "meta": {
+          "errors": [
+            "\"title\" is required"
+          ],
+          "requestId": "mock-request-id-400"
+        }
+      }
+    },
+    "401 Missing bearer token": {
+      "status": 401,
+      "body": {
+        "success": false,
+        "statusCode": 401,
+        "message": "Authorization Bearer token is required",
+        "data": null,
+        "meta": {
+          "errors": [],
+          "requestId": "mock-request-id-401"
+        }
+      }
+    },
+    "403 Forbidden": {
+      "status": 403,
+      "body": {
+        "success": false,
+        "statusCode": 403,
+        "message": "Insufficient permissions for this action",
+        "data": null,
+        "meta": {
+          "errors": [],
+          "requestId": "mock-request-id-403"
+        }
+      }
+    },
+    "404 Not found": {
+      "status": 404,
+      "body": {
+        "success": false,
+        "statusCode": 404,
+        "message": "Route not found: /api/v1/unknown",
+        "data": null,
+        "meta": {
+          "errors": [],
+          "requestId": "mock-request-id-404"
+        }
+      }
+    },
+    "409 Conflict": {
+      "status": 409,
+      "body": {
+        "success": false,
+        "statusCode": 409,
+        "message": "A pending invitation already exists for this email",
+        "data": null,
+        "meta": {
+          "errors": [],
+          "requestId": "mock-request-id-409"
+        }
+      }
+    },
+    "429 API rate limit": {
+      "status": 429,
+      "body": {
+        "success": false,
+        "message": "Too many requests, please try again later."
+      }
+    },
+    "429 Auth rate limit": {
+      "status": 429,
+      "body": {
+        "success": false,
+        "message": "Too many authentication attempts, please try again later."
+      }
+    },
+    "500 Internal": {
+      "status": 500,
+      "body": {
+        "success": false,
+        "statusCode": 500,
+        "message": "Internal server error",
+        "data": null,
+        "meta": {
+          "errors": [],
+          "requestId": "mock-request-id-500"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "resource": "collaboration",
+  "responses": {
+    "POST /api/v1/trips/:tripId/invitations": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Invitation created and email queued successfully",
+        "data": {
+          "invitation": {
+            "_id": "66c100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "email": "viewer@example.com",
+            "role": "VIEWER",
+            "invitedBy": "64f100000000000000000001",
+            "tokenHash": "mock_hash_002",
+            "status": "pending",
+            "expiresAt": "2026-03-15T10:00:00.000Z",
+            "respondedAt": null,
+            "createdAt": "2026-03-08T11:00:00.000Z",
+            "updatedAt": "2026-03-08T11:00:00.000Z"
+          },
+          "inviteToken": "mock_invite_token_002",
+          "inviteUrl": "http://localhost:5173/invitations/accept?token=mock_invite_token_002"
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/invitations": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Invitations fetched successfully",
+        "data": {
+          "invitations": [
+            {
+              "_id": "66c100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "email": "editor@example.com",
+              "role": "EDITOR",
+              "invitedBy": "64f100000000000000000001",
+              "tokenHash": "mock_hash_001",
+              "status": "accepted",
+              "expiresAt": "2026-03-15T10:00:00.000Z",
+              "respondedAt": "2026-03-08T10:05:00.000Z",
+              "createdAt": "2026-03-08T10:00:00.000Z",
+              "updatedAt": "2026-03-08T10:05:00.000Z"
+            },
+            {
+              "_id": "66c100000000000000000002",
+              "trip": "65a100000000000000000001",
+              "email": "viewer@example.com",
+              "role": "VIEWER",
+              "invitedBy": "64f100000000000000000001",
+              "tokenHash": "mock_hash_002",
+              "status": "pending",
+              "expiresAt": "2026-03-15T10:00:00.000Z",
+              "respondedAt": null,
+              "createdAt": "2026-03-08T11:00:00.000Z",
+              "updatedAt": "2026-03-08T11:00:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/members": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Members fetched successfully",
+        "data": {
+          "members": [
+            {
+              "_id": "67d100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "user": "64f100000000000000000001",
+              "role": "OWNER",
+              "addedBy": "64f100000000000000000001",
+              "joinedAt": "2026-03-08T10:00:00.000Z",
+              "isActive": true,
+              "createdAt": "2026-03-08T10:00:00.000Z",
+              "updatedAt": "2026-03-08T10:00:00.000Z"
+            },
+            {
+              "_id": "67d100000000000000000002",
+              "trip": "65a100000000000000000001",
+              "user": "64f100000000000000000002",
+              "role": "EDITOR",
+              "addedBy": "64f100000000000000000001",
+              "joinedAt": "2026-03-08T10:05:00.000Z",
+              "isActive": true,
+              "createdAt": "2026-03-08T10:05:00.000Z",
+              "updatedAt": "2026-03-08T10:05:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "PATCH /api/v1/trips/:tripId/members/:memberId/role": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Member role updated successfully",
+        "data": {
+          "member": {
+            "_id": "67d100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000002",
+            "role": "VIEWER",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:05:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:05:00.000Z",
+            "updatedAt": "2026-03-08T11:30:00.000Z"
+          }
+        }
+      }
+    },
+    "DELETE /api/v1/trips/:tripId/members/:memberId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Member deactivated successfully",
+        "data": {
+          "member": {
+            "_id": "67d100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000002",
+            "role": "VIEWER",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:05:00.000Z",
+            "isActive": false,
+            "createdAt": "2026-03-08T10:05:00.000Z",
+            "updatedAt": "2026-03-08T11:40:00.000Z"
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/members/:memberId/reactivate": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Member reactivated successfully",
+        "data": {
+          "member": {
+            "_id": "67d100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000002",
+            "role": "VIEWER",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:05:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:05:00.000Z",
+            "updatedAt": "2026-03-08T11:45:00.000Z"
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/ownership/transfer": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Ownership transferred successfully",
+        "data": {
+          "trip": {
+            "_id": "65a100000000000000000001",
+            "title": "Japan Spring Trip",
+            "description": "Tokyo + Kyoto",
+            "startDate": "2026-04-10T00:00:00.000Z",
+            "endDate": "2026-04-20T00:00:00.000Z",
+            "travelerCount": 3,
+            "owner": "64f100000000000000000002",
+            "status": "active",
+            "visibility": "shared",
+            "settings": {
+              "currency": "USD",
+              "timezone": "UTC"
+            },
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:00:00.000Z"
+          },
+          "previousOwnerMember": {
+            "_id": "67d100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000001",
+            "role": "EDITOR",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:00:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:00:00.000Z"
+          },
+          "newOwnerMember": {
+            "_id": "67d100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000002",
+            "role": "OWNER",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:05:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:05:00.000Z",
+            "updatedAt": "2026-03-08T12:00:00.000Z"
+          }
+        }
+      }
+    },
+    "POST /api/v1/trips/:tripId/comments": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Comment created successfully",
+        "data": {
+          "comment": {
+            "_id": "68e100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "author": "64f100000000000000000001",
+            "targetType": "day",
+            "day": "65b100000000000000000001",
+            "activity": null,
+            "body": "Let us start early for less crowd.",
+            "parentComment": null,
+            "mentions": [
+              "64f100000000000000000002"
+            ],
+            "isEdited": false,
+            "deletedAt": null,
+            "createdAt": "2026-03-08T11:50:00.000Z",
+            "updatedAt": "2026-03-08T11:50:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId/comments": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Comments fetched successfully",
+        "data": {
+          "comments": [
+            {
+              "_id": "68e100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "author": "64f100000000000000000001",
+              "targetType": "day",
+              "day": "65b100000000000000000001",
+              "activity": null,
+              "body": "Let us start early for less crowd.",
+              "parentComment": null,
+              "mentions": [
+                "64f100000000000000000002"
+              ],
+              "isEdited": false,
+              "deletedAt": null,
+              "createdAt": "2026-03-08T11:50:00.000Z",
+              "updatedAt": "2026-03-08T11:50:00.000Z"
+            }
+          ]
+        },
+        "meta": {
+          "page": 1,
+          "limit": 20,
+          "total": 1,
+          "totalPages": 1
+        }
+      }
+    }
+  }
+}

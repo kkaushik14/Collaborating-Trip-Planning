@@ -1,0 +1,64 @@
+{
+  "resource": "invitations",
+  "responses": {
+    "GET /api/v1/invitations/mine": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "My invitations fetched successfully",
+        "data": {
+          "invitations": [
+            {
+              "_id": "66c100000000000000000001",
+              "trip": "65a100000000000000000001",
+              "email": "editor@example.com",
+              "role": "EDITOR",
+              "invitedBy": "64f100000000000000000001",
+              "tokenHash": "mock_hash_001",
+              "status": "pending",
+              "expiresAt": "2026-03-15T10:00:00.000Z",
+              "respondedAt": null,
+              "createdAt": "2026-03-08T10:00:00.000Z",
+              "updatedAt": "2026-03-08T10:00:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "POST /api/v1/invitations/accept": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Invitation accepted successfully",
+        "data": {
+          "invitation": {
+            "_id": "66c100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "email": "editor@example.com",
+            "role": "EDITOR",
+            "invitedBy": "64f100000000000000000001",
+            "tokenHash": "mock_hash_001",
+            "status": "accepted",
+            "expiresAt": "2026-03-15T10:00:00.000Z",
+            "respondedAt": "2026-03-08T10:05:00.000Z",
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T10:05:00.000Z"
+          },
+          "member": {
+            "_id": "67d100000000000000000002",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000002",
+            "role": "EDITOR",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:05:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:05:00.000Z",
+            "updatedAt": "2026-03-08T10:05:00.000Z"
+          }
+        }
+      }
+    }
+  }
+}

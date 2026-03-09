@@ -1,0 +1,144 @@
+{
+  "resource": "trips",
+  "responses": {
+    "POST /api/v1/trips": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "statusCode": 201,
+        "message": "Trip created successfully",
+        "data": {
+          "trip": {
+            "_id": "65a100000000000000000001",
+            "title": "Japan Spring Trip",
+            "description": "Tokyo + Kyoto",
+            "startDate": "2026-04-10T00:00:00.000Z",
+            "endDate": "2026-04-20T00:00:00.000Z",
+            "travelerCount": 3,
+            "owner": "64f100000000000000000001",
+            "status": "draft",
+            "visibility": "private",
+            "settings": {
+              "currency": "USD",
+              "timezone": "UTC"
+            },
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T10:00:00.000Z"
+          }
+        }
+      }
+    },
+    "GET /api/v1/trips": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Trips fetched successfully",
+        "data": {
+          "trips": [
+            {
+              "_id": "65a100000000000000000001",
+              "title": "Japan Spring Trip",
+              "description": "Tokyo + Kyoto",
+              "startDate": "2026-04-10T00:00:00.000Z",
+              "endDate": "2026-04-20T00:00:00.000Z",
+              "travelerCount": 3,
+              "owner": "64f100000000000000000001",
+              "status": "active",
+              "visibility": "shared",
+              "settings": {
+                "currency": "USD",
+                "timezone": "UTC"
+              },
+              "createdAt": "2026-03-08T10:00:00.000Z",
+              "updatedAt": "2026-03-08T12:00:00.000Z",
+              "actorRole": "OWNER"
+            }
+          ]
+        }
+      }
+    },
+    "GET /api/v1/trips/:tripId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Trip fetched successfully",
+        "data": {
+          "trip": {
+            "_id": "65a100000000000000000001",
+            "title": "Japan Spring Trip",
+            "description": "Tokyo + Kyoto",
+            "startDate": "2026-04-10T00:00:00.000Z",
+            "endDate": "2026-04-20T00:00:00.000Z",
+            "travelerCount": 3,
+            "owner": "64f100000000000000000001",
+            "status": "active",
+            "visibility": "shared",
+            "settings": {
+              "currency": "USD",
+              "timezone": "UTC"
+            },
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:00:00.000Z"
+          },
+          "actorRole": "OWNER"
+        }
+      }
+    },
+    "PATCH /api/v1/trips/:tripId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Trip updated successfully",
+        "data": {
+          "trip": {
+            "_id": "65a100000000000000000001",
+            "title": "Japan Spring Trip Updated",
+            "description": "Tokyo + Kyoto + Osaka",
+            "startDate": "2026-04-10T00:00:00.000Z",
+            "endDate": "2026-04-22T00:00:00.000Z",
+            "travelerCount": 4,
+            "owner": "64f100000000000000000001",
+            "status": "active",
+            "visibility": "shared",
+            "settings": {
+              "currency": "USD",
+              "timezone": "Asia/Tokyo"
+            },
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:30:00.000Z"
+          }
+        }
+      }
+    },
+    "PUT /api/v1/trips/:tripId": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Trip updated successfully",
+        "data": {
+          "trip": {
+            "_id": "65a100000000000000000001",
+            "title": "Japan Spring Trip Updated",
+            "description": "Tokyo + Kyoto + Osaka",
+            "startDate": "2026-04-10T00:00:00.000Z",
+            "endDate": "2026-04-22T00:00:00.000Z",
+            "travelerCount": 4,
+            "owner": "64f100000000000000000001",
+            "status": "active",
+            "visibility": "shared",
+            "settings": {
+              "currency": "USD",
+              "timezone": "Asia/Tokyo"
+            },
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:30:00.000Z"
+          }
+        }
+      }
+    }
+  }
+}
