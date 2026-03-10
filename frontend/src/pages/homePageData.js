@@ -1,0 +1,333 @@
+const homePageData = Object.freeze({
+  tripPlanning: {
+    trip: {
+      title: 'Japan Spring Trip',
+      dateRangeLabel: 'Apr 10 - Apr 20, 2026',
+      travelerCount: 3,
+    },
+    days: [
+      {
+        id: 'day-1',
+        dayNumber: 1,
+        title: 'Arrival & Light Exploration',
+        dateLabel: 'Apr 10, 2026',
+        notes: 'Land early, settle in, and keep activities low-intensity.',
+        activities: [
+          {
+            id: 'activity-1',
+            title: 'Hotel check-in',
+            description: 'Drop bags and refresh before heading out.',
+            startTime: '08:30',
+            endTime: '09:15',
+            location: 'Shinjuku',
+            category: 'Stay',
+            estimatedCost: 0,
+            currency: 'USD',
+          },
+          {
+            id: 'activity-2',
+            title: 'Team brunch',
+            description: 'Quick meetup and itinerary sync.',
+            startTime: '10:00',
+            endTime: '11:00',
+            location: 'Shibuya',
+            category: 'Food',
+            estimatedCost: 45,
+            currency: 'USD',
+          },
+          {
+            id: 'activity-3',
+            title: 'Evening city walk',
+            description: 'Photo walk across key neighborhoods.',
+            startTime: '17:30',
+            endTime: '19:00',
+            location: 'Ginza',
+            category: 'Activity',
+            estimatedCost: 20,
+            currency: 'USD',
+          },
+        ],
+      },
+      {
+        id: 'day-2',
+        dayNumber: 2,
+        title: 'Culture Day',
+        dateLabel: 'Apr 11, 2026',
+        notes: 'Temple visit in the morning, open block in the afternoon.',
+        activities: [
+          {
+            id: 'activity-4',
+            title: 'Senso-ji visit',
+            description: 'Early slot to avoid crowd.',
+            startTime: '07:00',
+            endTime: '09:30',
+            location: 'Asakusa',
+            category: 'Activity',
+            estimatedCost: 30,
+            currency: 'USD',
+          },
+          {
+            id: 'activity-5',
+            title: 'Street food crawl',
+            description: 'Shared tasting route.',
+            startTime: '12:00',
+            endTime: '13:30',
+            location: 'Ueno',
+            category: 'Food',
+            estimatedCost: 70,
+            currency: 'USD',
+          },
+        ],
+      },
+    ],
+  },
+
+  collaboration: {
+    members: [
+      {
+        id: 'member-1',
+        name: 'Kaushik Kumar',
+        email: 'kaushik@example.com',
+        role: 'OWNER',
+        isActive: true,
+      },
+      {
+        id: 'member-2',
+        name: 'Riya Shah',
+        email: 'riya@example.com',
+        role: 'EDITOR',
+        isActive: true,
+      },
+      {
+        id: 'member-3',
+        name: 'Dev Mehta',
+        email: 'dev@example.com',
+        role: 'VIEWER',
+        isActive: false,
+      },
+    ],
+    invitations: [
+      {
+        id: 'invite-1',
+        email: 'ananya@example.com',
+        role: 'EDITOR',
+        status: 'PENDING',
+        expiresAtLabel: 'Mar 15, 2026',
+      },
+      {
+        id: 'invite-2',
+        email: 'sam@example.com',
+        role: 'VIEWER',
+        status: 'PENDING',
+        expiresAtLabel: 'Mar 16, 2026',
+      },
+    ],
+    comments: [
+      {
+        id: 'comment-1',
+        authorName: 'Riya Shah',
+        body: 'Let us keep 30 minutes buffer before evening train.',
+        targetLabel: 'Day 2',
+        createdAtLabel: 'Today, 09:20',
+      },
+      {
+        id: 'comment-2',
+        authorName: 'Kaushik Kumar',
+        body: 'Added a backup dinner option near hotel.',
+        targetLabel: 'Activity: Team brunch',
+        createdAtLabel: 'Today, 10:05',
+      },
+    ],
+  },
+
+  organization: {
+    checklists: [
+      {
+        id: 'checklist-1',
+        title: 'Packing Essentials',
+        type: 'packing',
+        items: [
+          { id: 'item-1', label: 'Passport', isCompleted: true },
+          { id: 'item-2', label: 'Power adapter', isCompleted: false },
+          { id: 'item-3', label: 'Travel insurance copy', isCompleted: false },
+        ],
+      },
+      {
+        id: 'checklist-2',
+        title: 'Pre-departure Tasks',
+        type: 'to-do',
+        items: [
+          { id: 'item-4', label: 'Check web check-in opening', isCompleted: false },
+          { id: 'item-5', label: 'Download offline maps', isCompleted: true },
+        ],
+      },
+    ],
+    attachments: [
+      {
+        id: 'attachment-1',
+        fileName: 'flight-ticket.pdf',
+        mimeType: 'application/pdf',
+        sizeLabel: '244 KB',
+        uploadedAtLabel: 'Mar 8, 2026',
+        url: '/uploads/flight-ticket.pdf',
+      },
+      {
+        id: 'attachment-2',
+        fileName: 'hotel-voucher.pdf',
+        mimeType: 'application/pdf',
+        sizeLabel: '182 KB',
+        uploadedAtLabel: 'Mar 8, 2026',
+        url: '/uploads/hotel-voucher.pdf',
+      },
+    ],
+    reservations: [
+      {
+        id: 'reservation-1',
+        title: 'Tokyo Stay - Hotel Booking',
+        providerName: 'Tokyo Stay',
+        status: 'booked',
+        confirmationCode: 'TOKYO-1234',
+        startLabel: 'Apr 10, 11:00',
+        endLabel: 'Apr 20, 09:00',
+        amount: 900,
+        currency: 'USD',
+      },
+    ],
+    expenses: [
+      {
+        id: 'expense-1',
+        title: 'Hotel payment',
+        category: 'Stay',
+        paidByName: 'Kaushik Kumar',
+        amount: 900,
+        currency: 'USD',
+        dateLabel: 'Mar 8, 2026',
+      },
+      {
+        id: 'expense-2',
+        title: 'Initial food advance',
+        category: 'Food',
+        paidByName: 'Riya Shah',
+        amount: 220,
+        currency: 'USD',
+        dateLabel: 'Mar 8, 2026',
+      },
+    ],
+    budget: {
+      currency: 'USD',
+      totalBudget: 2000,
+      segments: [
+        { id: 'budget-stay', label: 'Stay', value: 900, tone: 'primary' },
+        { id: 'budget-food', label: 'Food', value: 220, tone: 'warning' },
+        { id: 'budget-activities', label: 'Activities', value: 300, tone: 'success' },
+      ],
+    },
+  },
+
+  analytics: {
+    trendTimeline: [
+      {
+        id: 'trend-2026-01',
+        title: 'January',
+        subtitle: 'Total spend: $320',
+        description: 'Early bookings started with reservation deposits.',
+        timeLabel: '2026-01',
+        status: 'completed',
+      },
+      {
+        id: 'trend-2026-02',
+        title: 'February',
+        subtitle: 'Total spend: $500',
+        description: 'Flight and hotel commitments increased spend.',
+        timeLabel: '2026-02',
+        status: 'completed',
+      },
+      {
+        id: 'trend-2026-03',
+        title: 'March',
+        subtitle: 'Total spend: $600',
+        description: 'Budget acceleration observed before departure month.',
+        timeLabel: '2026-03',
+        status: 'active',
+      },
+    ],
+    forecastTimeline: [
+      {
+        id: 'forecast-1',
+        title: 'Forecast Window 1',
+        subtitle: 'Projected spend: $740',
+        description: 'Linear projection using last 3 monthly periods.',
+        timeLabel: 'Next period',
+        status: 'upcoming',
+      },
+      {
+        id: 'forecast-2',
+        title: 'Forecast Window 2',
+        subtitle: 'Projected spend: $880',
+        description: 'Expected growth driven by stay and activity categories.',
+        timeLabel: 'Period +2',
+        status: 'upcoming',
+      },
+    ],
+    exchangeRates: [
+      {
+        id: 'fx-1',
+        pair: 'EUR/USD',
+        rate: '1.10',
+        source: 'manual',
+        asOfLabel: 'Mar 8, 2026',
+      },
+      {
+        id: 'fx-2',
+        pair: 'JPY/USD',
+        rate: '0.0068',
+        source: 'manual',
+        asOfLabel: 'Mar 8, 2026',
+      },
+    ],
+    settlements: [
+      {
+        userId: 'member-1',
+        userName: 'Kaushik Kumar',
+        paid: 1220,
+        owed: 710,
+        net: 510,
+        currency: 'USD',
+      },
+      {
+        userId: 'member-2',
+        userName: 'Riya Shah',
+        paid: 200,
+        owed: 710,
+        net: -510,
+        currency: 'USD',
+      },
+    ],
+    settlementTransfers: [
+      {
+        fromUser: 'Riya Shah',
+        toUser: 'Kaushik Kumar',
+        amount: 510,
+        currency: 'USD',
+      },
+    ],
+    snapshots: [
+      {
+        id: 'snapshot-1',
+        reportType: 'settlement',
+        format: 'csv',
+        generatedAtLabel: 'Mar 8, 2026 13:00',
+        createdByName: 'Kaushik Kumar',
+      },
+      {
+        id: 'snapshot-2',
+        reportType: 'expense-analytics',
+        format: 'json',
+        generatedAtLabel: 'Mar 8, 2026 13:05',
+        createdByName: 'Kaushik Kumar',
+      },
+    ],
+  },
+})
+
+export { homePageData }

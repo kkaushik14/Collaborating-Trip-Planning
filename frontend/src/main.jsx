@@ -1,12 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  App,
-  AuthProvider,
-  QueryProvider,
-  ReduxStoreProvider,
-  UIStoreProvider,
-} from './app/index.js'
+import App from './App.jsx'
+import { AuthProvider, QueryProvider, ReduxStoreProvider, UIStoreProvider } from './app/index.js'
 import { TooltipProvider } from './components/ui/index.js'
 import './styles/index.css'
 

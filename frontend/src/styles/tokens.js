@@ -30,7 +30,7 @@ const designTokens = Object.freeze({
   },
 
   fontFamily: {
-    sans: ['"Inter"', '"Segoe UI"', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
+    sans: ['"Montserrat"', '"Segoe UI"', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
   },
 
   radius: {
