@@ -77,6 +77,7 @@ function SortableActivityList({
   renderActivity,
   className,
   emptyLabel = 'No activities yet.',
+  disabled = false,
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -125,6 +126,21 @@ function SortableActivityList({
     return (
       <div className={cn('rounded-lg border border-danger/40 bg-danger/10 p-lg text-body-sm text-danger', className)}>
         Each activity requires a stable `id` or `_id` for drag and reorder.
+      </div>
+    )
+  }
+
+  if (disabled) {
+    return (
+      <div className={cn('space-y-sm', className)}>
+        {activities.map((activity, index) => (
+          <ActivityCard
+            key={ids[index]}
+            activity={activity}
+            index={index}
+            dragDisabled
+          />
+        ))}
       </div>
     )
   }

@@ -104,11 +104,35 @@ const collaborationSchemas = {
   createComment: Joi.object({
     targetType: Joi.string().valid('day', 'activity').required(),
     dayId: objectIdSchema,
+    day: objectIdSchema,
     activityId: objectIdSchema,
+    activity: objectIdSchema,
     body: Joi.string().trim().min(1).max(2000).required(),
     parentComment: objectIdSchema.allow(null),
+    parentCommentId: objectIdSchema.allow(null),
     mentions: Joi.array().items(objectIdSchema),
-  }),
+  })
+    .custom((value, helpers) => {
+      const resolvedDayId = value.dayId || value.day
+      const resolvedActivityId = value.activityId || value.activity
+
+      if (value.targetType === 'day' && !resolvedDayId) {
+        return helpers.error('any.custom', {
+          message: 'dayId is required when targetType is day',
+        })
+      }
+
+      if (value.targetType === 'activity' && !resolvedActivityId) {
+        return helpers.error('any.custom', {
+          message: 'activityId is required when targetType is activity',
+        })
+      }
+
+      return value
+    })
+    .messages({
+      'any.custom': '{{#message}}',
+    }),
   acceptInvitation: Joi.object({
     token: Joi.string().required(),
   }),

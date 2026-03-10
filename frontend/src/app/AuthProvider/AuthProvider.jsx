@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { queryKeys } from '../QueryProvider/index.js'
 import {
+  createUserAccount,
   createUserSession,
   deleteUserSession,
   getUserProfile,
@@ -121,6 +122,27 @@ const AuthProvider = ({ children }) => {
     [applySession, queryClient],
   )
 
+  const signUp = useCallback(
+    async (registrationInput) => {
+      const response = await createUserAccount(registrationInput)
+      const tokens = response?.tokens || {}
+      const user = response?.user || null
+
+      if (!tokens.accessToken || !tokens.refreshToken) {
+        throw new Error('Sign up response did not include required tokens')
+      }
+
+      applySession(tokens, user)
+      queryClient.setQueryData(queryKeys.auth.me(), { user })
+
+      return {
+        user,
+        tokens,
+      }
+    },
+    [applySession, queryClient],
+  )
+
   const signOut = useCallback(async () => {
     try {
       if (accessToken) {
@@ -210,6 +232,7 @@ const AuthProvider = ({ children }) => {
   const authValue = useMemo(
     () => ({
       signIn,
+      signUp,
       signOut,
       refreshSession,
       currentUser,
@@ -228,6 +251,7 @@ const AuthProvider = ({ children }) => {
       refreshSession,
       refreshToken,
       signIn,
+      signUp,
       signOut,
     ],
   )

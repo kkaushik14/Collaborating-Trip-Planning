@@ -8,17 +8,18 @@ import { AuthPageShell } from '../components/common/index.js'
 import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
 import { Button } from '../components/ui/index.js'
 import { Text } from '../components/typography/index.js'
-import { signInSchema } from '../validators/index.js'
+import { signUpSchema } from '../validators/index.js'
 
-const LoginPage = () => {
-  const { signIn } = useAuth()
+const RegisterPage = () => {
+  const { signUp } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [submitError, setSubmitError] = useState('')
 
-  const loginForm = useForm({
-    resolver: zodResolver(signInSchema),
+  const registerForm = useForm({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
@@ -37,23 +38,31 @@ const LoginPage = () => {
   const handleSubmit = async (values) => {
     try {
       setSubmitError('')
-      await signIn(values)
+      await signUp(values)
       navigate(redirectPath, { replace: true })
     } catch (error) {
-      setSubmitError(error?.message || 'Unable to sign in. Please try again.')
+      setSubmitError(error?.message || 'Unable to register. Please try again.')
     }
   }
 
   return (
     <AuthPageShell
-      panelLabel="Operator Access"
-      panelTitle="Securely enter your trip operations workspace."
-      panelDescription="Authenticate once to continue planning, collaboration, and budget actions with role-based access."
-      formLabel="Welcome Back"
-      formTitle="Sign in to your account"
-      formDescription="Use your credentials to access protected trip planning routes."
+      panelLabel="New Workspace Setup"
+      panelTitle="Create your account and launch collaborative trip planning."
+      panelDescription="Onboarding is lightweight and gives you immediate access to trips, roles, organization, and analytics modules."
+      formLabel="Get Started"
+      formTitle="Create your account"
+      formDescription="Register once and start managing trip planning, collaboration, and budgets."
     >
-      <Form methods={loginForm} onSubmit={handleSubmit} className="space-y-md">
+      <Form methods={registerForm} onSubmit={handleSubmit} className="space-y-md">
+        <RHFTextField
+          name="name"
+          label="Full Name"
+          required
+          autoComplete="name"
+          placeholder="Enter your name"
+        />
+
         <RHFTextField
           name="email"
           label="Email"
@@ -68,25 +77,25 @@ const LoginPage = () => {
           label="Password"
           type="password"
           required
-          autoComplete="current-password"
-          placeholder="Enter your password"
+          autoComplete="new-password"
+          placeholder="Minimum 8 characters"
         />
 
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
 
-        <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
-          {loginForm.formState.isSubmitting ? 'Signing in...' : 'Sign In'}
+        <Button type="submit" className="w-full" disabled={registerForm.formState.isSubmitting}>
+          {registerForm.formState.isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
       </Form>
 
       <Text tone="muted" size="body-sm" className="mt-md text-center">
-        No account yet?{' '}
-        <Link to="/register" className="font-medium text-primary hover:underline">
-          Register
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium text-primary hover:underline">
+          Sign in
         </Link>
       </Text>
     </AuthPageShell>
   )
 }
 
-export default LoginPage
+export default RegisterPage

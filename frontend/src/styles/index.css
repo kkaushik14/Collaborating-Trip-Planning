@@ -19,9 +19,71 @@
   body {
     margin: 0;
     min-width: 320px;
+    background:
+      radial-gradient(
+        45rem 45rem at 92% -8%,
+        rgb(var(--gradient-glow-primary) / 0.25),
+        transparent 56%
+      ),
+      radial-gradient(
+        55rem 55rem at -16% 18%,
+        rgb(var(--gradient-glow-secondary) / 0.22),
+        transparent 58%
+      ),
+      linear-gradient(
+        160deg,
+        rgb(var(--gradient-hero-start)) 0%,
+        rgb(var(--gradient-hero-end)) 55%
+      );
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgb(var(--color-primary) / 0.35);
+    color: rgb(var(--color-ink));
+  }
+}
+
+@layer utilities {
+  .bg-auth-pattern {
+    background-image:
+      linear-gradient(
+        120deg,
+        rgb(var(--gradient-hero-start) / 0.9),
+        rgb(var(--gradient-hero-end) / 0.94)
+      ),
+      linear-gradient(rgb(var(--color-line) / 0.17) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--color-line) / 0.17) 1px, transparent 1px);
+    background-size:
+      cover,
+      2.25rem 2.25rem,
+      2.25rem 2.25rem;
+    background-position:
+      center,
+      center,
+      center;
+  }
+
+  .surface-glass {
+    background: linear-gradient(
+      160deg,
+      rgb(var(--color-panel) / 0.88),
+      rgb(var(--color-panel-muted) / 0.84)
+    );
+    backdrop-filter: blur(10px);
+  }
+
+  .text-gradient-primary {
+    background: linear-gradient(
+      110deg,
+      rgb(var(--color-primary)),
+      rgb(var(--color-warning))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

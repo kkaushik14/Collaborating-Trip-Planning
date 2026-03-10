@@ -26,6 +26,7 @@ function TripPlanningPanel({
   onDayChange,
   onActivitiesReorder,
   onAddActivity,
+  canEdit = true,
   className,
 }) {
   if (!trip) {
@@ -51,9 +52,14 @@ function TripPlanningPanel({
           </div>
         </div>
 
-        <Button size="sm" className="w-full sm:w-auto" onClick={() => onAddActivity?.(activeDayId)}>
+        <Button
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={() => onAddActivity?.(activeDayId)}
+          disabled={!canEdit}
+        >
           <PlusIcon className="size-4" />
-          Add Activity
+          {canEdit ? 'Add Activity' : 'Read-only'}
         </Button>
       </header>
 
@@ -92,6 +98,7 @@ function TripPlanningPanel({
               onReorder={(reorderedActivities, context) =>
                 onActivitiesReorder?.(day.id, reorderedActivities, context)
               }
+              disabled={!canEdit}
               renderActivity={({
                 activity,
                 index,

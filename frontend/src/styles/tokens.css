@@ -1,19 +1,25 @@
 :root {
   /* Color tokens */
-  --color-primary: 59 130 246;
-  --color-neutral: 100 116 139;
-  --color-success: 34 197 94;
-  --color-danger: 239 68 68;
-  --color-warning: 245 158 11;
+  --color-primary: 24 201 255;
+  --color-neutral: 106 124 153;
+  --color-success: 52 211 153;
+  --color-danger: 244 63 94;
+  --color-warning: 250 204 21;
 
-  --color-canvas: 248 250 252;
-  --color-panel: 255 255 255;
-  --color-panel-muted: 241 245 249;
-  --color-ink: 15 23 42;
-  --color-ink-muted: 71 85 105;
-  --color-ink-inverse: 255 255 255;
-  --color-line: 203 213 225;
-  --color-line-strong: 148 163 184;
+  --color-canvas: 4 10 24;
+  --color-panel: 9 19 40;
+  --color-panel-muted: 16 31 59;
+  --color-ink: 236 244 255;
+  --color-ink-muted: 156 177 211;
+  --color-ink-inverse: 3 11 30;
+  --color-line: 41 65 106;
+  --color-line-strong: 62 95 144;
+
+  /* Decorative gradient references */
+  --gradient-hero-start: 17 35 70;
+  --gradient-hero-end: 4 10 24;
+  --gradient-glow-primary: 24 201 255;
+  --gradient-glow-secondary: 86 108 255;
 
   /* Spacing tokens */
   --space-0: 0rem;
@@ -31,16 +37,16 @@
   --font-size-caption: 0.75rem;
   --font-size-body-sm: 0.875rem;
   --font-size-body: 1rem;
-  --font-size-title-sm: 1.125rem;
-  --font-size-title: 1.25rem;
-  --font-size-display: 1.5rem;
+  --font-size-title-sm: 1.25rem;
+  --font-size-title: 1.5rem;
+  --font-size-display: 2.5rem;
 
   --line-height-caption: 1rem;
   --line-height-body-sm: 1.25rem;
   --line-height-body: 1.5rem;
-  --line-height-title-sm: 1.5rem;
-  --line-height-title: 1.75rem;
-  --line-height-display: 2rem;
+  --line-height-title-sm: 1.75rem;
+  --line-height-title: 2rem;
+  --line-height-display: 3rem;
 
   /* Font families */
   --font-family-sans: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

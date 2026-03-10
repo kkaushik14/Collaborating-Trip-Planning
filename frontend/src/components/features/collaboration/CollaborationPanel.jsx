@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
 import { MailPlusIcon, MoreHorizontalIcon, SendIcon, Users2Icon } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import {
   Form,
@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/index.js'
 import { Heading, Text } from '@/components/typography/index.js'
-import { commentInputSchema, inviteMemberSchema } from '@/validators/index.js'
+import { commentSchema, inviteMemberSchema } from '@/validators/index.js'
 import { cn } from '@/lib/utils'
 
 const ROLE_OPTIONS = ['OWNER', 'EDITOR', 'VIEWER']
@@ -46,14 +46,24 @@ function CollaborationPanel({
   members = [],
   invitations = [],
   comments = [],
+  dayTargets = [],
+  activityTargets = [],
   onInviteSubmit,
   onMemberRoleChange,
   onMemberActiveToggle,
   onCommentSubmit,
+  canManageMembers = true,
+  canInviteMembers = true,
+  canComment = true,
   className,
 }) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteRole, setInviteRole] = useState('VIEWER')
+  const defaultDayTargetId = dayTargets[0]?.id || ''
+  const defaultActivityTargetId = activityTargets[0]?.id || ''
+  const hasDayTargets = dayTargets.length > 0
+  const hasActivityTargets = activityTargets.length > 0
+
   const inviteForm = useForm({
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
@@ -64,19 +74,52 @@ function CollaborationPanel({
     reValidateMode: 'onChange',
   })
   const commentForm = useForm({
-    resolver: zodResolver(commentInputSchema),
+    resolver: zodResolver(commentSchema),
     defaultValues: {
       body: '',
+      targetType: hasDayTargets ? 'day' : 'activity',
+      dayId: defaultDayTargetId || undefined,
+      activityId: defaultActivityTargetId || undefined,
+      parentCommentId: undefined,
     },
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   })
 
+  const commentTargetType = useWatch({
+    control: commentForm.control,
+    name: 'targetType',
+  })
+  const selectedDayId = useWatch({
+    control: commentForm.control,
+    name: 'dayId',
+  })
+  const selectedActivityId = useWatch({
+    control: commentForm.control,
+    name: 'activityId',
+  })
+
   const visibleMembers = members.filter((member) => member.isActive)
   const hiddenCount = Math.max(0, members.length - 3)
   const recentComments = useMemo(() => comments.slice(0, 8), [comments])
+  const activityTargetOptions = useMemo(() => {
+    if (commentTargetType === 'day') {
+      return []
+    }
+
+    if (selectedDayId) {
+      const filtered = activityTargets.filter((target) => target.dayId === selectedDayId)
+      return filtered.length ? filtered : activityTargets
+    }
+
+    return activityTargets
+  }, [activityTargets, commentTargetType, selectedDayId])
 
   const handleInviteSubmit = (values) => {
+    if (!canInviteMembers) {
+      return
+    }
+
     onInviteSubmit?.(values)
     inviteForm.reset({
       email: '',
@@ -86,10 +129,18 @@ function CollaborationPanel({
     setIsInviteOpen(false)
   }
 
-  const handleCommentSubmit = ({ body }) => {
-    onCommentSubmit?.(body)
+  const handleCommentSubmit = (values) => {
+    if (!canComment) {
+      return
+    }
+
+    onCommentSubmit?.(values)
     commentForm.reset({
       body: '',
+      targetType: values.targetType,
+      dayId: values.dayId,
+      activityId: values.activityId,
+      parentCommentId: undefined,
     })
   }
 
@@ -101,6 +152,11 @@ function CollaborationPanel({
           <Text tone="muted">
             Invite members, manage roles, and keep conversation anchored to trip context.
           </Text>
+          {!canInviteMembers ? (
+            <Text size="body-sm" tone="muted">
+              Invitations are available for OWNER/EDITOR roles. Member role updates require OWNER.
+            </Text>
+          ) : null}
         </div>
 
         <Dialog
@@ -118,7 +174,7 @@ function CollaborationPanel({
           }}
         >
           <DialogTrigger>
-            <Button size="sm" className="w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto" disabled={!canInviteMembers}>
               <MailPlusIcon className="size-4" />
               Invite Member
             </Button>
@@ -157,6 +213,7 @@ function CollaborationPanel({
                       type="button"
                       size="sm"
                       variant={inviteRole === role ? 'default' : 'outline'}
+                      disabled={!canInviteMembers}
                       onClick={() => {
                         setInviteRole(role)
                         inviteForm.setValue('role', role, {
@@ -180,7 +237,7 @@ function CollaborationPanel({
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={inviteForm.formState.isSubmitting}
+                  disabled={inviteForm.formState.isSubmitting || !canInviteMembers}
                 >
                   <SendIcon className="size-4" />
                   Create Invite
@@ -225,7 +282,12 @@ function CollaborationPanel({
                 <div className="flex w-full items-center gap-xs sm:w-auto">
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                        disabled={!canManageMembers}
+                      >
                         {member.role}
                       </Button>
                     </DropdownMenuTrigger>
@@ -233,6 +295,7 @@ function CollaborationPanel({
                       {ROLE_OPTIONS.map((role) => (
                         <DropdownMenuItem
                           key={role}
+                          disabled={!canManageMembers}
                           onClick={() => onMemberRoleChange?.(member.id, role)}
                         >
                           {role}
@@ -245,6 +308,7 @@ function CollaborationPanel({
                     size="sm"
                     variant="ghost"
                     className="shrink-0"
+                    disabled={!canManageMembers}
                     onClick={() => onMemberActiveToggle?.(member.id, !member.isActive)}
                   >
                     <MoreHorizontalIcon className="size-4" />
@@ -279,6 +343,11 @@ function CollaborationPanel({
               </li>
             ))}
           </ul>
+          {!invitations.length ? (
+            <Text size="body-sm" tone="muted">
+              No pending invitations.
+            </Text>
+          ) : null}
         </article>
       </div>
 
@@ -313,6 +382,11 @@ function CollaborationPanel({
               </Text>
             </div>
           ))}
+          {!recentComments.length ? (
+            <Text size="body-sm" tone="muted">
+              No comments yet. Add the first update for this trip.
+            </Text>
+          ) : null}
         </div>
 
         <Form
@@ -320,6 +394,97 @@ function CollaborationPanel({
           onSubmit={handleCommentSubmit}
           className="space-y-sm"
         >
+          {!canComment ? (
+            <Text size="body-sm" tone="muted">
+              Add itinerary days or activities first, then comments can be posted against those targets.
+            </Text>
+          ) : null}
+          <div className="grid gap-sm sm:grid-cols-2">
+            <div className="space-y-xs">
+              <label htmlFor="comment-target-type" className="text-body-sm font-medium text-ink">
+                Target Type
+              </label>
+              <select
+                id="comment-target-type"
+                className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                value={commentTargetType || (hasDayTargets ? 'day' : 'activity')}
+                disabled={!canComment}
+                onChange={(event) => {
+                  const nextTargetType = event.target.value
+                  commentForm.setValue('targetType', nextTargetType, {
+                    shouldTouch: true,
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                  if (nextTargetType === 'day') {
+                    commentForm.setValue('dayId', defaultDayTargetId || undefined, {
+                      shouldValidate: true,
+                    })
+                  } else {
+                    commentForm.setValue('activityId', defaultActivityTargetId || undefined, {
+                      shouldValidate: true,
+                    })
+                  }
+                }}
+              >
+                <option value="day" disabled={!hasDayTargets}>Day</option>
+                <option value="activity" disabled={!hasActivityTargets}>Activity</option>
+              </select>
+            </div>
+
+            {commentTargetType === 'day' ? (
+              <div className="space-y-xs">
+                <label htmlFor="comment-day-target" className="text-body-sm font-medium text-ink">
+                  Day
+                </label>
+                <select
+                  id="comment-day-target"
+                  className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                  value={selectedDayId || defaultDayTargetId}
+                  disabled={!canComment || !hasDayTargets}
+                  onChange={(event) =>
+                    commentForm.setValue('dayId', event.target.value || undefined, {
+                      shouldTouch: true,
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  {dayTargets.map((target) => (
+                    <option key={target.id} value={target.id}>
+                      {target.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="space-y-xs">
+                <label htmlFor="comment-activity-target" className="text-body-sm font-medium text-ink">
+                  Activity
+                </label>
+                <select
+                  id="comment-activity-target"
+                  className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                  value={selectedActivityId || defaultActivityTargetId}
+                  disabled={!canComment || !activityTargetOptions.length}
+                  onChange={(event) =>
+                    commentForm.setValue('activityId', event.target.value || undefined, {
+                      shouldTouch: true,
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  {activityTargetOptions.map((target) => (
+                    <option key={target.id} value={target.id}>
+                      {target.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
           <RHFTextareaField
             name="body"
             label="Comment"
@@ -332,7 +497,7 @@ function CollaborationPanel({
             <Button
               type="submit"
               size="sm"
-              disabled={commentForm.formState.isSubmitting}
+              disabled={commentForm.formState.isSubmitting || !canComment}
             >
               <SendIcon className="size-4" />
               Post Comment

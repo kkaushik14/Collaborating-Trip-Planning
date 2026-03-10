@@ -59,9 +59,17 @@ const getTrip = (tripId, options = {}) =>
       defaultData: {},
       normalize: (value) => {
         const payload = ensureObject(value)
+        const normalizedTrip = normalizeEntity(payload.trip)
+        const actorRole = payload.actorRole || normalizedTrip?.actorRole || null
+
         return {
-          trip: normalizeEntity(payload.trip),
-          actorRole: payload.actorRole || null,
+          trip: normalizedTrip
+            ? {
+                ...normalizedTrip,
+                actorRole,
+              }
+            : null,
+          actorRole,
         }
       },
     },

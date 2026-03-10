@@ -341,7 +341,20 @@ const transferOwnership = asyncHandler(async (req, res) => {
 
 const createComment = asyncHandler(async (req, res) => {
   const { tripId } = req.params
-  const { targetType, dayId, activityId, body, parentComment, mentions = [] } = req.body
+  const {
+    targetType,
+    dayId,
+    day,
+    activityId,
+    activity,
+    body,
+    parentComment,
+    parentCommentId,
+    mentions = [],
+  } = req.body
+  const resolvedDayId = dayId || day || null
+  const resolvedActivityId = activityId || activity || null
+  const resolvedParentCommentId = parentComment || parentCommentId || null
 
   if (!targetType || !COMMENT_TARGET_TYPES.includes(targetType)) {
     throw ApiError.badRequest(`targetType must be one of: ${COMMENT_TARGET_TYPES.join(', ')}`)
@@ -352,24 +365,35 @@ const createComment = asyncHandler(async (req, res) => {
   }
 
   if (targetType === 'day') {
-    assertObjectId(dayId, 'dayId')
-    const day = await ItineraryDay.findOne({ _id: dayId, trip: tripId }).select('_id')
-    if (!day) {
+    if (!resolvedDayId) {
+      throw ApiError.badRequest('dayId is required when targetType is day')
+    }
+
+    assertObjectId(resolvedDayId, 'dayId')
+    const dayRecord = await ItineraryDay.findOne({ _id: resolvedDayId, trip: tripId }).select('_id')
+    if (!dayRecord) {
       throw ApiError.notFound('Day not found for this trip')
     }
   }
 
   if (targetType === 'activity') {
-    assertObjectId(activityId, 'activityId')
-    const activity = await Activity.findOne({ _id: activityId, trip: tripId }).select('_id')
-    if (!activity) {
+    if (!resolvedActivityId) {
+      throw ApiError.badRequest('activityId is required when targetType is activity')
+    }
+
+    assertObjectId(resolvedActivityId, 'activityId')
+    const activityRecord = await Activity.findOne({
+      _id: resolvedActivityId,
+      trip: tripId,
+    }).select('_id')
+    if (!activityRecord) {
       throw ApiError.notFound('Activity not found for this trip')
     }
   }
 
-  if (parentComment) {
-    assertObjectId(parentComment, 'parentComment')
-    const parent = await Comment.findOne({ _id: parentComment, trip: tripId }).select('_id')
+  if (resolvedParentCommentId) {
+    assertObjectId(resolvedParentCommentId, 'parentComment')
+    const parent = await Comment.findOne({ _id: resolvedParentCommentId, trip: tripId }).select('_id')
     if (!parent) {
       throw ApiError.notFound('Parent comment not found')
     }
@@ -383,10 +407,10 @@ const createComment = asyncHandler(async (req, res) => {
     trip: tripId,
     author: req.actorId,
     targetType,
-    day: targetType === 'day' ? dayId : null,
-    activity: targetType === 'activity' ? activityId : null,
+    day: targetType === 'day' ? resolvedDayId : null,
+    activity: targetType === 'activity' ? resolvedActivityId : null,
     body: body.trim(),
-    parentComment: parentComment || null,
+    parentComment: resolvedParentCommentId,
     mentions,
   })
 
@@ -395,8 +419,16 @@ const createComment = asyncHandler(async (req, res) => {
 
 const listComments = asyncHandler(async (req, res) => {
   const { tripId } = req.params
-  const { targetType, dayId, activityId } = req.query
+  const {
+    targetType,
+    dayId,
+    day,
+    activityId,
+    activity,
+  } = req.query
   const { page, limit, skip } = parsePagination(req.query)
+  const resolvedDayId = dayId || day
+  const resolvedActivityId = activityId || activity
 
   const filters = { trip: tripId }
 
@@ -408,13 +440,21 @@ const listComments = asyncHandler(async (req, res) => {
     filters.targetType = targetType
 
     if (targetType === 'day') {
-      assertObjectId(dayId, 'dayId')
-      filters.day = dayId
+      if (!resolvedDayId) {
+        throw ApiError.badRequest('dayId is required when targetType is day')
+      }
+
+      assertObjectId(resolvedDayId, 'dayId')
+      filters.day = resolvedDayId
     }
 
     if (targetType === 'activity') {
-      assertObjectId(activityId, 'activityId')
-      filters.activity = activityId
+      if (!resolvedActivityId) {
+        throw ApiError.badRequest('activityId is required when targetType is activity')
+      }
+
+      assertObjectId(resolvedActivityId, 'activityId')
+      filters.activity = resolvedActivityId
     }
   }
 

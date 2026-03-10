@@ -10,8 +10,11 @@ import {
 import { ProtectedRoute, useAuth } from './app/AuthProvider/index.js'
 import { MainLayout } from './layouts/index.js'
 import {
+  InvitationsPage,
+  LandingPage,
   LoginPage,
   NotFoundPage,
+  RegisterPage,
   TripAnalyticsPage,
   TripCollaborationPage,
   TripOrganizationPage,
@@ -47,8 +50,13 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    const nextPath = location.state?.from?.pathname
-    const redirectPath = nextPath && nextPath !== '/login' ? nextPath : '/trips'
+    const nextLocation = location.state?.from
+    const nextPathname = nextLocation?.pathname
+    const nextSearch = nextLocation?.search || ''
+    const redirectPath =
+      nextPathname && nextPathname !== '/login' && nextPathname !== '/register'
+        ? `${nextPathname}${nextSearch}`
+        : '/trips'
     return <Navigate to={redirectPath} replace />
   }
 
@@ -59,6 +67,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+
         <Route
           path="/login"
           element={(
@@ -67,9 +77,18 @@ function App() {
             </PublicOnlyRoute>
           )}
         />
+        <Route
+          path="/register"
+          element={(
+            <PublicOnlyRoute>
+              <RegisterPage />
+            </PublicOnlyRoute>
+          )}
+        />
 
         <Route element={<ProtectedAppLayout />}>
-          <Route index element={<Navigate to="/trips" replace />} />
+          <Route path="/invitations" element={<InvitationsPage />} />
+          <Route path="/invitations/accept" element={<InvitationsPage />} />
           <Route path="/trips" element={<TripsPage />} />
           <Route path="/trips/:tripId" element={<TripRouteLayout />}>
             <Route index element={<Navigate to="planning" replace />} />

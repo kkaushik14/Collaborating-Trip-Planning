@@ -99,7 +99,25 @@ const fallbackMemberName = (id) => {
   return `Member ${String(id).slice(-4).toUpperCase()}`
 }
 
+const normalizeActorRole = (value) => {
+  const role = String(value || '').trim().toUpperCase()
+  if (role === 'OWNER' || role === 'EDITOR' || role === 'VIEWER') {
+    return role
+  }
+
+  return 'VIEWER'
+}
+
+const canEditTripContent = (role) => {
+  const normalizedRole = normalizeActorRole(role)
+  return normalizedRole === 'OWNER' || normalizedRole === 'EDITOR'
+}
+
+const canManageTripCollaboration = (role) => normalizeActorRole(role) === 'OWNER'
+
 export {
+  canEditTripContent,
+  canManageTripCollaboration,
   fallbackMemberName,
   formatCurrency,
   formatDateLabel,
@@ -108,4 +126,5 @@ export {
   formatTimeLabel,
   getActivityLocationLabel,
   mapTripSummary,
+  normalizeActorRole,
 }

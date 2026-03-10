@@ -41,6 +41,7 @@ function OrganizationPanel({
   expenses = [],
   budget = null,
   onChecklistToggle,
+  canEdit = true,
   className,
 }) {
   const [sheetItem, setSheetItem] = useState(null)
@@ -87,6 +88,7 @@ function OrganizationPanel({
                     <li key={item.id} className="flex items-center gap-sm rounded-sm bg-panel px-sm py-xs">
                       <Checkbox
                         checked={item.isCompleted}
+                        disabled={!canEdit}
                         onCheckedChange={(nextChecked) =>
                           onChecklistToggle?.(checklist.id, item.id, Boolean(nextChecked))
                         }
@@ -164,6 +166,7 @@ function OrganizationPanel({
                     size="sm"
                     variant="outline"
                     className="w-full sm:w-auto"
+                    disabled={!attachment.url}
                     onClick={() => setSheetItem({ type: 'attachment', payload: attachment })}
                   >
                     View Details

@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 950" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGlow" cx="0%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1F6FEB" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#0D1117" stop-opacity="1" />
+    </radialGradient>
+
+    <linearGradient id="rootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F81F7" />
+      <stop offset="100%" stop-color="#1A4A8F" />
+    </linearGradient>
+
+    <style>
+      .bg { fill: url(#bgGlow); }
+      .text-main { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; fill: #E6EDF3; font-size: 13px; }
+      .text-sub { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 400; fill: #8B949E; font-size: 11.5px; }
+      .text-root { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; fill: #FFFFFF; font-size: 15px; }
+      .node-bg { fill: #1C2128; stroke: #30363D; stroke-width: 1.5; rx: 6; }
+      .node-bg-l1 { fill: #161B22; stroke-width: 1.5; rx: 8; }
+      
+      /* Path animations for a lucid feel */
+      .link { fill: none; stroke-width: 2; opacity: 0.45; }
+      
+      /* Branch Colors */
+      .color-journey { stroke: #3FB950; }
+      .color-features { stroke: #2F81F7; }
+      .color-roles { stroke: #BC8CFF; }
+      .color-system { stroke: #E3B341; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg" />
+
+  <path d="M 200 501 C 250 501, 250 155, 300 155" class="link color-journey" />
+  <path d="M 200 501 C 250 501, 250 395, 300 395" class="link color-features" />
+  <path d="M 200 501 C 250 501, 250 635, 300 635" class="link color-roles" />
+  <path d="M 200 501 C 250 501, 250 847, 300 847" class="link color-system" />
+
+  <path d="M 480 155 C 530 155, 530 72.5, 580 72.5" class="link color-journey" />
+  <path d="M 480 155 C 530 155, 530 127.5, 580 127.5" class="link color-journey" />
+  <path d="M 480 155 C 530 155, 530 182.5, 580 182.5" class="link color-journey" />
+  <path d="M 480 155 C 530 155, 530 237.5, 580 237.5" class="link color-journey" />
+
+  <path d="M 480 395 C 530 395, 530 312.5, 580 312.5" class="link color-features" />
+  <path d="M 480 395 C 530 395, 530 367.5, 580 367.5" class="link color-features" />
+  <path d="M 480 395 C 530 395, 530 422.5, 580 422.5" class="link color-features" />
+  <path d="M 480 395 C 530 395, 530 477.5, 580 477.5" class="link color-features" />
+
+  <path d="M 480 635 C 530 635, 530 552.5, 580 552.5" class="link color-roles" />
+  <path d="M 480 635 C 530 635, 530 607.5, 580 607.5" class="link color-roles" />
+  <path d="M 480 635 C 530 635, 530 662.5, 580 662.5" class="link color-roles" />
+  <path d="M 480 635 C 530 635, 530 717.5, 580 717.5" class="link color-roles" />
+
+  <path d="M 480 847.5 C 530 847.5, 530 792.5, 580 792.5" class="link color-system" />
+  <path d="M 480 847.5 C 530 847.5, 530 847.5, 580 847.5" class="link color-system" />
+  <path d="M 480 847.5 C 530 847.5, 530 902.5, 580 902.5" class="link color-system" />
+
+
+  <rect x="30" y="476" width="170" height="50" fill="url(#rootGrad)" rx="8" />
+  <text x="115" y="506" text-anchor="middle" class="text-root">Collaborating Trip Planning</text>
+
+
+  <rect x="300" y="135" width="180" height="40" class="node-bg-l1 color-journey" />
+  <text x="390" y="160" text-anchor="middle" class="text-main">👤 User Journey</text>
+
+  <rect x="300" y="375" width="180" height="40" class="node-bg-l1 color-features" />
+  <text x="390" y="400" text-anchor="middle" class="text-main">🧩 Feature Modules</text>
+
+  <rect x="300" y="615" width="180" height="40" class="node-bg-l1 color-roles" />
+  <text x="390" y="640" text-anchor="middle" class="text-main">🛡️ Role Lifecycle</text>
+
+  <rect x="300" y="827.5" width="180" height="40" class="node-bg-l1 color-system" />
+  <text x="390" y="852.5" text-anchor="middle" class="text-main">⚙️ System Response</text>
+
+
+  <g>
+    <rect x="580" y="50" width="310" height="45" class="node-bg" />
+    <rect x="580" y="50" width="4" height="45" fill="#3FB950" rx="2" />
+    <text x="595" y="68" class="text-main">Open Web App</text>
+    <text x="595" y="86" class="text-sub">Initial application entry point</text>
+
+    <rect x="580" y="105" width="310" height="45" class="node-bg" />
+    <rect x="580" y="105" width="4" height="45" fill="#3FB950" rx="2" />
+    <text x="595" y="123" class="text-main">Authentication</text>
+    <text x="595" y="141" class="text-sub">Register new account or Login</text>
+
+    <rect x="580" y="160" width="310" height="45" class="node-bg" />
+    <rect x="580" y="160" width="4" height="45" fill="#3FB950" rx="2" />
+    <text x="595" y="178" class="text-main">Trips Dashboard</text>
+    <text x="595" y="196" class="text-sub">View existing trips &amp; overview</text>
+
+    <rect x="580" y="215" width="310" height="45" class="node-bg" />
+    <rect x="580" y="215" width="4" height="45" fill="#3FB950" rx="2" />
+    <text x="595" y="233" class="text-main">Workspace Setup</text>
+    <text x="595" y="251" class="text-sub">Create new trip or open existing workspace</text>
+  </g>
+
+  <g>
+    <rect x="580" y="290" width="310" height="45" class="node-bg" />
+    <rect x="580" y="290" width="4" height="45" fill="#2F81F7" rx="2" />
+    <text x="595" y="308" class="text-main">Planning Module</text>
+    <text x="595" y="326" class="text-sub">Manage days, activities &amp; timeline reordering</text>
+
+    <rect x="580" y="345" width="310" height="45" class="node-bg" />
+    <rect x="580" y="345" width="4" height="45" fill="#2F81F7" rx="2" />
+    <text x="595" y="363" class="text-main">Collaboration Module</text>
+    <text x="595" y="381" class="text-sub">Manage members, user roles &amp; trip comments</text>
+
+    <rect x="580" y="400" width="310" height="45" class="node-bg" />
+    <rect x="580" y="400" width="4" height="45" fill="#2F81F7" rx="2" />
+    <text x="595" y="418" class="text-main">Organization Module</text>
+    <text x="595" y="436" class="text-sub">Checklists, shared files &amp; budget tracking</text>
+
+    <rect x="580" y="455" width="310" height="45" class="node-bg" />
+    <rect x="580" y="455" width="4" height="45" fill="#2F81F7" rx="2" />
+    <text x="595" y="473" class="text-main">Analytics Module</text>
+    <text x="595" y="491" class="text-sub">Expense forecasts, bill settlements &amp; reports</text>
+  </g>
+
+  <g>
+    <rect x="580" y="530" width="310" height="45" class="node-bg" />
+    <rect x="580" y="530" width="4" height="45" fill="#BC8CFF" rx="2" />
+    <text x="595" y="548" class="text-main">Creator Assignment</text>
+    <text x="595" y="566" class="text-sub">Workspace creator automatically becomes OWNER</text>
+
+    <rect x="580" y="585" width="310" height="45" class="node-bg" />
+    <rect x="580" y="585" width="4" height="45" fill="#BC8CFF" rx="2" />
+    <text x="595" y="603" class="text-main">Member Invitation</text>
+    <text x="595" y="621" class="text-sub">Invite new users as EDITOR or VIEWER</text>
+
+    <rect x="580" y="640" width="310" height="45" class="node-bg" />
+    <rect x="580" y="640" width="4" height="45" fill="#BC8CFF" rx="2" />
+    <text x="595" y="658" class="text-main">Role Fulfillment</text>
+    <text x="595" y="676" class="text-sub">Member accepts invite &amp; assigned TripMember role</text>
+
+    <rect x="580" y="695" width="310" height="45" class="node-bg" />
+    <rect x="580" y="695" width="4" height="45" fill="#BC8CFF" rx="2" />
+    <text x="595" y="713" class="text-main">Access Control</text>
+    <text x="595" y="731" class="text-sub">OWNER (Full), EDITOR (Edit+), VIEWER (View+)</text>
+  </g>
+
+  <g>
+    <rect x="580" y="770" width="310" height="45" class="node-bg" />
+    <rect x="580" y="770" width="4" height="45" fill="#E3B341" rx="2" />
+    <text x="595" y="788" class="text-main">Backend Processing</text>
+    <text x="595" y="806" class="text-sub">Backend API executes updates in MongoDB</text>
+
+    <rect x="580" y="825" width="310" height="45" class="node-bg" />
+    <rect x="580" y="825" width="4" height="45" fill="#E3B341" rx="2" />
+    <text x="595" y="843" class="text-main">State Management</text>
+    <text x="595" y="861" class="text-sub">TanStack Query handles refetch &amp; invalidation</text>
+
+    <rect x="580" y="880" width="310" height="45" class="node-bg" />
+    <rect x="580" y="880" width="4" height="45" fill="#E3B341" rx="2" />
+    <text x="595" y="898" class="text-main">Client Rendering</text>
+    <text x="595" y="916" class="text-sub">Updated UI interface is displayed to the user</text>
+  </g>
+</svg>

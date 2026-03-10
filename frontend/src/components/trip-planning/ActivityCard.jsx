@@ -8,6 +8,7 @@ function ActivityCard({
   className,
   isDragging = false,
   dragHandleProps,
+  dragDisabled = false,
   onClick,
   footer,
 }) {
@@ -36,9 +37,13 @@ function ActivityCard({
       <header className="flex items-start gap-md">
         <button
           type="button"
-          className="mt-2 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-panel-muted text-ink-muted outline-none transition-colors hover:bg-line/30 focus-visible:ring-2 focus-visible:ring-primary/30"
-          aria-label={`Reorder ${title}`}
+          className={cn(
+            'mt-2 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-panel-muted text-ink-muted outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/30',
+            dragDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-line/30',
+          )}
+          aria-label={dragDisabled ? `${title} drag disabled` : `Reorder ${title}`}
           onClick={(event) => event.stopPropagation()}
+          disabled={dragDisabled}
           {...dragHandleProps}
         >
           <GripVerticalIcon className="size-4" />

@@ -228,6 +228,103 @@ test('Collaboration flow: invite + accept + role update + ownership transfer + m
   assert.equal(reactivateResponse.body.data.member.isActive, true)
 })
 
+test('Comment flow: create/list comments with canonical and legacy payload keys', async () => {
+  const owner = await registerUser({
+    name: 'Owner User',
+    email: 'owner+comments@example.com',
+    password: 'Password123!',
+  })
+
+  const tripResponse = await request(app)
+    .post('/api/v1/trips')
+    .set(buildAuthHeader(owner.accessToken))
+    .send({
+      title: 'Comment Test Trip',
+      startDate: '2026-10-01T00:00:00.000Z',
+      endDate: '2026-10-05T00:00:00.000Z',
+      travelers: 2,
+    })
+
+  assert.equal(tripResponse.statusCode, 201)
+  const tripId = tripResponse.body.data.trip._id
+
+  const dayResponse = await request(app)
+    .post(`/api/v1/trips/${tripId}/days`)
+    .set(buildAuthHeader(owner.accessToken))
+    .send({
+      dayNumber: 1,
+      date: '2026-10-01T00:00:00.000Z',
+      title: 'Day one',
+    })
+
+  assert.equal(dayResponse.statusCode, 201)
+  const dayId = dayResponse.body.data.day._id
+
+  const activityResponse = await request(app)
+    .post(`/api/v1/trips/${tripId}/days/${dayId}/activities`)
+    .set(buildAuthHeader(owner.accessToken))
+    .send({
+      title: 'Museum visit',
+    })
+
+  assert.equal(activityResponse.statusCode, 201)
+  const activityId = activityResponse.body.data.activity._id
+
+  const createDayCommentLegacyPayloadResponse = await request(app)
+    .post(`/api/v1/trips/${tripId}/comments`)
+    .set(buildAuthHeader(owner.accessToken))
+    .send({
+      targetType: 'day',
+      day: dayId,
+      body: 'Start day with briefing',
+    })
+
+  assert.equal(createDayCommentLegacyPayloadResponse.statusCode, 201)
+  assert.equal(createDayCommentLegacyPayloadResponse.body.data.comment.day, dayId)
+
+  const createActivityCommentCanonicalPayloadResponse = await request(app)
+    .post(`/api/v1/trips/${tripId}/comments`)
+    .set(buildAuthHeader(owner.accessToken))
+    .send({
+      targetType: 'activity',
+      activityId,
+      body: 'Carry student ID for museum entry',
+    })
+
+  assert.equal(createActivityCommentCanonicalPayloadResponse.statusCode, 201)
+  assert.equal(createActivityCommentCanonicalPayloadResponse.body.data.comment.activity, activityId)
+
+  const listDayCommentsCanonicalQueryResponse = await request(app)
+    .get(`/api/v1/trips/${tripId}/comments`)
+    .set(buildAuthHeader(owner.accessToken))
+    .query({
+      targetType: 'day',
+      dayId,
+    })
+
+  assert.equal(listDayCommentsCanonicalQueryResponse.statusCode, 200)
+  assert.equal(listDayCommentsCanonicalQueryResponse.body.data.comments.length, 1)
+  assert.equal(
+    listDayCommentsCanonicalQueryResponse.body.data.comments[0].body,
+    'Start day with briefing',
+  )
+
+  const listActivityCommentsLegacyQueryResponse = await request(app)
+    .get(`/api/v1/trips/${tripId}/comments`)
+    .set(buildAuthHeader(owner.accessToken))
+    .query({
+      targetType: 'activity',
+      activity: activityId,
+    })
+
+  assert.equal(listActivityCommentsLegacyQueryResponse.statusCode, 200)
+  assert.equal(listActivityCommentsLegacyQueryResponse.body.data.comments.length, 1)
+  assert.equal(
+    listActivityCommentsLegacyQueryResponse.body.data.comments[0].body,
+    'Carry student ID for museum entry',
+  )
+})
+
 test('Organization flow: checklist + upload + reservation + expense + budget summary', async () => {
   const owner = await registerUser({
     name: 'Owner User',

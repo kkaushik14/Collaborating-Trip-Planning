@@ -24,9 +24,9 @@ const designTokens = Object.freeze({
     caption: ['0.75rem', { lineHeight: '1rem' }],
     'body-sm': ['0.875rem', { lineHeight: '1.25rem' }],
     body: ['1rem', { lineHeight: '1.5rem' }],
-    'title-sm': ['1.125rem', { lineHeight: '1.5rem' }],
-    title: ['1.25rem', { lineHeight: '1.75rem' }],
-    display: ['1.5rem', { lineHeight: '2rem' }],
+    'title-sm': ['1.25rem', { lineHeight: '1.75rem' }],
+    title: ['1.5rem', { lineHeight: '2rem' }],
+    display: ['2.5rem', { lineHeight: '3rem' }],
   },
 
   fontFamily: {
@@ -42,27 +42,26 @@ const designTokens = Object.freeze({
   },
 
   shadows: {
-    card: '0 1px 2px 0 rgb(15 23 42 / 0.08), 0 1px 3px 0 rgb(15 23 42 / 0.08)',
+    card: '0 20px 38px -24px rgb(5 9 20 / 0.7), 0 14px 22px -18px rgb(13 28 58 / 0.7)',
   },
 
   colors: {
-    // Directly mapped from the provided CSV (category examples):
-    // primary: #3B82F6, neutral: #64748B, success: #22C55E, danger: #EF4444, warning: #F59E0B
-    primary: '59 130 246',
-    neutral: '100 116 139',
-    success: '34 197 94',
-    danger: '239 68 68',
-    warning: '245 158 11',
+    // Primary token set used by Tailwind theme and CSS custom properties.
+    primary: '24 201 255',
+    neutral: '106 124 153',
+    success: '52 211 153',
+    danger: '244 63 94',
+    warning: '250 204 21',
 
-    // Minimal semantic surfaces and text tokens for application layout.
-    canvas: '248 250 252',
-    panel: '255 255 255',
-    panelMuted: '241 245 249',
-    ink: '15 23 42',
-    inkMuted: '71 85 105',
-    inkInverse: '255 255 255',
-    line: '203 213 225',
-    lineStrong: '148 163 184',
+    // Semantic surfaces and text tokens.
+    canvas: '4 10 24',
+    panel: '9 19 40',
+    panelMuted: '16 31 59',
+    ink: '236 244 255',
+    inkMuted: '156 177 211',
+    inkInverse: '3 11 30',
+    line: '41 65 106',
+    lineStrong: '62 95 144',
   },
 })
 

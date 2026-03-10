@@ -6,6 +6,7 @@ import {
   useCreateTripComment,
   useCreateTripInvitation,
   useCreateTripMemberReactivation,
+  useCreateTripOwnershipTransfer,
   useDeleteTripMember,
   useItineraryDays,
   useTripComments,
@@ -13,16 +14,23 @@ import {
   useTripMembers,
   useUpdateTripMemberRole,
 } from '../hooks/index.js'
+import { Button } from '../components/ui/index.js'
 import {
   PageErrorState,
   PageLoadingState,
 } from './PageStates.jsx'
-import { fallbackMemberName, formatDateLabel } from './tripPageUtils.js'
+import {
+  canEditTripContent,
+  canManageTripCollaboration,
+  fallbackMemberName,
+  formatDateLabel,
+  normalizeActorRole,
+} from './tripPageUtils.js'
 
 const getPrimaryError = (...errors) => errors.find(Boolean) || null
 
 const TripCollaborationPage = () => {
-  const { tripId } = useOutletContext()
+  const { tripId, trip } = useOutletContext()
 
   const membersQuery = useTripMembers({ tripId })
   const invitationsQuery = useTripInvitations({ tripId })
@@ -33,7 +41,11 @@ const TripCollaborationPage = () => {
   const updateMemberRoleMutation = useUpdateTripMemberRole()
   const deactivateMemberMutation = useDeleteTripMember()
   const reactivateMemberMutation = useCreateTripMemberReactivation()
+  const transferOwnershipMutation = useCreateTripOwnershipTransfer()
   const createCommentMutation = useCreateTripComment()
+  const actorRole = normalizeActorRole(trip?.actorRole)
+  const canManageMembers = canManageTripCollaboration(actorRole)
+  const canInviteMembers = canEditTripContent(actorRole)
 
   const isLoading =
     membersQuery.isPending ||
@@ -80,6 +92,7 @@ const TripCollaborationPage = () => {
 
       return {
         id: member._id,
+        userId,
         name: knownUser?.name || fallbackMemberName(userId),
         email: knownUser?.email || 'Email unavailable',
         role: member.role || 'VIEWER',
@@ -102,13 +115,24 @@ const TripCollaborationPage = () => {
 
   const mappedComments = useMemo(() => {
     const comments = commentsQuery.data?.comments || []
+    const dayLookup = new Map(
+      (itineraryDaysQuery.data?.days || []).map((day) => [
+        day._id,
+        `Day ${Number(day.dayNumber || 0)}${day.title ? ` - ${day.title}` : ''}`,
+      ]),
+    )
+    const activityLookup = new Map(
+      (itineraryDaysQuery.data?.days || [])
+        .flatMap((day) => day.activities || [])
+        .map((activity) => [activity._id, activity.title || 'Activity']),
+    )
 
     return comments.map((comment) => {
       const author = memberMap.get(comment.author)
       const targetLabel =
         comment.targetType === 'activity'
-          ? `Activity ${comment.activity ? String(comment.activity).slice(-4) : ''}`
-          : `Day ${comment.day ? String(comment.day).slice(-4) : ''}`
+          ? activityLookup.get(comment.activity) || `Activity ${comment.activity ? String(comment.activity).slice(-4) : ''}`
+          : dayLookup.get(comment.day) || `Day ${comment.day ? String(comment.day).slice(-4) : ''}`
 
       return {
         id: comment._id,
@@ -123,9 +147,35 @@ const TripCollaborationPage = () => {
         }),
       }
     })
-  }, [commentsQuery.data?.comments, memberMap])
+  }, [commentsQuery.data?.comments, itineraryDaysQuery.data?.days, memberMap])
 
-  const defaultDayId = itineraryDaysQuery.data?.days?.[0]?._id
+  const dayTargets = useMemo(
+    () =>
+      (itineraryDaysQuery.data?.days || []).map((day) => ({
+        id: day._id,
+        label: `Day ${Number(day.dayNumber || 0)} - ${day.title || 'Untitled Day'}`,
+      })),
+    [itineraryDaysQuery.data?.days],
+  )
+
+  const activityTargets = useMemo(
+    () =>
+      (itineraryDaysQuery.data?.days || []).flatMap((day) =>
+        (day.activities || []).map((activity) => ({
+          id: activity._id,
+          dayId: day._id,
+          label: `${day.title || `Day ${Number(day.dayNumber || 0)}`} · ${activity.title || 'Untitled Activity'}`,
+        })),
+      ),
+    [itineraryDaysQuery.data?.days],
+  )
+  const canComment = dayTargets.length > 0 || activityTargets.length > 0
+
+  const activeMembersCount = mappedMembers.filter((member) => member.isActive).length
+  const pendingInvitationsCount = mappedInvitations.filter((invitation) => invitation.status === 'PENDING').length
+  const ownershipCandidates = mappedMembers.filter(
+    (member) => member.isActive && member.role !== 'OWNER' && member.userId,
+  )
 
   if (isLoading) {
     return (
@@ -156,6 +206,69 @@ const TripCollaborationPage = () => {
 
   return (
     <div className="space-y-md">
+      <section className="grid gap-sm sm:grid-cols-3">
+        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+          <p className="text-caption text-ink-muted">Active Members</p>
+          <p className="mt-2xs text-title font-semibold text-ink">{activeMembersCount}</p>
+        </article>
+        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+          <p className="text-caption text-ink-muted">Pending Invites</p>
+          <p className="mt-2xs text-title font-semibold text-ink">{pendingInvitationsCount}</p>
+        </article>
+        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+          <p className="text-caption text-ink-muted">Comments</p>
+          <p className="mt-2xs text-title font-semibold text-ink">{mappedComments.length}</p>
+        </article>
+      </section>
+
+      <section className="rounded-xl border border-line bg-panel p-lg shadow-card">
+        <h3 className="text-title-sm font-semibold text-ink">Transfer Ownership</h3>
+        <p className="mt-xs text-body-sm text-ink-muted">
+          Assign OWNER role to an active member. This calls backend ownership transfer flow.
+        </p>
+        {!canManageMembers ? (
+          <p className="mt-sm text-body-sm text-ink-muted">
+            Your current role is {actorRole}. Only OWNER can transfer trip ownership.
+          </p>
+        ) : null}
+        <div className="mt-md flex flex-wrap items-center gap-sm">
+          <select
+            className="h-10 min-w-[15rem] rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+            defaultValue=""
+            id="ownership-candidate"
+            disabled={!canManageMembers}
+            onChange={(event) => {
+              const userId = event.target.value
+              if (!userId || !canManageMembers) {
+                return
+              }
+
+              transferOwnershipMutation.mutate({
+                tripId,
+                body: {
+                  newOwnerUserId: userId,
+                },
+              })
+            }}
+          >
+            <option value="">Select member to transfer ownership</option>
+            {ownershipCandidates.map((member) => (
+              <option key={`${member.id}-${member.userId}`} value={member.userId}>
+                {member.name} ({member.email})
+              </option>
+            ))}
+          </select>
+          <Button
+            type="button"
+            variant="outline"
+            disabled
+            title="Choose member from dropdown to trigger transfer"
+          >
+            Transfer via Selection
+          </Button>
+        </div>
+      </section>
+
       {createInvitationMutation.error ? (
         <PageErrorState
           title="Invitation request failed"
@@ -174,24 +287,46 @@ const TripCollaborationPage = () => {
         />
       ) : null}
 
+      {transferOwnershipMutation.error ? (
+        <PageErrorState
+          title="Ownership transfer failed"
+          description="Backend rejected ownership transfer request."
+          errorMessage={transferOwnershipMutation.error?.message}
+          onRetry={() => transferOwnershipMutation.reset()}
+        />
+      ) : null}
+
       <CollaborationPanel
         members={mappedMembers}
         invitations={mappedInvitations}
         comments={mappedComments}
+        dayTargets={dayTargets}
+        activityTargets={activityTargets}
+        canManageMembers={canManageMembers}
+        canInviteMembers={canInviteMembers}
+        canComment={canComment}
         onInviteSubmit={(payload) =>
-          createInvitationMutation.mutate({
-            tripId,
-            body: payload,
-          })
+          canInviteMembers
+            ? createInvitationMutation.mutate({
+                tripId,
+                body: payload,
+              })
+            : null
         }
         onMemberRoleChange={(memberId, role) =>
-          updateMemberRoleMutation.mutate({
-            tripId,
-            memberId,
-            body: { role },
-          })
+          canManageMembers
+            ? updateMemberRoleMutation.mutate({
+                tripId,
+                memberId,
+                body: { role },
+              })
+            : null
         }
         onMemberActiveToggle={(memberId, nextActive) => {
+          if (!canManageMembers) {
+            return
+          }
+
           if (nextActive) {
             reactivateMemberMutation.mutate({
               tripId,
@@ -205,16 +340,24 @@ const TripCollaborationPage = () => {
             memberId,
           })
         }}
-        onCommentSubmit={(body) =>
+        onCommentSubmit={({ body, targetType, dayId, activityId }) => {
+          const hasDayTarget = targetType === 'day' && Boolean(dayId)
+          const hasActivityTarget = targetType === 'activity' && Boolean(activityId)
+
+          if (!hasDayTarget && !hasActivityTarget) {
+            return
+          }
+
           createCommentMutation.mutate({
             tripId,
             body: {
               body,
-              targetType: 'day',
-              day: defaultDayId,
+              targetType,
+              dayId: hasDayTarget ? dayId : undefined,
+              activityId: hasActivityTarget ? activityId : undefined,
             },
           })
-        }
+        }}
       />
     </div>
   )

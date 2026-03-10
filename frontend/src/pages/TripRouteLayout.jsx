@@ -3,7 +3,7 @@ import { NavLink, Outlet, useParams } from 'react-router-dom'
 import { useTrip } from '../hooks/index.js'
 import { Heading, Text } from '../components/typography/index.js'
 import { PageErrorState, PageLoadingState } from './PageStates.jsx'
-import { mapTripSummary } from './tripPageUtils.js'
+import { mapTripSummary, normalizeActorRole } from './tripPageUtils.js'
 
 const TRIP_ROUTE_LINKS = Object.freeze([
   { to: 'planning', label: 'Planning' },
@@ -38,6 +38,11 @@ const TripRouteLayout = () => {
 
   const trip = tripQuery.data.trip
   const tripSummary = mapTripSummary(trip)
+  const actorRole = normalizeActorRole(tripQuery.data.actorRole || trip.actorRole)
+  const tripContext = {
+    ...trip,
+    actorRole,
+  }
 
   return (
     <div className="space-y-lg">
@@ -50,6 +55,9 @@ const TripRouteLayout = () => {
             <Text tone="muted" className="break-words">
               {tripSummary.dateRangeLabel} · {tripSummary.travelerCount} traveler(s)
             </Text>
+            <span className="inline-flex w-fit rounded-full bg-panel-muted px-sm py-2xs text-caption font-medium text-ink-muted">
+              Role: {actorRole}
+            </span>
           </div>
 
           <nav className="overflow-x-auto" aria-label="Trip feature navigation">
@@ -76,7 +84,7 @@ const TripRouteLayout = () => {
         </div>
       </section>
 
-      <Outlet context={{ tripId, trip }} />
+      <Outlet context={{ tripId, trip: tripContext }} />
     </div>
   )
 }
