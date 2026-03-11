@@ -129,6 +129,37 @@ npm run test
 npm run build
 ```
 
+## CI/CD Deployment (GitHub Actions -> EC2)
+
+- Workflow file: `.github/workflows/CI.yml`
+- Trigger:
+  - `push` to `main` when files change under `frontend/**`, `backend/**`, workflow file, or deploy script
+  - `pull_request` to `main` for CI checks
+- Jobs:
+  - Frontend checks (`lint`, `test:ci`, `build`)
+  - Backend checks (`npm run check`, `npm test`)
+  - EC2 deploy job (runs only on push to `main`)
+
+### Required GitHub configuration
+
+- Secret:
+  - `EC2_SSH_KEY`
+- Variables (or secrets as fallback in workflow):
+  - `EC2_HOST`
+  - `EC2_USER`
+  - `EC2_PORT`
+  - `EC2_APP_DIR` (absolute app path on EC2; defaults handled by script)
+
+### Deploy script
+
+- Path: `scripts/deploy.sh`
+- Responsibilities:
+  - Pull latest `main`
+  - Install backend deps (`npm ci --omit=dev`)
+  - Install frontend deps + build
+  - Restart/start PM2 backend and frontend processes
+  - Save PM2 state
+
 ## Deployment Link
 - Frontend: _TBD_
 - Backend: _TBD_
