@@ -3,6 +3,7 @@ import { resetAuthTokenProvider, setAuthTokenProvider } from '../../services/ind
 const SESSION_STORAGE_KEYS = Object.freeze({
   accessToken: 'tripPlannerAccessToken',
   refreshToken: 'tripPlannerRefreshToken',
+  currentUser: 'tripPlannerCurrentUser',
 })
 
 let inMemoryAccessToken = null
@@ -23,6 +24,22 @@ const readSessionTokens = () => {
   return {
     accessToken,
     refreshToken,
+  }
+}
+
+const readStoredUser = () => {
+  const storage = getStorage()
+  const rawUser = storage?.getItem(SESSION_STORAGE_KEYS.currentUser)
+
+  if (!rawUser) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(rawUser)
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
   }
 }
 
@@ -47,6 +64,21 @@ const setSessionTokens = ({ accessToken = null, refreshToken = null } = {}) => {
   }
 }
 
+const setStoredUser = (user = null) => {
+  const storage = getStorage()
+
+  if (!storage) {
+    return
+  }
+
+  if (user && typeof user === 'object') {
+    storage.setItem(SESSION_STORAGE_KEYS.currentUser, JSON.stringify(user))
+    return
+  }
+
+  storage.removeItem(SESSION_STORAGE_KEYS.currentUser)
+}
+
 const clearSessionTokens = () => {
   inMemoryAccessToken = null
 
@@ -57,6 +89,7 @@ const clearSessionTokens = () => {
 
   storage.removeItem(SESSION_STORAGE_KEYS.accessToken)
   storage.removeItem(SESSION_STORAGE_KEYS.refreshToken)
+  storage.removeItem(SESSION_STORAGE_KEYS.currentUser)
 }
 
 const getAccessToken = () => inMemoryAccessToken || readSessionTokens().accessToken
@@ -75,6 +108,8 @@ export {
   clearSessionTokens,
   getAccessToken,
   readSessionTokens,
+  readStoredUser,
   resetAuthTokenProviderToDefault,
   setSessionTokens,
+  setStoredUser,
 }

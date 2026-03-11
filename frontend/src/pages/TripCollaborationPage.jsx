@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useCallback, useMemo } from 'react'
+import { useOutletContext, useSearchParams } from 'react-router-dom'
 
+import { useAuth } from '../app/AuthProvider/index.js'
 import { CollaborationPanel } from '../components/features/index.js'
 import {
   useCreateTripComment,
@@ -12,6 +13,7 @@ import {
   useTripComments,
   useTripInvitations,
   useTripMembers,
+  useUpdateMyTripCommentEmailPreference,
   useUpdateTripMemberRole,
 } from '../hooks/index.js'
 import { Button } from '../components/ui/index.js'
@@ -31,6 +33,8 @@ const getPrimaryError = (...errors) => errors.find(Boolean) || null
 
 const TripCollaborationPage = () => {
   const { tripId, trip } = useOutletContext()
+  const { currentUser } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const membersQuery = useTripMembers({ tripId })
   const invitationsQuery = useTripInvitations({ tripId })
@@ -42,6 +46,7 @@ const TripCollaborationPage = () => {
   const deactivateMemberMutation = useDeleteTripMember()
   const reactivateMemberMutation = useCreateTripMemberReactivation()
   const transferOwnershipMutation = useCreateTripOwnershipTransfer()
+  const updateMyCommentEmailPreferenceMutation = useUpdateMyTripCommentEmailPreference()
   const createCommentMutation = useCreateTripComment()
   const actorRole = normalizeActorRole(trip?.actorRole)
   const canManageMembers = canManageTripCollaboration(actorRole)
@@ -71,12 +76,14 @@ const TripCollaborationPage = () => {
         continue
       }
 
+      const normalizedUserId = String(id)
+
       const name =
         (typeof rawUser === 'object' ? rawUser?.name || rawUser?.displayName : '') ||
-        fallbackMemberName(id)
+        fallbackMemberName(normalizedUserId)
       const email = typeof rawUser === 'object' ? rawUser?.email || 'Email unavailable' : 'Email unavailable'
 
-      map.set(id, { id, name, email })
+      map.set(normalizedUserId, { id: normalizedUserId, name, email })
     }
 
     return map
@@ -87,7 +94,8 @@ const TripCollaborationPage = () => {
 
     return members.map((member) => {
       const rawUser = member.user
-      const userId = typeof rawUser === 'object' ? rawUser?._id : rawUser
+      const userIdRaw = typeof rawUser === 'object' ? rawUser?._id : rawUser
+      const userId = userIdRaw ? String(userIdRaw) : ''
       const knownUser = memberMap.get(userId)
 
       return {
@@ -97,6 +105,7 @@ const TripCollaborationPage = () => {
         email: knownUser?.email || 'Email unavailable',
         role: member.role || 'VIEWER',
         isActive: Boolean(member.isActive),
+        commentEmailOptIn: String(member.commentEmailOptIn || 'true').toLowerCase() === 'false' ? 'false' : 'true',
       }
     })
   }, [memberMap, membersQuery.data?.members])
@@ -170,6 +179,36 @@ const TripCollaborationPage = () => {
     [itineraryDaysQuery.data?.days],
   )
   const canComment = dayTargets.length > 0 || activityTargets.length > 0
+  const currentActorMember = useMemo(
+    () =>
+      mappedMembers.find(
+        (member) => member.userId && String(member.userId) === String(currentUser?._id || ''),
+      ),
+    [currentUser?._id, mappedMembers],
+  )
+  const isCommentEmailOptIn = (currentActorMember?.commentEmailOptIn || 'true') === 'true'
+  const shouldOpenOptOutPromptFromQuery = searchParams.get('commentEmailPref') === 'optout'
+
+  const handleCommentEmailPreferenceChange = useCallback(
+    (nextOptIn) =>
+      updateMyCommentEmailPreferenceMutation.mutateAsync({
+        tripId,
+        body: {
+          commentEmailOptIn: nextOptIn ? 'true' : 'false',
+        },
+      }),
+    [tripId, updateMyCommentEmailPreferenceMutation],
+  )
+
+  const consumeOptOutQueryPrompt = useCallback(() => {
+    if (searchParams.get('commentEmailPref') !== 'optout') {
+      return
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.delete('commentEmailPref')
+    setSearchParams(nextSearchParams, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const activeMembersCount = mappedMembers.filter((member) => member.isActive).length
   const pendingInvitationsCount = mappedInvitations.filter((invitation) => invitation.status === 'PENDING').length
@@ -181,7 +220,7 @@ const TripCollaborationPage = () => {
     return (
       <PageLoadingState
         title="Loading collaboration..."
-        description="Fetching members, invitations, and comments."
+        description="Preparing members, invites, and comment threads."
       />
     )
   }
@@ -190,7 +229,7 @@ const TripCollaborationPage = () => {
     return (
       <PageErrorState
         title="Unable to load collaboration data"
-        description="Collaboration endpoints returned an error."
+        description="We could not load collaboration details for this trip."
         errorMessage={combinedError?.message}
         onRetry={() =>
           Promise.all([
@@ -224,7 +263,7 @@ const TripCollaborationPage = () => {
       <section className="rounded-xl border border-line bg-panel p-lg shadow-card">
         <h3 className="text-title-sm font-semibold text-ink">Transfer Ownership</h3>
         <p className="mt-xs text-body-sm text-ink-muted">
-          Assign OWNER role to an active member. This calls backend ownership transfer flow.
+          Transfer ownership to another active member when trip leadership changes.
         </p>
         {!canManageMembers ? (
           <p className="mt-sm text-body-sm text-ink-muted">
@@ -281,22 +320,32 @@ const TripCollaborationPage = () => {
       {createCommentMutation.error ? (
         <PageErrorState
           title="Comment could not be posted"
-          description="The comment API request failed."
+          description="Your comment was not posted. Please try again."
           errorMessage={createCommentMutation.error?.message}
           onRetry={() => createCommentMutation.reset()}
+        />
+      ) : null}
+
+      {updateMyCommentEmailPreferenceMutation.error ? (
+        <PageErrorState
+          title="Comment email preference update failed"
+          description="We could not update your email preference for comment notifications."
+          errorMessage={updateMyCommentEmailPreferenceMutation.error?.message}
+          onRetry={() => updateMyCommentEmailPreferenceMutation.reset()}
         />
       ) : null}
 
       {transferOwnershipMutation.error ? (
         <PageErrorState
           title="Ownership transfer failed"
-          description="Backend rejected ownership transfer request."
+          description="We could not transfer ownership right now."
           errorMessage={transferOwnershipMutation.error?.message}
           onRetry={() => transferOwnershipMutation.reset()}
         />
       ) : null}
 
       <CollaborationPanel
+        tripId={tripId}
         members={mappedMembers}
         invitations={mappedInvitations}
         comments={mappedComments}
@@ -305,13 +354,18 @@ const TripCollaborationPage = () => {
         canManageMembers={canManageMembers}
         canInviteMembers={canInviteMembers}
         canComment={canComment}
+        commentEmailOptIn={isCommentEmailOptIn}
+        isCommentEmailPreferenceUpdating={updateMyCommentEmailPreferenceMutation.isPending}
+        onCommentEmailPreferenceChange={handleCommentEmailPreferenceChange}
+        shouldPromptOptOutFromQuery={shouldOpenOptOutPromptFromQuery}
+        onOptOutQueryPromptConsumed={consumeOptOutQueryPrompt}
         onInviteSubmit={(payload) =>
           canInviteMembers
-            ? createInvitationMutation.mutate({
+            ? createInvitationMutation.mutateAsync({
                 tripId,
                 body: payload,
               })
-            : null
+            : Promise.resolve(null)
         }
         onMemberRoleChange={(memberId, role) =>
           canManageMembers
@@ -345,10 +399,10 @@ const TripCollaborationPage = () => {
           const hasActivityTarget = targetType === 'activity' && Boolean(activityId)
 
           if (!hasDayTarget && !hasActivityTarget) {
-            return
+            return Promise.resolve(null)
           }
 
-          createCommentMutation.mutate({
+          return createCommentMutation.mutateAsync({
             tripId,
             body: {
               body,

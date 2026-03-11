@@ -48,33 +48,36 @@ const TripAnalyticsPage = () => {
   const snapshotDownloadMutation = useReportSnapshotDownload()
   const actorRole = normalizeActorRole(trip?.actorRole)
   const canEdit = canEditTripContent(actorRole)
+  const exchangeRateDefaultValues = {
+    baseCurrency: 'USD',
+    quoteCurrency: 'INR',
+    rate: 83,
+    source: 'manual',
+    asOf: new Date().toISOString().slice(0, 10),
+  }
+  const conversionDefaultValues = {
+    amount: 100,
+    fromCurrency: 'USD',
+    toCurrency: 'INR',
+  }
+  const reportSnapshotDefaultValues = {
+    reportType: 'analytics',
+    format: 'json',
+  }
 
   const exchangeRateForm = useForm({
     resolver: zodResolver(exchangeRateSchema),
-    defaultValues: {
-      baseCurrency: 'USD',
-      quoteCurrency: 'INR',
-      rate: 83,
-      source: 'manual',
-      asOf: new Date().toISOString().slice(0, 10),
-    },
+    defaultValues: exchangeRateDefaultValues,
   })
 
   const conversionForm = useForm({
     resolver: zodResolver(currencyConversionSchema),
-    defaultValues: {
-      amount: 100,
-      fromCurrency: 'USD',
-      toCurrency: 'INR',
-    },
+    defaultValues: conversionDefaultValues,
   })
 
   const reportSnapshotForm = useForm({
     resolver: zodResolver(reportSnapshotSchema),
-    defaultValues: {
-      reportType: 'analytics',
-      format: 'json',
-    },
+    defaultValues: reportSnapshotDefaultValues,
   })
 
   const isLoading =
@@ -216,7 +219,7 @@ const TripAnalyticsPage = () => {
     return (
       <PageErrorState
         title="Unable to load analytics"
-        description="One or more analytics endpoints failed."
+        description="Some analytics details are unavailable right now."
         errorMessage={combinedError?.message}
         onRetry={() =>
           Promise.all([
@@ -267,8 +270,22 @@ const TripAnalyticsPage = () => {
               if (!canEdit) {
                 return
               }
-              updateExchangeRateMutation.mutate({ tripId, body: values })
+              updateExchangeRateMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    exchangeRateForm.reset({
+                      ...exchangeRateDefaultValues,
+                      baseCurrency: values.baseCurrency || exchangeRateDefaultValues.baseCurrency,
+                      quoteCurrency: values.quoteCurrency || exchangeRateDefaultValues.quoteCurrency,
+                      source: values.source || exchangeRateDefaultValues.source,
+                      asOf: values.asOf || exchangeRateDefaultValues.asOf,
+                    })
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:analytics:update-rate`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="baseCurrency" label="Base Currency" required />
@@ -293,8 +310,20 @@ const TripAnalyticsPage = () => {
               if (!canEdit) {
                 return
               }
-              createConversionMutation.mutate({ tripId, body: values })
+              createConversionMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    conversionForm.reset({
+                      ...conversionDefaultValues,
+                      fromCurrency: values.fromCurrency || conversionDefaultValues.fromCurrency,
+                      toCurrency: values.toCurrency || conversionDefaultValues.toCurrency,
+                    })
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:analytics:convert-currency`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="amount" label="Amount" type="number" required />
@@ -326,8 +355,16 @@ const TripAnalyticsPage = () => {
               if (!canEdit) {
                 return
               }
-              createSnapshotMutation.mutate({ tripId, body: values })
+              createSnapshotMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    reportSnapshotForm.reset(reportSnapshotDefaultValues)
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:analytics:create-snapshot`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="reportType" label="Report Type" required />

@@ -1,6 +1,5 @@
 import crypto from 'node:crypto'
 
-import { env } from '../config/index.js'
 import {
   Activity,
   COMMENT_TARGET_TYPES,
@@ -14,6 +13,7 @@ import {
   User,
 } from '../models/index.js'
 import {
+  queueCommentNotification,
   runInTransaction,
   sendInvitationEmail,
 } from '../services/index.js'
@@ -24,9 +24,24 @@ import {
   asyncHandler,
   assertObjectId,
   parsePagination,
+  resolveFrontendBaseUrl,
 } from '../utils/index.js'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const normalizeCommentEmailOptIn = (value) => {
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false'
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+    if (normalized === 'true' || normalized === 'false') {
+      return normalized
+    }
+  }
+
+  return 'true'
+}
 
 const inviteMember = asyncHandler(async (req, res) => {
   const { tripId } = req.params
@@ -72,13 +87,15 @@ const inviteMember = asyncHandler(async (req, res) => {
     expiresAt,
   })
 
-  const inviteUrl = `${env.frontendBaseUrl.replace(/\/$/, '')}/invitations/accept?token=${inviteToken}`
+  const frontendBaseUrl = resolveFrontendBaseUrl(req)
+  const inviteUrl = `${frontendBaseUrl}/invitations/accept?token=${inviteToken}`
 
   await sendInvitationEmail({
     email: normalizedEmail,
     tripTitle: req.trip.title,
     role,
     inviteUrl,
+    inviterName: req.user.name || req.user.email || 'Trip Owner',
   })
 
   return res.status(201).json(
@@ -198,7 +215,38 @@ const listMembers = asyncHandler(async (req, res) => {
     .sort({ createdAt: 1 })
     .lean()
 
-  return res.status(200).json(new ApiResponse(200, { members }, 'Members fetched successfully'))
+  const normalizedMembers = members.map((member) => ({
+    ...member,
+    commentEmailOptIn: normalizeCommentEmailOptIn(member.commentEmailOptIn),
+  }))
+
+  return res.status(200).json(new ApiResponse(200, { members: normalizedMembers }, 'Members fetched successfully'))
+})
+
+const updateMyCommentEmailPreference = asyncHandler(async (req, res) => {
+  const { tripId } = req.params
+  const nextPreference = normalizeCommentEmailOptIn(req.body.commentEmailOptIn)
+
+  const member = await TripMember.findOne({
+    trip: tripId,
+    user: req.actorId,
+    isActive: true,
+  })
+
+  if (!member) {
+    throw ApiError.notFound('Active trip membership not found')
+  }
+
+  member.commentEmailOptIn = nextPreference
+  await member.save()
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { member },
+      `Comment email notifications ${nextPreference === 'true' ? 'enabled' : 'disabled'} successfully`,
+    ),
+  )
 })
 
 const updateMemberRole = asyncHandler(async (req, res) => {
@@ -414,6 +462,14 @@ const createComment = asyncHandler(async (req, res) => {
     mentions,
   })
 
+  queueCommentNotification({
+    tripId,
+    targetType,
+    dayId: targetType === 'day' ? resolvedDayId : null,
+    activityId: targetType === 'activity' ? resolvedActivityId : null,
+    commentId: comment._id,
+  })
+
   return res.status(201).json(new ApiResponse(201, { comment }, 'Comment created successfully'))
 })
 
@@ -491,5 +547,6 @@ export {
   listMyInvitations,
   reactivateMember,
   transferOwnership,
+  updateMyCommentEmailPreference,
   updateMemberRole,
 }

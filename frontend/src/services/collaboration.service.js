@@ -129,6 +129,27 @@ const createTripMemberReactivation = (tripId, memberId, options = {}) =>
     },
   )
 
+const updateMyTripCommentEmailPreference = (tripId, body, options = {}) =>
+  apiRequest(
+    {
+      path: `/api/v1/trips/${tripId}/members/me/comment-email-preference`,
+      method: 'PATCH',
+      body,
+      ...options,
+    },
+    {
+      resource: 'collaboration',
+      operation: 'updateMyTripCommentEmailPreference',
+      defaultData: {},
+      normalize: (value) => {
+        const payload = ensureObject(value)
+        return {
+          member: normalizeEntity(payload.member),
+        }
+      },
+    },
+  )
+
 const createTripOwnershipTransfer = (tripId, body, options = {}) =>
   apiRequest(
     {
@@ -210,5 +231,6 @@ export {
   listTripComments,
   listTripInvitations,
   listTripMembers,
+  updateMyTripCommentEmailPreference,
   updateTripMemberRole,
 }

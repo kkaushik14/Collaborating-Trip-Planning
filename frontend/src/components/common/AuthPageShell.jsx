@@ -14,7 +14,7 @@ const VALUE_POINTS = [
   {
     id: 'secure',
     title: 'Secure Session Flow',
-    description: 'Access + refresh token strategy integrated with protected route guards.',
+    description: 'Secure sign-in keeps your account protected while you move across pages.',
     icon: ShieldCheckIcon,
   },
   {

@@ -192,6 +192,31 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
+    '/trips/{tripId}/members/me/comment-email-preference': {
+      patch: {
+        summary: 'Update current member comment email preference',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['commentEmailOptIn'],
+                properties: {
+                  commentEmailOptIn: {
+                    oneOf: [
+                      { type: 'string', enum: ['true', 'false'] },
+                      { type: 'boolean' },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/trips/{tripId}/members/{memberId}/role': {
       patch: {
         summary: 'Update member role',

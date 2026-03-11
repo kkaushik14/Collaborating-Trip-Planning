@@ -10,6 +10,7 @@ import {
   listTripComments,
   listTripInvitations,
   listTripMembers,
+  updateMyTripCommentEmailPreference,
   updateTripMemberRole,
 } from '../services/index.js'
 import {
@@ -218,6 +219,20 @@ const useCreateTripOwnershipTransfer = ({ mutationOptions = {}, requestOptions =
   )
 }
 
+const useUpdateMyTripCommentEmailPreference = ({ mutationOptions = {}, requestOptions = {} } = {}) => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    createMutationConfig({
+      mutationFn: ({ tripId, body }) => updateMyTripCommentEmailPreference(tripId, body, requestOptions),
+      mutationOptions,
+      onSuccess: async (_data, variables) => {
+        await invalidateQueryScopes(queryClient, [queryKeys.collaboration.members(variables.tripId)])
+      },
+    }),
+  )
+}
+
 const useCreateTripComment = ({ mutationOptions = {}, requestOptions = {} } = {}) => {
   const queryClient = useQueryClient()
 
@@ -237,6 +252,7 @@ export {
   useCreateTripInvitation,
   useCreateTripMemberReactivation,
   useCreateTripOwnershipTransfer,
+  useUpdateMyTripCommentEmailPreference,
   useDeleteTripMember,
   useTripComments,
   useTripInvitations,

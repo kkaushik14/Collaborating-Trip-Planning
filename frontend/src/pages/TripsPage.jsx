@@ -114,7 +114,7 @@ const TripsPage = () => {
     return (
       <PageErrorState
         title="Unable to load trips"
-        description="Trips could not be fetched from the API."
+        description="We could not load your trips right now."
         errorMessage={tripsQuery.error?.message}
         onRetry={() => tripsQuery.refetch()}
       />
@@ -259,11 +259,16 @@ const CreateTripSection = ({
         Create New Trip
       </Heading>
       <Text tone="muted" size="body-sm">
-        This form directly calls backend `POST /api/v1/trips`.
+        Start a new trip with basic details and invite your travelers later.
       </Text>
     </header>
 
-    <Form methods={tripForm} onSubmit={onSubmit} className="mt-md grid gap-md md:grid-cols-2">
+    <Form
+      methods={tripForm}
+      onSubmit={onSubmit}
+      persistKey="trips:create"
+      className="mt-md grid gap-md md:grid-cols-2"
+    >
       <RHFTextField
         name="title"
         label="Title"

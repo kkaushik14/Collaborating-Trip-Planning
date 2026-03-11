@@ -1,6 +1,12 @@
 import { User } from '../models/index.js'
-import { clearRefreshToken, issueAuthTokens, isRefreshTokenValid, verifyRefreshToken } from '../services/index.js'
-import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js'
+import {
+  clearRefreshToken,
+  issueAuthTokens,
+  isRefreshTokenValid,
+  sendWelcomeEmail,
+  verifyRefreshToken,
+} from '../services/index.js'
+import { ApiError, ApiResponse, asyncHandler, resolveFrontendBaseUrl } from '../utils/index.js'
 
 const serializeUser = (user) => ({
   _id: user._id,
@@ -40,6 +46,14 @@ const register = asyncHandler(async (req, res) => {
   })
 
   const { accessToken, refreshToken } = await issueAuthTokens(user)
+
+  void sendWelcomeEmail({
+    email: user.email,
+    recipientName: user.name || 'Traveler',
+    appUrl: resolveFrontendBaseUrl(req),
+  }).catch((error) => {
+    console.error('Failed to send welcome email after registration:', error)
+  })
 
   return res.status(201).json(
     new ApiResponse(

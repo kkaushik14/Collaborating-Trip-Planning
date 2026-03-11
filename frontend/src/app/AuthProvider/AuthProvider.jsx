@@ -12,23 +12,67 @@ import {
 import {
   applyAuthTokenProvider,
   clearSessionTokens,
+  readStoredUser,
   readSessionTokens,
   resetAuthTokenProviderToDefault,
   setSessionTokens,
+  setStoredUser,
 } from './authSession.js'
+import { clearAllFormDrafts } from '../../components/forms/form-utils.js'
 
 const AuthContext = createContext(null)
 
 const isUnauthorizedError = (error) => Number(error?.status) === 401
+const isRetryableAuthError = (error) =>
+  Number(error?.status) === 429 || Boolean(error?.isNetworkError) || Boolean(error?.isTimeout)
+
+const REFRESH_BURST_WINDOW_MS = 15_000
+const REFRESH_BURST_THRESHOLD = 5
+const REFRESH_BURST_DELAY_MS = 2_000
+const REFRESH_BURST_SESSION_KEY = 'tripPlannerRefreshBursts'
+
+const sleep = (durationMs) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, durationMs)
+  })
+
+const getRefreshBurstDelayMs = () => {
+  if (typeof window === 'undefined' || !window.sessionStorage) {
+    return 0
+  }
+
+  const now = Date.now()
+  const raw = window.sessionStorage.getItem(REFRESH_BURST_SESSION_KEY)
+  let timestamps = []
+
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) {
+        timestamps = parsed
+      }
+    } catch {
+      timestamps = []
+    }
+  }
+
+  const nextTimestamps = [...timestamps, now].filter((value) =>
+    Number.isFinite(value) && now - Number(value) <= REFRESH_BURST_WINDOW_MS,
+  )
+
+  window.sessionStorage.setItem(REFRESH_BURST_SESSION_KEY, JSON.stringify(nextTimestamps))
+  return nextTimestamps.length >= REFRESH_BURST_THRESHOLD ? REFRESH_BURST_DELAY_MS : 0
+}
 
 const AuthProvider = ({ children }) => {
   const initialTokens = readSessionTokens()
+  const initialStoredUser = readStoredUser()
   const queryClient = useQueryClient()
   const refreshPromiseRef = useRef(null)
 
   const [accessToken, setAccessToken] = useState(initialTokens.accessToken)
   const [refreshToken, setRefreshToken] = useState(initialTokens.refreshToken)
-  const [currentUser, setCurrentUser] = useState(null)
+  const [currentUser, setCurrentUser] = useState(initialStoredUser)
   const [isInitializing, setIsInitializing] = useState(true)
   const [authError, setAuthError] = useState(null)
 
@@ -46,6 +90,7 @@ const AuthProvider = ({ children }) => {
 
     if (user !== undefined) {
       setCurrentUser(user)
+      setStoredUser(user || null)
     }
 
     setAuthError(null)
@@ -53,10 +98,12 @@ const AuthProvider = ({ children }) => {
 
   const clearSession = useCallback(() => {
     clearSessionTokens()
+    clearAllFormDrafts()
 
     setAccessToken(null)
     setRefreshToken(null)
     setCurrentUser(null)
+    setStoredUser(null)
 
     queryClient.removeQueries({ queryKey: queryKeys.auth.root(), exact: false })
     queryClient.removeQueries({ queryKey: queryKeys.invitations.root(), exact: false })
@@ -97,6 +144,7 @@ const AuthProvider = ({ children }) => {
   const loadCurrentUser = useCallback(async () => {
     const profile = await getUserProfile()
     setCurrentUser(profile?.user || null)
+    setStoredUser(profile?.user || null)
     queryClient.setQueryData(queryKeys.auth.me(), profile)
     return profile?.user || null
   }, [queryClient])
@@ -177,6 +225,7 @@ const AuthProvider = ({ children }) => {
       if (!accessToken) {
         if (!isCancelled) {
           setCurrentUser(null)
+          setStoredUser(null)
           setIsInitializing(false)
           setAuthError(null)
         }
@@ -187,13 +236,42 @@ const AuthProvider = ({ children }) => {
         setIsInitializing(true)
       }
 
+      const burstDelayMs = getRefreshBurstDelayMs()
+      if (burstDelayMs > 0) {
+        await sleep(burstDelayMs)
+      }
+
       try {
         await loadCurrentUser()
         if (!isCancelled) {
           setAuthError(null)
         }
-      } catch (error) {
+      } catch (initialError) {
+        let error = initialError
+
+        if (isRetryableAuthError(error)) {
+          await sleep(2_000)
+          try {
+            await loadCurrentUser()
+            if (!isCancelled) {
+              setAuthError(null)
+            }
+            return
+          } catch (retryError) {
+            error = retryError
+          }
+        }
+
         if (!isUnauthorizedError(error) || !refreshToken) {
+          const hasCachedUser = Boolean(readStoredUser())
+
+          if (isRetryableAuthError(error) && hasCachedUser) {
+            if (!isCancelled) {
+              setAuthError(null)
+            }
+            return
+          }
+
           if (!isCancelled) {
             clearSession()
             setAuthError(error)
@@ -207,7 +285,53 @@ const AuthProvider = ({ children }) => {
           if (!isCancelled) {
             setAuthError(null)
           }
-        } catch (refreshError) {
+        } catch (initialRefreshError) {
+          let refreshError = initialRefreshError
+
+          if (isRetryableAuthError(refreshError)) {
+            await sleep(2_000)
+
+            try {
+              await refreshSession()
+              await loadCurrentUser()
+              if (!isCancelled) {
+                setAuthError(null)
+              }
+              return
+            } catch (retryRefreshError) {
+              refreshError = retryRefreshError
+            }
+          }
+
+          const latestStoredTokens = readSessionTokens()
+          const hasRotatedRefreshToken = Boolean(
+            latestStoredTokens.refreshToken && latestStoredTokens.refreshToken !== refreshToken,
+          )
+
+          if (isUnauthorizedError(refreshError) && hasRotatedRefreshToken) {
+            try {
+              applySession({
+                accessToken: latestStoredTokens.accessToken,
+                refreshToken: latestStoredTokens.refreshToken,
+              })
+              await loadCurrentUser()
+              if (!isCancelled) {
+                setAuthError(null)
+              }
+              return
+            } catch (retryWithLatestStoredTokenError) {
+              refreshError = retryWithLatestStoredTokenError
+            }
+          }
+
+          const hasCachedUser = Boolean(readStoredUser())
+          if (isRetryableAuthError(refreshError) && hasCachedUser) {
+            if (!isCancelled) {
+              setAuthError(null)
+            }
+            return
+          }
+
           if (!isCancelled) {
             clearSession()
             setAuthError(refreshError)
@@ -225,7 +349,7 @@ const AuthProvider = ({ children }) => {
     return () => {
       isCancelled = true
     }
-  }, [accessToken, clearSession, loadCurrentUser, refreshSession, refreshToken])
+  }, [accessToken, applySession, clearSession, loadCurrentUser, refreshSession, refreshToken])
 
   const isAuthenticated = Boolean(accessToken && currentUser)
 

@@ -6,6 +6,18 @@ import {
   objectIdSchema,
 } from './schema-utils.js'
 
+const emptyStringToUndefined = (value) => {
+  if (value === undefined || value === null) {
+    return undefined
+  }
+
+  if (typeof value === 'string' && !value.trim()) {
+    return undefined
+  }
+
+  return value
+}
+
 const tripCreateSchema = z
   .object({
     title: z
@@ -59,7 +71,7 @@ const itineraryDaySchema = z.object({
 
 const activityCardSchema = z
   .object({
-    dayId: objectIdSchema.optional(),
+    dayId: z.preprocess(emptyStringToUndefined, objectIdSchema.optional()),
     title: z
       .string()
       .trim()
@@ -77,8 +89,8 @@ const activityCardSchema = z
       .max(200, 'Location cannot exceed 200 characters')
       .optional()
       .or(z.literal('')),
-    startTime: isoDateStringSchema.optional(),
-    endTime: isoDateStringSchema.optional(),
+    startTime: z.preprocess(emptyStringToUndefined, isoDateStringSchema.optional()),
+    endTime: z.preprocess(emptyStringToUndefined, isoDateStringSchema.optional()),
     estimatedCost: z.coerce
       .number()
       .min(0, 'Estimated cost cannot be negative')

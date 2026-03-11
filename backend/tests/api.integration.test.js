@@ -178,16 +178,32 @@ test('Collaboration flow: invite + accept + role update + ownership transfer + m
 
   assert.equal(acceptResponse.statusCode, 200)
 
+  const updateCommentEmailPreferenceResponse = await request(app)
+    .patch(`/api/v1/trips/${tripId}/members/me/comment-email-preference`)
+    .set(buildAuthHeader(collaborator.accessToken))
+    .send({
+      commentEmailOptIn: 'false',
+    })
+
+  assert.equal(updateCommentEmailPreferenceResponse.statusCode, 200)
+  assert.equal(updateCommentEmailPreferenceResponse.body.data.member.commentEmailOptIn, 'false')
+
   const membersBeforeTransfer = await request(app)
     .get(`/api/v1/trips/${tripId}/members`)
     .set(buildAuthHeader(owner.accessToken))
 
   assert.equal(membersBeforeTransfer.statusCode, 200)
   assert.equal(membersBeforeTransfer.body.data.members.length, 2)
-
-  const collabMember = membersBeforeTransfer.body.data.members.find(
+  const collabMembershipFromList = membersBeforeTransfer.body.data.members.find(
     (member) => member.user === collaborator.user._id,
   )
+  assert.equal(collabMembershipFromList.commentEmailOptIn, 'false')
+  const ownerMembershipFromList = membersBeforeTransfer.body.data.members.find(
+    (member) => member.user === owner.user._id,
+  )
+  assert.equal(ownerMembershipFromList.commentEmailOptIn, 'true')
+
+  const collabMember = collabMembershipFromList
 
   const roleUpdateResponse = await request(app)
     .patch(`/api/v1/trips/${tripId}/members/${collabMember._id}/role`)

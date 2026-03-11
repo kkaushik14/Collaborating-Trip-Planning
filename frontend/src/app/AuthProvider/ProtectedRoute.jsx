@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuth } from './useAuth.js'
+import { buildAuthRouteSearch } from './redirect-utils.js'
 
 const ProtectedRoute = ({
   children,
@@ -20,9 +21,12 @@ const ProtectedRoute = ({
       return fallback
     }
 
+    const nextPath = `${location.pathname}${location.search || ''}${location.hash || ''}`
+    const redirectSearch = buildAuthRouteSearch(nextPath)
+
     return (
       <Navigate
-        to={redirectTo}
+        to={`${redirectTo}${redirectSearch}`}
         replace
         state={{
           from: location,

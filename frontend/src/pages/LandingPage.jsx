@@ -49,8 +49,8 @@ const LIVE_METRICS = [
     value: 'Owner / Editor / Viewer',
   },
   {
-    label: 'Core APIs Connected',
-    value: 'Auth · Trips · Itinerary · Budget',
+    label: 'Core Areas Covered',
+    value: 'Planning · Collaboration · Organization · Analytics',
   },
 ]
 
@@ -108,7 +108,7 @@ const LandingPage = () => {
 
             <Text tone="muted" className="mt-md max-w-[60ch]">
               {APP_TITLE} unifies itinerary planning, member roles, files, reservations, and
-              budget analytics in a single operational surface backed by production APIs.
+              budget analytics in one focused workspace for your whole travel team.
             </Text>
 
             <div className="mt-xl flex flex-wrap gap-sm">
@@ -166,7 +166,7 @@ const LandingPage = () => {
             </div>
 
             <Text tone="muted" size="body-sm" className="mt-xs">
-              API-driven collaboration with role-safe editing and operational visibility.
+              A shared trip space where planning, updates, and decisions stay in sync.
             </Text>
 
             <div className="mt-lg space-y-sm">

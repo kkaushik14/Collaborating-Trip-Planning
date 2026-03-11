@@ -66,67 +66,73 @@ const TripOrganizationPage = () => {
   const [selectedChecklistId, setSelectedChecklistId] = useState('')
   const actorRole = normalizeActorRole(trip?.actorRole)
   const canEdit = canEditTripContent(actorRole)
+  const checklistDefaultValues = {
+    title: '',
+    type: 'todo',
+  }
+  const checklistItemDefaultValues = {
+    label: '',
+    isCompleted: false,
+    sortOrder: 0,
+  }
+  const attachmentMetaDefaultValues = {
+    fileName: '',
+    mimeType: '',
+    sizeBytes: 1,
+    url: '',
+  }
+  const reservationDefaultValues = {
+    title: '',
+    reservationType: 'hotel',
+    providerName: '',
+    confirmationCode: '',
+    startDateTime: '',
+    endDateTime: '',
+    amount: 0,
+    currency: 'USD',
+    notes: '',
+  }
+  const expenseDefaultValues = {
+    title: '',
+    category: 'food',
+    amount: 0,
+    currency: 'USD',
+    expenseDate: '',
+    notes: '',
+  }
+  const budgetDefaultValues = {
+    currency: 'USD',
+    totalBudget: 1000,
+  }
 
   const checklistForm = useForm({
     resolver: zodResolver(checklistSchema),
-    defaultValues: {
-      title: '',
-      type: 'todo',
-    },
+    defaultValues: checklistDefaultValues,
   })
 
   const checklistItemForm = useForm({
     resolver: zodResolver(checklistItemSchema),
-    defaultValues: {
-      label: '',
-      isCompleted: false,
-      sortOrder: 0,
-    },
+    defaultValues: checklistItemDefaultValues,
   })
 
   const attachmentMetaForm = useForm({
     resolver: zodResolver(attachmentMetadataSchema),
-    defaultValues: {
-      fileName: '',
-      mimeType: '',
-      sizeBytes: 1,
-      url: '',
-    },
+    defaultValues: attachmentMetaDefaultValues,
   })
 
   const reservationForm = useForm({
     resolver: zodResolver(reservationSchema),
-    defaultValues: {
-      title: '',
-      reservationType: 'hotel',
-      providerName: '',
-      confirmationCode: '',
-      startDateTime: '',
-      endDateTime: '',
-      amount: 0,
-      currency: 'USD',
-      notes: '',
-    },
+    defaultValues: reservationDefaultValues,
   })
 
   const expenseForm = useForm({
     resolver: zodResolver(expenseSchema),
-    defaultValues: {
-      title: '',
-      category: 'food',
-      amount: 0,
-      currency: 'USD',
-      expenseDate: '',
-      notes: '',
-    },
+    defaultValues: expenseDefaultValues,
   })
 
   const budgetForm = useForm({
     resolver: zodResolver(budgetSchema),
-    defaultValues: {
-      currency: 'USD',
-      totalBudget: 1000,
-    },
+    defaultValues: budgetDefaultValues,
   })
 
   const isLoading =
@@ -241,7 +247,7 @@ const TripOrganizationPage = () => {
     return (
       <PageErrorState
         title="Unable to load organization section"
-        description="One or more organization endpoints failed."
+        description="Some organization details could not be loaded."
         errorMessage={combinedError?.message}
         onRetry={() =>
           Promise.all([
@@ -280,7 +286,7 @@ const TripOrganizationPage = () => {
       {!canEdit ? (
         <PageEmptyState
           title="Read-only Organization Access"
-          description={`Your current role is ${actorRole}. Owner/Editor can create and update organization records.`}
+          description={`Your current role is ${actorRole}. Owners and editors can create and update organization details.`}
         />
       ) : null}
 
@@ -293,8 +299,16 @@ const TripOrganizationPage = () => {
               if (!canEdit) {
                 return
               }
-              createChecklistMutation.mutate({ tripId, body: values })
+              createChecklistMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    checklistForm.reset(checklistDefaultValues)
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:organization:create-checklist`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
@@ -320,14 +334,22 @@ const TripOrganizationPage = () => {
               if (!checklistId) {
                 return
               }
-              createChecklistItemMutation.mutate({
-                tripId,
-                checklistId,
-                body: {
-                  label: values.label,
+              createChecklistItemMutation.mutate(
+                {
+                  tripId,
+                  checklistId,
+                  body: {
+                    label: values.label,
+                  },
                 },
-              })
+                {
+                  onSuccess: () => {
+                    checklistItemForm.reset(checklistItemDefaultValues)
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:organization:create-checklist-item`}
             className="mt-sm space-y-sm"
           >
             <div className="space-y-xs">
@@ -368,8 +390,16 @@ const TripOrganizationPage = () => {
               if (!canEdit) {
                 return
               }
-              createAttachmentMutation.mutate({ tripId, body: values })
+              createAttachmentMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    attachmentMetaForm.reset(attachmentMetaDefaultValues)
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:organization:create-attachment-meta`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="fileName" label="File Name" required />
@@ -388,7 +418,7 @@ const TripOrganizationPage = () => {
         <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
           <h3 className="text-title-sm font-semibold text-ink">Upload Attachment</h3>
           <p className="mt-xs text-body-sm text-ink-muted">
-            Uploads file with multipart form-data to backend storage flow.
+            Upload tickets, documents, or images to keep trip records in one place.
           </p>
           <div className="mt-sm space-y-sm">
             <input
@@ -427,8 +457,20 @@ const TripOrganizationPage = () => {
               if (!canEdit) {
                 return
               }
-              createReservationMutation.mutate({ tripId, body: values })
+              createReservationMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    reservationForm.reset({
+                      ...reservationDefaultValues,
+                      reservationType: values.reservationType || reservationDefaultValues.reservationType,
+                      currency: values.currency || reservationDefaultValues.currency,
+                    })
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:organization:create-reservation`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
@@ -457,8 +499,20 @@ const TripOrganizationPage = () => {
               if (!canEdit) {
                 return
               }
-              createExpenseMutation.mutate({ tripId, body: values })
+              createExpenseMutation.mutate(
+                { tripId, body: values },
+                {
+                  onSuccess: () => {
+                    expenseForm.reset({
+                      ...expenseDefaultValues,
+                      category: values.category || expenseDefaultValues.category,
+                      currency: values.currency || expenseDefaultValues.currency,
+                    })
+                  },
+                },
+              )
             }}
+            persistKey={`trip:${tripId}:organization:create-expense`}
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
@@ -485,8 +539,19 @@ const TripOrganizationPage = () => {
             if (!canEdit) {
               return
             }
-            updateTripBudgetMutation.mutate({ tripId, body: values })
+            updateTripBudgetMutation.mutate(
+              { tripId, body: values },
+              {
+                onSuccess: () => {
+                  budgetForm.reset({
+                    currency: values.currency || budgetDefaultValues.currency,
+                    totalBudget: Number(values.totalBudget || budgetDefaultValues.totalBudget),
+                  })
+                },
+              },
+            )
           }}
+          persistKey={`trip:${tripId}:organization:update-budget`}
           className="mt-sm grid gap-sm sm:grid-cols-3"
         >
           <RHFTextField name="currency" label="Currency" required />

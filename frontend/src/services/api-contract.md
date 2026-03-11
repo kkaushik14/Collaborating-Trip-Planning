@@ -133,6 +133,7 @@ type TripMember = {
   trip: ObjectId;
   user: ObjectId;
   role: 'OWNER' | 'EDITOR' | 'VIEWER';
+  commentEmailOptIn: 'true' | 'false';
   addedBy?: ObjectId;
   joinedAt: ISODateTime;
   isActive: boolean;
@@ -560,6 +561,20 @@ type ReportSnapshot = {
 - Trip permission: `VIEW_TRIP`
 - Headers: `Authorization`
 - Success: `200`, `data: { members: TripMember[] }`
+- Errors: `400`, `401`, `403`, `404`, `429`, `500`
+
+### `PATCH /api/v1/trips/:tripId/members/me/comment-email-preference`
+- Auth: Bearer required
+- Trip permission: `VIEW_TRIP`
+- Headers: `Authorization`, `Content-Type: application/json`
+- Body:
+```json
+{ "commentEmailOptIn": "true|false" }
+```
+- Notes:
+  - Backend normalizes booleans to string values.
+  - Stored as string enum in member record: `"true"` (opt-in), `"false"` (opt-out).
+- Success: `200`, `data: { member: TripMember }`
 - Errors: `400`, `401`, `403`, `404`, `429`, `500`
 
 ### `PATCH /api/v1/trips/:tripId/members/:memberId/role`

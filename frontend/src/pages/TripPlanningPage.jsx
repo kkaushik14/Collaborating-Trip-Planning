@@ -303,7 +303,7 @@ const TripPlanningPage = () => {
       {!canEdit ? (
         <PageEmptyState
           title="Read-only Planning Access"
-          description={`Your current role is ${actorRole}. Owner/Editor can create and reorder itinerary content.`}
+          description={`Your current role is ${actorRole}. Owners and editors can create and reorder itinerary details.`}
         />
       ) : null}
 
@@ -313,7 +313,12 @@ const TripPlanningPage = () => {
           <p className="mt-xs text-body-sm text-ink-muted">
             Add day metadata before adding activity cards.
           </p>
-          <Form methods={itineraryDayForm} onSubmit={handleCreateDay} className="mt-md space-y-sm">
+          <Form
+            methods={itineraryDayForm}
+            onSubmit={handleCreateDay}
+            persistKey={`trip:${tripId}:planning:create-day`}
+            className="mt-md space-y-sm"
+          >
             <RHFTextField name="dayNumber" label="Day Number" type="number" required />
             <RHFTextField name="date" label="Date" type="date" required />
             <RHFTextField name="title" label="Title" required />
@@ -330,9 +335,14 @@ const TripPlanningPage = () => {
         <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
           <h3 className="text-title-sm font-semibold text-ink">Create Activity Card</h3>
           <p className="mt-xs text-body-sm text-ink-muted">
-            Post activity details directly to backend and place it in a selected day.
+            Add activity details and place them in the day you choose.
           </p>
-          <Form methods={activityForm} onSubmit={handleCreateActivityFromForm} className="mt-md space-y-sm">
+          <Form
+            methods={activityForm}
+            onSubmit={handleCreateActivityFromForm}
+            persistKey={`trip:${tripId}:planning:create-activity`}
+            className="mt-md space-y-sm"
+          >
             <div className="space-y-xs">
               <label htmlFor="activity-day-id" className="text-body-sm font-medium text-ink">
                 Day
@@ -392,7 +402,7 @@ const TripPlanningPage = () => {
       {createActivityMutation.error ? (
         <PageErrorState
           title="Unable to create activity"
-          description="The API rejected the activity creation request."
+          description="We could not create this activity right now."
           errorMessage={createActivityMutation.error?.message}
           onRetry={() => createActivityMutation.reset()}
         />
@@ -401,7 +411,7 @@ const TripPlanningPage = () => {
       {createItineraryDayMutation.error ? (
         <PageErrorState
           title="Unable to create itinerary day"
-          description="The API rejected the day creation request."
+          description="We could not create this day right now."
           errorMessage={createItineraryDayMutation.error?.message}
           onRetry={() => createItineraryDayMutation.reset()}
         />

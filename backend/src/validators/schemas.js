@@ -101,6 +101,14 @@ const collaborationSchemas = {
   updateMemberRole: Joi.object({
     role: Joi.string().valid('EDITOR', 'VIEWER', 'OWNER').required(),
   }),
+  updateCommentEmailPreference: Joi.object({
+    commentEmailOptIn: Joi.alternatives()
+      .try(
+        Joi.string().trim().lowercase().valid('true', 'false'),
+        Joi.boolean(),
+      )
+      .required(),
+  }),
   createComment: Joi.object({
     targetType: Joi.string().valid('day', 'activity').required(),
     dayId: objectIdSchema,

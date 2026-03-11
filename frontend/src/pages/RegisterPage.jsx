@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
+import { getRedirectPathFromLocation } from '../app/AuthProvider/redirect-utils.js'
 import { AuthPageShell } from '../components/common/index.js'
 import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
 import { Button } from '../components/ui/index.js'
@@ -27,18 +28,17 @@ const RegisterPage = () => {
     reValidateMode: 'onChange',
   })
 
-  const fromLocation = location.state?.from
-  const fromPathname = fromLocation?.pathname
-  const fromSearch = fromLocation?.search || ''
-  const redirectPath =
-    fromPathname && fromPathname !== '/login' && fromPathname !== '/register'
-      ? `${fromPathname}${fromSearch}`
-      : '/trips'
+  const redirectPath = getRedirectPathFromLocation(location, '/trips')
 
   const handleSubmit = async (values) => {
     try {
       setSubmitError('')
       await signUp(values)
+      registerForm.reset({
+        name: '',
+        email: '',
+        password: '',
+      })
       navigate(redirectPath, { replace: true })
     } catch (error) {
       setSubmitError(error?.message || 'Unable to register. Please try again.')
@@ -54,7 +54,13 @@ const RegisterPage = () => {
       formTitle="Create your account"
       formDescription="Register once and start managing trip planning, collaboration, and budgets."
     >
-      <Form methods={registerForm} onSubmit={handleSubmit} className="space-y-md">
+      <Form
+        methods={registerForm}
+        onSubmit={handleSubmit}
+        persistKey="auth:register"
+        persistIgnoreFields={['password']}
+        className="space-y-md"
+      >
         <RHFTextField
           name="name"
           label="Full Name"
@@ -90,7 +96,14 @@ const RegisterPage = () => {
 
       <Text tone="muted" size="body-sm" className="mt-md text-center">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-primary hover:underline">
+        <Link
+          to={{
+            pathname: '/login',
+            search: location.search,
+          }}
+          state={location.state}
+          className="font-medium text-primary hover:underline"
+        >
           Sign in
         </Link>
       </Text>

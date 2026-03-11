@@ -1,19 +1,14 @@
-import { AlertTriangleIcon, LoaderCircleIcon } from 'lucide-react'
+import { AlertTriangleIcon } from 'lucide-react'
 
+import { TravelLoader } from '../components/common/index.js'
 import { Button } from '../components/ui/index.js'
 import { Heading, Text } from '../components/typography/index.js'
 
 function PageLoadingState({ title = 'Loading data...', description = 'Please wait while we fetch the latest trip data.' }) {
   return (
-    <section className="rounded-xl border border-line bg-panel p-xl shadow-card">
-      <div className="flex items-start gap-md">
-        <LoaderCircleIcon className="mt-1 size-5 animate-spin text-primary" />
-        <div className="space-y-xs">
-          <Heading level={2} size="title-sm">
-            {title}
-          </Heading>
-          <Text tone="muted">{description}</Text>
-        </div>
+    <section className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-sm py-lg sm:px-md">
+      <div className="w-full max-w-xl rounded-xl border border-line bg-panel p-xl shadow-card sm:p-2xl">
+        <TravelLoader title={title} description={description} />
       </div>
     </section>
   )

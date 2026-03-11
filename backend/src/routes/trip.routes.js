@@ -35,6 +35,7 @@ import {
   reactivateMember,
   reorderActivities,
   transferOwnership,
+  updateMyCommentEmailPreference,
   updateChecklistItem,
   updateMemberRole,
   updateTrip,
@@ -138,6 +139,16 @@ tripRouter
     authorizeTripPermission(TRIP_PERMISSIONS.VIEW_TRIP),
     listMembers,
   )
+
+tripRouter.patch(
+  '/:tripId/members/me/comment-email-preference',
+  validateRequest({
+    params: tripSchemas.tripIdParam,
+    body: collaborationSchemas.updateCommentEmailPreference,
+  }),
+  authorizeTripPermission(TRIP_PERMISSIONS.VIEW_TRIP),
+  updateMyCommentEmailPreference,
+)
 
 tripRouter.patch(
   '/:tripId/members/:memberId/role',

@@ -36,6 +36,12 @@ const tripMemberSchema = new Schema(
       default: true,
       index: true,
     },
+    commentEmailOptIn: {
+      type: String,
+      enum: ['true', 'false'],
+      default: 'true',
+      index: true,
+    },
   },
   {
     timestamps: true,

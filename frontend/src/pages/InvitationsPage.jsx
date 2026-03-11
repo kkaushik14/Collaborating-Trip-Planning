@@ -110,7 +110,7 @@ const InvitationsPage = () => {
     return (
       <PageErrorState
         title="Unable to load invitations"
-        description="The invitation list endpoint returned an error."
+        description="We could not load your invitations right now."
         errorMessage={invitationsQuery.error?.message}
         onRetry={() => invitationsQuery.refetch()}
       />
@@ -124,7 +124,7 @@ const InvitationsPage = () => {
           My Invitations
         </Heading>
         <Text tone="muted">
-          Accept invitation tokens and join shared trip workspaces.
+          Review your pending invites and join trips shared with you.
         </Text>
       </header>
 
@@ -142,6 +142,7 @@ const InvitationsPage = () => {
               clearTokenFromUrl: Boolean(tokenFromQuery),
             })
           }
+          persistKey="invitations:accept-token"
           className="mt-md space-y-sm"
         >
           <RHFTextField

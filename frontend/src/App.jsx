@@ -8,6 +8,8 @@ import {
 } from 'react-router-dom'
 
 import { ProtectedRoute, useAuth } from './app/AuthProvider/index.js'
+import { getRedirectPathFromLocation } from './app/AuthProvider/redirect-utils.js'
+import { TravelLoader } from './components/common/index.js'
 import { MainLayout } from './layouts/index.js'
 import {
   InvitationsPage,
@@ -25,8 +27,13 @@ import {
 
 function RouteLoadingFallback() {
   return (
-    <div className="rounded-xl border border-line bg-panel p-xl text-body-sm text-ink-muted">
-      Checking your session...
+    <div className="flex min-h-screen items-center justify-center px-lg py-xl sm:px-xl">
+      <div className="w-full max-w-xl rounded-xl border border-line bg-panel p-xl shadow-card sm:p-2xl">
+        <TravelLoader
+          title="Restoring your session..."
+          description="Checking your account and preparing your trip workspace."
+        />
+      </div>
     </div>
   )
 }
@@ -50,13 +57,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    const nextLocation = location.state?.from
-    const nextPathname = nextLocation?.pathname
-    const nextSearch = nextLocation?.search || ''
-    const redirectPath =
-      nextPathname && nextPathname !== '/login' && nextPathname !== '/register'
-        ? `${nextPathname}${nextSearch}`
-        : '/trips'
+    const redirectPath = getRedirectPathFromLocation(location, '/trips')
     return <Navigate to={redirectPath} replace />
   }
 

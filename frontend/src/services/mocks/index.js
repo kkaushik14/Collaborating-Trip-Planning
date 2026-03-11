@@ -79,6 +79,11 @@ const ROUTE_DEFINITIONS = Object.freeze([
   },
   {
     method: 'PATCH',
+    pattern: /^\/api\/v1\/trips\/[^/]+\/members\/me\/comment-email-preference$/,
+    key: 'PATCH /api/v1/trips/:tripId/members/me/comment-email-preference',
+  },
+  {
+    method: 'PATCH',
     pattern: /^\/api\/v1\/trips\/[^/]+\/members\/[^/]+\/role$/,
     key: 'PATCH /api/v1/trips/:tripId/members/:memberId/role',
   },

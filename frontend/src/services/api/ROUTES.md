@@ -79,6 +79,7 @@ This file lists all URLs currently wired in the frontend app (UI routes + backen
 | `POST` | `/api/v1/trips/:tripId/invitations` | Creates and sends a trip invitation. |
 | `GET` | `/api/v1/trips/:tripId/invitations` | Lists invitation records for a trip. |
 | `GET` | `/api/v1/trips/:tripId/members` | Lists members and roles for a trip. |
+| `PATCH` | `/api/v1/trips/:tripId/members/me/comment-email-preference` | Updates current member comment email preference (`"true"`/`"false"`). |
 | `PATCH` | `/api/v1/trips/:tripId/members/:memberId/role` | Updates a member role (Owner/Editor/Viewer rules apply). |
 | `DELETE` | `/api/v1/trips/:tripId/members/:memberId` | Deactivates/removes a trip member. |
 | `POST` | `/api/v1/trips/:tripId/members/:memberId/reactivate` | Reactivates a previously deactivated member. |

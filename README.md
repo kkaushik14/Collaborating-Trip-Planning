@@ -36,6 +36,15 @@ The project is split into:
 - Role model: `OWNER`, `EDITOR`, `VIEWER`
 - Ownership transfer and member activate/deactivate
 - Comment system for day/activity targets
+- Comment email preference toggle per member (`"true"` opt-in / `"false"` opt-out) with delayed notification queue and opt-out deep-link handling
+- Comment emails are recipient-driven: only opted-in members receive updates when someone else comments
+
+### Email Notifications
+- Branded welcome email on first-time registration
+- Branded trip creation email (includes professional congratulatory copy and journey sign-off)
+- Enhanced invitation email template with role/context language
+- Comment update email with direct collaboration link and opt-out link
+- Email links auto-resolve local/prod frontend base URL from request origin (localhost in local dev, deployed host/IP in production)
 
 ### 3. Organization
 - Checklists and checklist items
@@ -52,6 +61,7 @@ The project is split into:
 ### 5. Auth and Platform
 - Register, login, refresh, logout, current-user endpoints
 - JWT access/refresh token strategy
+- Cached-session bootstrap for smoother refresh behavior with burst refresh throttling delay
 - API error/response utilities, async handler, validation, rate limit, audit hooks
 - OpenAPI/Swagger and health/metrics endpoints
 
@@ -59,8 +69,11 @@ The project is split into:
 - Centralized HTTP client and service modules
 - TanStack Query for server-state
 - Route guards via auth provider
+- Redirect-safe auth flow (shared/protected links return user to original destination after login/register)
 - Role-aware UI behavior for protected pages
 - Global UI toast notifications for async success/error feedback (including invitation acceptance)
+- Draft-safe form handling: persist unsaved values on navigation/reload and reset fields only after successful submit
+- Shared travel-themed loader component used across route and page loading states
 - Jest + React Testing Library setup with CI workflow
 
 ## Monorepo Structure

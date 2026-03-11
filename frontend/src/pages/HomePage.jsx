@@ -125,7 +125,7 @@ const HomePage = () => {
           <div className="space-y-xs">
             <Heading level={1}>Frontend Feature Scaffold</Heading>
             <Text tone="muted">
-              Props-driven UI only, no network calls inside components.
+              Preview of trip planning, collaboration, organization, and analytics sections.
             </Text>
           </div>
           <span className="inline-flex items-center gap-xs rounded-full bg-primary/10 px-md py-xs text-caption font-medium text-primary">

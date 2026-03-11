@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
-import { MailPlusIcon, MoreHorizontalIcon, SendIcon, Users2Icon } from 'lucide-react'
+import { BellRingIcon, MailPlusIcon, MoreHorizontalIcon, SendIcon, Users2Icon } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
 
 import {
@@ -43,6 +43,7 @@ function getInitials(value) {
 }
 
 function CollaborationPanel({
+  tripId = '',
   members = [],
   invitations = [],
   comments = [],
@@ -55,10 +56,16 @@ function CollaborationPanel({
   canManageMembers = true,
   canInviteMembers = true,
   canComment = true,
+  commentEmailOptIn = true,
+  isCommentEmailPreferenceUpdating = false,
+  onCommentEmailPreferenceChange,
+  shouldPromptOptOutFromQuery = false,
+  onOptOutQueryPromptConsumed,
   className,
 }) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteRole, setInviteRole] = useState('VIEWER')
+  const [isCommentOptOutDialogOpen, setIsCommentOptOutDialogOpen] = useState(false)
   const defaultDayTargetId = dayTargets[0]?.id || ''
   const defaultActivityTargetId = activityTargets[0]?.id || ''
   const hasDayTargets = dayTargets.length > 0
@@ -114,34 +121,75 @@ function CollaborationPanel({
 
     return activityTargets
   }, [activityTargets, commentTargetType, selectedDayId])
+  const isQueryOptOutPromptOpen = Boolean(shouldPromptOptOutFromQuery && commentEmailOptIn)
+  const isCommentEmailDialogOpen = isCommentOptOutDialogOpen || isQueryOptOutPromptOpen
 
-  const handleInviteSubmit = (values) => {
+  const handleInviteSubmit = async (values) => {
     if (!canInviteMembers) {
       return
     }
 
-    onInviteSubmit?.(values)
-    inviteForm.reset({
-      email: '',
-      role: 'VIEWER',
-    })
-    setInviteRole('VIEWER')
-    setIsInviteOpen(false)
+    try {
+      await Promise.resolve(onInviteSubmit?.(values))
+      inviteForm.reset({
+        email: '',
+        role: 'VIEWER',
+      })
+      setInviteRole('VIEWER')
+      setIsInviteOpen(false)
+    } catch {
+      // Keep form data intact so user can retry/correct input.
+    }
   }
 
-  const handleCommentSubmit = (values) => {
+  const handleCommentSubmit = async (values) => {
     if (!canComment) {
       return
     }
 
-    onCommentSubmit?.(values)
-    commentForm.reset({
-      body: '',
-      targetType: values.targetType,
-      dayId: values.dayId,
-      activityId: values.activityId,
-      parentCommentId: undefined,
-    })
+    try {
+      await Promise.resolve(onCommentSubmit?.(values))
+      commentForm.reset({
+        body: '',
+        targetType: values.targetType,
+        dayId: values.dayId,
+        activityId: values.activityId,
+        parentCommentId: undefined,
+      })
+    } catch {
+      // Keep form data intact so user can retry/correct input.
+    }
+  }
+
+  const handleCommentEmailToggle = async () => {
+    if (isCommentEmailPreferenceUpdating) {
+      return
+    }
+
+    if (commentEmailOptIn) {
+      setIsCommentOptOutDialogOpen(true)
+      return
+    }
+
+    try {
+      await Promise.resolve(onCommentEmailPreferenceChange?.(true))
+    } catch {
+      // Keep existing state if update fails.
+    }
+  }
+
+  const handleCommentEmailOptOutConfirm = async () => {
+    if (isCommentEmailPreferenceUpdating) {
+      return
+    }
+
+    try {
+      await Promise.resolve(onCommentEmailPreferenceChange?.(false))
+      onOptOutQueryPromptConsumed?.()
+      setIsCommentOptOutDialogOpen(false)
+    } catch {
+      // Keep dialog open on failure so user can retry.
+    }
   }
 
   return (
@@ -184,13 +232,14 @@ function CollaborationPanel({
             <DialogHeader>
               <DialogTitle>Invite a collaborator</DialogTitle>
               <DialogDescription>
-                Send an invite with role assignment. This panel is presentational and emits data through callback props.
+                Invite people to this trip and assign how they can contribute.
               </DialogDescription>
             </DialogHeader>
 
             <Form
               methods={inviteForm}
               onSubmit={handleInviteSubmit}
+              persistKey={`trip:${tripId}:collaboration:invite-member`}
               className="space-y-md"
             >
               <RHFTextField
@@ -352,6 +401,43 @@ function CollaborationPanel({
       </div>
 
       <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <div className="rounded-md border border-line bg-panel-muted p-md">
+          <div className="flex flex-wrap items-start justify-between gap-sm">
+            <div className="space-y-xs">
+              <div className="flex items-center gap-xs text-ink">
+                <BellRingIcon className="size-4" />
+                <Text size="body-sm" weight="medium">
+                  Comment Email Updates
+                </Text>
+              </div>
+              <Text size="body-sm" tone="muted">
+                Choose whether you want email updates when new comments are posted.
+              </Text>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              role="switch"
+              aria-checked={commentEmailOptIn}
+              variant={commentEmailOptIn ? 'default' : 'outline'}
+              className="min-w-[7.5rem] whitespace-nowrap"
+              disabled={isCommentEmailPreferenceUpdating}
+              onClick={handleCommentEmailToggle}
+            >
+              {isCommentEmailPreferenceUpdating
+                ? 'Saving...'
+                : commentEmailOptIn
+                  ? 'Opt-out'
+                  : 'Opt-in'}
+            </Button>
+          </div>
+          <Text size="caption" tone="muted" className="mt-xs">
+            {commentEmailOptIn
+              ? 'Status: On - you will receive comment updates by email.'
+              : 'Status: Off - comment update emails are paused for this trip.'}
+          </Text>
+        </div>
+
         <header>
           <Heading level={3} size="title-sm">
             Comment Thread
@@ -392,6 +478,7 @@ function CollaborationPanel({
         <Form
           methods={commentForm}
           onSubmit={handleCommentSubmit}
+          persistKey={`trip:${tripId}:collaboration:create-comment`}
           className="space-y-sm"
         >
           {!canComment ? (
@@ -505,6 +592,45 @@ function CollaborationPanel({
           </div>
         </Form>
       </article>
+
+      <Dialog
+        open={isCommentEmailDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            onOptOutQueryPromptConsumed?.()
+          }
+          setIsCommentOptOutDialogOpen(nextOpen)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Turn Off Comment Emails?</DialogTitle>
+            <DialogDescription>
+              You may miss important updates from collaborators. You can turn email updates back on anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-sm sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto whitespace-normal text-left sm:text-center"
+              disabled={isCommentEmailPreferenceUpdating}
+              onClick={() => setIsCommentOptOutDialogOpen(false)}
+            >
+              Keep Emails On
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="h-auto whitespace-normal text-left sm:text-center"
+              disabled={isCommentEmailPreferenceUpdating}
+              onClick={handleCommentEmailOptOutConfirm}
+            >
+              Turn Off Updates
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

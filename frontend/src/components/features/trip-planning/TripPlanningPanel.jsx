@@ -1,8 +1,8 @@
-import { CalendarDaysIcon, PlusIcon, UsersIcon } from 'lucide-react'
+import { CalendarDaysIcon, UsersIcon } from 'lucide-react'
 
 import { ActivityCard, SortableActivityList } from '@/components/trip-planning/index.js'
 import { Heading, Text } from '@/components/typography/index.js'
-import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/index.js'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/index.js'
 import { cn } from '@/lib/utils'
 
 function formatCurrency(amount, currency) {
@@ -34,6 +34,7 @@ function TripPlanningPanel({
   }
 
   const activeDayId = selectedDayId || days[0]?.id || ''
+  const _TEMP_DISABLED_ADD_ACTIVITY_HANDLER = onAddActivity
 
   return (
     <section className={cn('space-y-lg', className)}>
@@ -52,7 +53,7 @@ function TripPlanningPanel({
           </div>
         </div>
 
-        <Button
+        {/* <Button
           size="sm"
           className="w-full sm:w-auto"
           onClick={() => onAddActivity?.(activeDayId)}
@@ -60,7 +61,7 @@ function TripPlanningPanel({
         >
           <PlusIcon className="size-4" />
           {canEdit ? 'Add Activity' : 'Read-only'}
-        </Button>
+        </Button> */}
       </header>
 
       <Tabs value={activeDayId} onValueChange={onDayChange}>

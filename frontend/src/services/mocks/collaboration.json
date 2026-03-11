@@ -77,6 +77,7 @@
               "trip": "65a100000000000000000001",
               "user": "64f100000000000000000001",
               "role": "OWNER",
+              "commentEmailOptIn": "true",
               "addedBy": "64f100000000000000000001",
               "joinedAt": "2026-03-08T10:00:00.000Z",
               "isActive": true,
@@ -88,6 +89,7 @@
               "trip": "65a100000000000000000001",
               "user": "64f100000000000000000002",
               "role": "EDITOR",
+              "commentEmailOptIn": "true",
               "addedBy": "64f100000000000000000001",
               "joinedAt": "2026-03-08T10:05:00.000Z",
               "isActive": true,
@@ -95,6 +97,28 @@
               "updatedAt": "2026-03-08T10:05:00.000Z"
             }
           ]
+        }
+      }
+    },
+    "PATCH /api/v1/trips/:tripId/members/me/comment-email-preference": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "statusCode": 200,
+        "message": "Comment email notifications updated successfully",
+        "data": {
+          "member": {
+            "_id": "67d100000000000000000001",
+            "trip": "65a100000000000000000001",
+            "user": "64f100000000000000000001",
+            "role": "OWNER",
+            "commentEmailOptIn": "false",
+            "addedBy": "64f100000000000000000001",
+            "joinedAt": "2026-03-08T10:00:00.000Z",
+            "isActive": true,
+            "createdAt": "2026-03-08T10:00:00.000Z",
+            "updatedAt": "2026-03-08T12:10:00.000Z"
+          }
         }
       }
     },
@@ -110,6 +134,7 @@
             "trip": "65a100000000000000000001",
             "user": "64f100000000000000000002",
             "role": "VIEWER",
+            "commentEmailOptIn": "true",
             "addedBy": "64f100000000000000000001",
             "joinedAt": "2026-03-08T10:05:00.000Z",
             "isActive": true,
@@ -131,6 +156,7 @@
             "trip": "65a100000000000000000001",
             "user": "64f100000000000000000002",
             "role": "VIEWER",
+            "commentEmailOptIn": "true",
             "addedBy": "64f100000000000000000001",
             "joinedAt": "2026-03-08T10:05:00.000Z",
             "isActive": false,
@@ -152,6 +178,7 @@
             "trip": "65a100000000000000000001",
             "user": "64f100000000000000000002",
             "role": "VIEWER",
+            "commentEmailOptIn": "true",
             "addedBy": "64f100000000000000000001",
             "joinedAt": "2026-03-08T10:05:00.000Z",
             "isActive": true,
@@ -190,6 +217,7 @@
             "trip": "65a100000000000000000001",
             "user": "64f100000000000000000001",
             "role": "EDITOR",
+            "commentEmailOptIn": "true",
             "addedBy": "64f100000000000000000001",
             "joinedAt": "2026-03-08T10:00:00.000Z",
             "isActive": true,
@@ -201,6 +229,7 @@
             "trip": "65a100000000000000000001",
             "user": "64f100000000000000000002",
             "role": "OWNER",
+            "commentEmailOptIn": "true",
             "addedBy": "64f100000000000000000001",
             "joinedAt": "2026-03-08T10:05:00.000Z",
             "isActive": true,

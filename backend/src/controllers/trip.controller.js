@@ -10,8 +10,9 @@ import {
   ApiResponse,
   asyncHandler,
   parseDateOrThrow,
+  resolveFrontendBaseUrl,
 } from '../utils/index.js'
-import { runInTransaction } from '../services/index.js'
+import { runInTransaction, sendTripCreatedEmail } from '../services/index.js'
 
 const normalizeTravelerCount = (travelerCount, travelers) => {
   if (Array.isArray(travelers)) {
@@ -99,6 +100,17 @@ const createTrip = asyncHandler(async (req, res) => {
     }
 
     return createdTrip
+  })
+
+  void sendTripCreatedEmail({
+    email: req.user.email,
+    recipientName: req.user.name || 'Traveler',
+    tripTitle: trip.title,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    tripUrl: `${resolveFrontendBaseUrl(req)}/trips/${trip._id}/planning`,
+  }).catch((error) => {
+    console.error('Failed to send trip creation email:', error)
   })
 
   return res
