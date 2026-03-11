@@ -27,7 +27,9 @@ const authenticate = asyncHandler(async (req, _res, next) => {
     throw ApiError.unauthorized('Invalid or expired access token')
   }
 
-  const user = await User.findById(payload.sub).select('_id name email isActive').lean()
+  const user = await User.findById(payload.sub)
+    .select('_id name email isActive avatarUrl mobileNumber emailUpdateCount themePreference createdAt updatedAt')
+    .lean()
 
   if (!user || !user.isActive) {
     throw ApiError.unauthorized('User account is invalid or inactive')

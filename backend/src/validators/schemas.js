@@ -16,6 +16,13 @@ const authSchemas = {
   refresh: Joi.object({
     refreshToken: Joi.string().required(),
   }),
+  updateProfile: Joi.object({
+    name: Joi.string().trim().min(2).max(120),
+    email: Joi.string().email(),
+    mobileNumber: Joi.string().trim().pattern(/^[0-9+\-()\s]{7,20}$/).allow('', null),
+    avatarUrl: Joi.string().trim().uri().allow('', null),
+    themePreference: Joi.string().valid('light', 'dark'),
+  }).min(1),
 }
 
 const tripSchemas = {

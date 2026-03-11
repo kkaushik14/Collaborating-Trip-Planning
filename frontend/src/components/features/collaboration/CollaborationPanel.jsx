@@ -221,11 +221,12 @@ function CollaborationPanel({
             }
           }}
         >
-          <DialogTrigger>
-            <Button size="sm" className="w-full sm:w-auto" disabled={!canInviteMembers}>
-              <MailPlusIcon className="size-4" />
-              Invite Member
-            </Button>
+          <DialogTrigger
+            disabled={!canInviteMembers}
+            render={<Button size="sm" className="w-full sm:w-auto" />}
+          >
+            <MailPlusIcon className="size-4" />
+            Invite Member
           </DialogTrigger>
 
           <DialogContent>
@@ -330,15 +331,11 @@ function CollaborationPanel({
 
                 <div className="flex w-full items-center gap-xs sm:w-auto">
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                        disabled={!canManageMembers}
-                      >
-                        {member.role}
-                      </Button>
+                    <DropdownMenuTrigger
+                      disabled={!canManageMembers}
+                      render={<Button size="sm" variant="outline" className="w-full sm:w-auto" />}
+                    >
+                      {member.role}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {ROLE_OPTIONS.map((role) => (

@@ -105,6 +105,27 @@ const openApiSpec = {
         summary: 'Get current user',
         security: [{ bearerAuth: [] }],
       },
+      patch: {
+        summary: 'Update current user profile',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  email: { type: 'string', format: 'email' },
+                  mobileNumber: { type: 'string', nullable: true },
+                  avatarUrl: { type: 'string', format: 'uri', nullable: true },
+                  themePreference: { type: 'string', enum: ['light', 'dark'] },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     '/invitations/mine': {
       get: {

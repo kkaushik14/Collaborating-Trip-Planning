@@ -46,6 +46,64 @@ test.beforeEach(async () => {
   await mongoose.connection.db.dropDatabase()
 })
 
+test('Auth profile flow: update profile fields and enforce email update limit', async () => {
+  const user = await registerUser({
+    name: 'Profile User',
+    email: 'profile@example.com',
+    password: 'Password123!',
+  })
+
+  const firstUpdateResponse = await request(app)
+    .patch('/api/v1/auth/me')
+    .set(buildAuthHeader(user.accessToken))
+    .send({
+      name: 'Profile User Updated',
+      mobileNumber: '+91 9876543210',
+      avatarUrl: 'https://example.com/avatar-1.png',
+      themePreference: 'light',
+    })
+
+  assert.equal(firstUpdateResponse.statusCode, 200)
+  assert.equal(firstUpdateResponse.body.data.user.name, 'Profile User Updated')
+  assert.equal(firstUpdateResponse.body.data.user.mobileNumber, '+91 9876543210')
+  assert.equal(firstUpdateResponse.body.data.user.avatarUrl, 'https://example.com/avatar-1.png')
+  assert.equal(firstUpdateResponse.body.data.user.themePreference, 'light')
+  assert.equal(firstUpdateResponse.body.data.user.emailUpdateCount, 0)
+
+  const secondUpdateResponse = await request(app)
+    .patch('/api/v1/auth/me')
+    .set(buildAuthHeader(user.accessToken))
+    .send({
+      email: 'profile+1@example.com',
+    })
+
+  assert.equal(secondUpdateResponse.statusCode, 200)
+  assert.equal(secondUpdateResponse.body.data.user.email, 'profile+1@example.com')
+  assert.equal(secondUpdateResponse.body.data.user.emailUpdateCount, 1)
+
+  const thirdUpdateResponse = await request(app)
+    .patch('/api/v1/auth/me')
+    .set(buildAuthHeader(user.accessToken))
+    .send({
+      email: 'profile+2@example.com',
+    })
+
+  assert.equal(thirdUpdateResponse.statusCode, 200)
+  assert.equal(thirdUpdateResponse.body.data.user.email, 'profile+2@example.com')
+  assert.equal(thirdUpdateResponse.body.data.user.emailUpdateCount, 2)
+  assert.equal(thirdUpdateResponse.body.data.user.emailUpdatesRemaining, 0)
+
+  const limitReachedResponse = await request(app)
+    .patch('/api/v1/auth/me')
+    .set(buildAuthHeader(user.accessToken))
+    .send({
+      email: 'profile+3@example.com',
+    })
+
+  assert.equal(limitReachedResponse.statusCode, 400)
+  assert.match(limitReachedResponse.body.message, /email update limit/i)
+})
+
 test('Trip planning flow: auth + create/list/update trip + itinerary + activity reorder', async () => {
   const owner = await registerUser({
     name: 'Owner User',

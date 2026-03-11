@@ -1,6 +1,13 @@
 import express from 'express'
 
-import { getCurrentUser, login, logout, refreshToken, register } from '../controllers/index.js'
+import {
+  getCurrentUser,
+  login,
+  logout,
+  refreshToken,
+  register,
+  updateCurrentUserProfile,
+} from '../controllers/index.js'
 import { authRateLimiter, authenticate } from '../middlewares/index.js'
 import { authSchemas, validateRequest } from '../validators/index.js'
 
@@ -21,5 +28,11 @@ authRouter.post(
 )
 authRouter.post('/logout', authenticate, logout)
 authRouter.get('/me', authenticate, getCurrentUser)
+authRouter.patch(
+  '/me',
+  authenticate,
+  validateRequest({ body: authSchemas.updateProfile }),
+  updateCurrentUserProfile,
+)
 
 export { authRouter }

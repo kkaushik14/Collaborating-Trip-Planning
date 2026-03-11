@@ -42,26 +42,26 @@ const designTokens = Object.freeze({
   },
 
   shadows: {
-    card: '0 20px 38px -24px rgb(5 9 20 / 0.7), 0 14px 22px -18px rgb(13 28 58 / 0.7)',
+    card: '0 20px 38px -24px rgb(20 17 35 / 0.55), 0 14px 22px -18px rgb(39 45 88 / 0.45)',
   },
 
   colors: {
     // Primary token set used by Tailwind theme and CSS custom properties.
-    primary: '24 201 255',
-    neutral: '106 124 153',
-    success: '52 211 153',
-    danger: '244 63 94',
-    warning: '250 204 21',
+    primary: '83 53 49',
+    neutral: '39 45 88',
+    success: '76 175 123',
+    danger: '220 96 117',
+    warning: '214 164 89',
 
     // Semantic surfaces and text tokens.
-    canvas: '4 10 24',
-    panel: '9 19 40',
-    panelMuted: '16 31 59',
-    ink: '236 244 255',
-    inkMuted: '156 177 211',
-    inkInverse: '3 11 30',
-    line: '41 65 106',
-    lineStrong: '62 95 144',
+    canvas: '17 19 38',
+    panel: '28 31 59',
+    panelMuted: '40 44 78',
+    ink: '245 239 236',
+    inkMuted: '182 171 177',
+    inkInverse: '32 22 21',
+    line: '67 71 109',
+    lineStrong: '101 106 152',
   },
 })
 

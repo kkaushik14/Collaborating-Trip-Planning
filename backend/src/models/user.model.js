@@ -20,11 +20,33 @@ const userSchema = new Schema(
       unique: true,
       index: true,
     },
+    emailUpdateCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 2,
+    },
     password: {
       type: String,
       required: true,
       minlength: 8,
       select: false,
+    },
+    avatarUrl: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    mobileNumber: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: 32,
+    },
+    themePreference: {
+      type: String,
+      enum: ['light', 'dark'],
+      default: 'dark',
     },
     isActive: {
       type: Boolean,

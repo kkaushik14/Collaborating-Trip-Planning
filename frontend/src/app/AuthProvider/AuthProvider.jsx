@@ -149,6 +149,16 @@ const AuthProvider = ({ children }) => {
     return profile?.user || null
   }, [queryClient])
 
+  const setCurrentUserProfile = useCallback(
+    (user) => {
+      const normalizedUser = user || null
+      setCurrentUser(normalizedUser)
+      setStoredUser(normalizedUser)
+      queryClient.setQueryData(queryKeys.auth.me(), { user: normalizedUser })
+    },
+    [queryClient],
+  )
+
   const signIn = useCallback(
     async (credentials) => {
       const response = await createUserSession(credentials)
@@ -360,6 +370,7 @@ const AuthProvider = ({ children }) => {
       signOut,
       refreshSession,
       currentUser,
+      setCurrentUserProfile,
       isAuthenticated,
       isInitializing,
       authError,
@@ -370,6 +381,7 @@ const AuthProvider = ({ children }) => {
       accessToken,
       authError,
       currentUser,
+      setCurrentUserProfile,
       isAuthenticated,
       isInitializing,
       refreshSession,

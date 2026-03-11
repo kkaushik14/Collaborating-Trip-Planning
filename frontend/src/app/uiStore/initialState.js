@@ -1,4 +1,4 @@
-const DEFAULT_THEME = 'light'
+const DEFAULT_THEME = 'dark'
 
 const initialUIState = {
   theme: DEFAULT_THEME,

@@ -8,11 +8,36 @@ import {
 } from '../services/index.js'
 import { ApiError, ApiResponse, asyncHandler, resolveFrontendBaseUrl } from '../utils/index.js'
 
+const EMAIL_UPDATE_LIMIT = 2
+const normalizeMobileNumber = (value) => {
+  if (value === null || value === undefined) {
+    return null
+  }
+
+  const normalized = String(value).trim()
+  return normalized ? normalized : null
+}
+
+const normalizeAvatarUrl = (value) => {
+  if (value === null || value === undefined) {
+    return null
+  }
+
+  const normalized = String(value).trim()
+  return normalized ? normalized : null
+}
+
 const serializeUser = (user) => ({
   _id: user._id,
   name: user.name,
   email: user.email,
   isActive: user.isActive,
+  avatarUrl: user.avatarUrl || null,
+  mobileNumber: user.mobileNumber || null,
+  themePreference: user.themePreference === 'light' ? 'light' : 'dark',
+  emailUpdateCount: Number(user.emailUpdateCount || 0),
+  emailUpdateLimit: EMAIL_UPDATE_LIMIT,
+  emailUpdatesRemaining: Math.max(0, EMAIL_UPDATE_LIMIT - Number(user.emailUpdateCount || 0)),
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 })
@@ -162,7 +187,74 @@ const logout = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(new ApiResponse(200, { user: req.user }, 'Current user fetched successfully'))
+    .json(new ApiResponse(200, { user: serializeUser(req.user) }, 'Current user fetched successfully'))
 })
 
-export { getCurrentUser, login, logout, refreshToken, register }
+const updateCurrentUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.actorId)
+
+  if (!user || !user.isActive) {
+    throw ApiError.notFound('User not found')
+  }
+
+  const { name, email, mobileNumber, avatarUrl, themePreference } = req.body
+
+  if (name !== undefined) {
+    const normalizedName = String(name || '').trim()
+    if (!normalizedName) {
+      throw ApiError.badRequest('name cannot be empty')
+    }
+    user.name = normalizedName
+  }
+
+  if (email !== undefined) {
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+    if (!normalizedEmail) {
+      throw ApiError.badRequest('email cannot be empty')
+    }
+
+    if (normalizedEmail !== user.email) {
+      if (Number(user.emailUpdateCount || 0) >= EMAIL_UPDATE_LIMIT) {
+        throw ApiError.badRequest('Email update limit reached for this account')
+      }
+
+      const existingEmailUser = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: user._id },
+      }).select('_id')
+
+      if (existingEmailUser) {
+        throw ApiError.conflict('A user with this email already exists')
+      }
+
+      user.email = normalizedEmail
+      user.emailUpdateCount = Number(user.emailUpdateCount || 0) + 1
+    }
+  }
+
+  if (mobileNumber !== undefined) {
+    user.mobileNumber = normalizeMobileNumber(mobileNumber)
+  }
+
+  if (avatarUrl !== undefined) {
+    user.avatarUrl = normalizeAvatarUrl(avatarUrl)
+  }
+
+  if (themePreference !== undefined) {
+    user.themePreference = themePreference === 'light' ? 'light' : 'dark'
+  }
+
+  await user.save()
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: serializeUser(user),
+      },
+      'Profile updated successfully',
+    ),
+  )
+})
+
+export { getCurrentUser, login, logout, refreshToken, register, updateCurrentUserProfile }

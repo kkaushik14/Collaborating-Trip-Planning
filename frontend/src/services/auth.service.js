@@ -27,6 +27,13 @@ const normalizeCurrentUserResponse = (value) => {
   }
 }
 
+const normalizeProfileUpdateResponse = (value) => {
+  const payload = ensureObject(value)
+  return {
+    user: normalizeEntity(payload.user),
+  }
+}
+
 const createUserAccount = (body, options = {}) =>
   apiRequest(
     {
@@ -108,10 +115,27 @@ const getUserProfile = (options = {}) =>
     },
   )
 
+const updateUserProfile = (body, options = {}) =>
+  apiRequest(
+    {
+      path: '/api/v1/auth/me',
+      method: 'PATCH',
+      body,
+      ...options,
+    },
+    {
+      resource: 'auth',
+      operation: 'updateUserProfile',
+      defaultData: {},
+      normalize: normalizeProfileUpdateResponse,
+    },
+  )
+
 export {
   createUserAccount,
   createUserSession,
   deleteUserSession,
   getUserProfile,
+  updateUserProfile,
   updateUserSession,
 }

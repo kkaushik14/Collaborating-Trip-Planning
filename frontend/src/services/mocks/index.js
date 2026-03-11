@@ -34,6 +34,7 @@ const ROUTE_DEFINITIONS = Object.freeze([
   { method: 'POST', pattern: /^\/api\/v1\/auth\/refresh$/, key: 'POST /api/v1/auth/refresh' },
   { method: 'POST', pattern: /^\/api\/v1\/auth\/logout$/, key: 'POST /api/v1/auth/logout' },
   { method: 'GET', pattern: /^\/api\/v1\/auth\/me$/, key: 'GET /api/v1/auth/me' },
+  { method: 'PATCH', pattern: /^\/api\/v1\/auth\/me$/, key: 'PATCH /api/v1/auth/me' },
 
   { method: 'GET', pattern: /^\/api\/v1\/invitations\/mine$/, key: 'GET /api/v1/invitations/mine' },
   { method: 'POST', pattern: /^\/api\/v1\/invitations\/accept$/, key: 'POST /api/v1/invitations/accept' },

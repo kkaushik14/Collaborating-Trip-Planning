@@ -72,6 +72,12 @@ type UserPublic = {
   name: string;
   email: string;
   isActive: boolean;
+  avatarUrl: string | null;
+  mobileNumber: string | null;
+  themePreference: 'light' | 'dark';
+  emailUpdateCount: number;
+  emailUpdateLimit: number;
+  emailUpdatesRemaining: number;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 };
@@ -413,6 +419,28 @@ type ReportSnapshot = {
 - Body: none
 - Success: `200`, `data: { user: UserPublic }`
 - Errors: `401`, `429`, `500`
+
+### `PATCH /api/v1/auth/me`
+- Auth: Bearer required
+- Required headers: `Authorization`, `Content-Type: application/json`
+- Body:
+```json
+{
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "mobileNumber": "+91 9876543210",
+  "avatarUrl": "https://example.com/avatar.png",
+  "themePreference": "light"
+}
+```
+- Notes:
+  - At least one field is required.
+  - `email` can be changed only 2 times per account.
+  - Send `mobileNumber: null` to remove mobile number.
+  - Send `avatarUrl: null` to remove avatar.
+  - `themePreference` persists display mode per user profile.
+- Success: `200`, `data: { user: UserPublic }`
+- Errors: `400`, `401`, `409`, `429`, `500`
 
 ## 2) Invitation Inbox
 

@@ -6,6 +6,7 @@ import {
   createUserSession,
   deleteUserSession,
   getUserProfile,
+  updateUserProfile,
   updateUserSession,
 } from '../services/index.js'
 import { createMutationConfig, invalidateQueryScopes } from './hook-utils.js'
@@ -59,6 +60,20 @@ const useUpdateUserSession = ({ mutationOptions = {}, requestOptions = {} } = {}
   )
 }
 
+const useUpdateUserProfile = ({ mutationOptions = {}, requestOptions = {} } = {}) => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    createMutationConfig({
+      mutationFn: (body) => updateUserProfile(body, requestOptions),
+      mutationOptions,
+      onSuccess: async () => {
+        await invalidateQueryScopes(queryClient, [queryKeys.auth.me()])
+      },
+    }),
+  )
+}
+
 const useDeleteUserSession = ({ mutationOptions = {}, requestOptions = {} } = {}) => {
   const queryClient = useQueryClient()
 
@@ -84,6 +99,7 @@ export {
   useCreateUserAccount,
   useCreateUserSession,
   useDeleteUserSession,
+  useUpdateUserProfile,
   useUpdateUserSession,
   useUserProfile,
 }

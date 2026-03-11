@@ -24,7 +24,11 @@ function SheetOverlay({ className, ...props }) {
   return (
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
-      className={cn('fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm', className)}
+      className={cn(
+        'fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm transition-opacity duration-200 ease-out',
+        'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
+        className,
+      )}
       {...props}
     />
   )
@@ -45,10 +49,16 @@ function SheetContent({
         data-side={side}
         className={cn(
           'fixed z-50 flex flex-col gap-lg border-line bg-panel p-lg text-body-sm text-ink shadow-card outline-none',
+          'will-change-[opacity,transform] transition-[opacity,transform] duration-220 ease-out',
+          'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
           'data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:border-b',
+          'data-[side=top]:data-[starting-style]:-translate-y-3 data-[side=top]:data-[ending-style]:-translate-y-3',
           'data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:border-t',
+          'data-[side=bottom]:data-[starting-style]:translate-y-3 data-[side=bottom]:data-[ending-style]:translate-y-3',
           'data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-4/5 data-[side=left]:max-w-md data-[side=left]:border-r',
+          'data-[side=left]:data-[starting-style]:-translate-x-3 data-[side=left]:data-[ending-style]:-translate-x-3',
           'data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-4/5 data-[side=right]:max-w-md data-[side=right]:border-l',
+          'data-[side=right]:data-[starting-style]:translate-x-3 data-[side=right]:data-[ending-style]:translate-x-3',
           className,
         )}
         {...props}

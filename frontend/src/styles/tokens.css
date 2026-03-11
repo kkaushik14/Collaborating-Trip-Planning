@@ -1,25 +1,25 @@
 :root {
   /* Color tokens */
-  --color-primary: 24 201 255;
-  --color-neutral: 106 124 153;
-  --color-success: 52 211 153;
-  --color-danger: 244 63 94;
-  --color-warning: 250 204 21;
+  --color-primary: 83 53 49; /* #533531 */
+  --color-neutral: 39 45 88; /* #272D58 */
+  --color-success: 76 175 123;
+  --color-danger: 220 96 117;
+  --color-warning: 214 164 89;
 
-  --color-canvas: 4 10 24;
-  --color-panel: 9 19 40;
-  --color-panel-muted: 16 31 59;
-  --color-ink: 236 244 255;
-  --color-ink-muted: 156 177 211;
-  --color-ink-inverse: 3 11 30;
-  --color-line: 41 65 106;
-  --color-line-strong: 62 95 144;
+  --color-canvas: 17 19 38;
+  --color-panel: 28 31 59;
+  --color-panel-muted: 40 44 78;
+  --color-ink: 245 239 236;
+  --color-ink-muted: 182 171 177;
+  --color-ink-inverse: 32 22 21;
+  --color-line: 67 71 109;
+  --color-line-strong: 101 106 152;
 
   /* Decorative gradient references */
-  --gradient-hero-start: 17 35 70;
-  --gradient-hero-end: 4 10 24;
-  --gradient-glow-primary: 24 201 255;
-  --gradient-glow-secondary: 86 108 255;
+  --gradient-hero-start: 35 39 74;
+  --gradient-hero-end: 18 20 42;
+  --gradient-glow-primary: 83 53 49;
+  --gradient-glow-secondary: 39 45 88;
 
   /* Spacing tokens */
   --space-0: 0rem;
@@ -64,6 +64,28 @@
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 80rem;
   --breakpoint-2xl: 96rem;
+}
+
+:root[data-theme='light'] {
+  --color-primary: 133 96 91;
+  --color-neutral: 97 108 171;
+  --color-success: 34 134 94;
+  --color-danger: 191 56 81;
+  --color-warning: 173 126 52;
+
+  --color-canvas: 249 245 243;
+  --color-panel: 255 255 255;
+  --color-panel-muted: 243 238 248;
+  --color-ink: 37 28 30;
+  --color-ink-muted: 104 91 104;
+  --color-ink-inverse: 244 240 239;
+  --color-line: 215 204 220;
+  --color-line-strong: 186 169 199;
+
+  --gradient-hero-start: 252 248 246;
+  --gradient-hero-end: 239 235 247;
+  --gradient-glow-primary: 170 130 124;
+  --gradient-glow-secondary: 145 154 206;
 }
 
 body {

@@ -36,6 +36,9 @@ function DropdownMenuContent({
           data-slot="dropdown-menu-content"
           className={cn(
             'min-w-40 rounded-md border border-line bg-panel p-xs text-body-sm text-ink shadow-card outline-none',
+            'origin-[var(--transform-origin)] will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out',
+            'data-[starting-style]:opacity-0 data-[starting-style]:scale-95',
+            'data-[ending-style]:opacity-0 data-[ending-style]:scale-95',
             className,
           )}
           {...props}
@@ -51,7 +54,7 @@ function DropdownMenuGroup(props) {
 
 function DropdownMenuLabel({ className, inset, ...props }) {
   return (
-    <MenuPrimitive.GroupLabel
+    <div
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn('px-md py-sm text-caption font-semibold text-ink-muted data-[inset=true]:pl-xl', className)}

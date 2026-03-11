@@ -44,6 +44,7 @@ This file lists all URLs currently wired in the frontend app (UI routes + backen
 | `POST` | `/api/v1/auth/refresh` | Rotates and returns fresh auth tokens. |
 | `POST` | `/api/v1/auth/logout` | Terminates user session on server/client. |
 | `GET` | `/api/v1/auth/me` | Returns currently authenticated user profile. |
+| `PATCH` | `/api/v1/auth/me` | Updates current user profile fields (name/email/mobile/avatar) with email-edit limits. |
 
 ### Invitations
 
