@@ -1,10 +1,10 @@
+#!/usr/bin/env bash
 set -Eeuo pipefail
 
 BRANCH="main"
 APP_DIR="/home/ubuntu/Collaborating-Trip-Planning"
 
 BACKEND_PM2_NAME="${BACKEND_PM2_NAME:-backend}"
-FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
 usage() {
   cat <<'EOF'
@@ -12,9 +12,7 @@ Usage:
   deploy-ec2.sh [--branch <branch>] [--repo-url <url>] [--app-dir <dir>]
 
 Optional environment variables:
-  BACKEND_PM2_NAME   PM2 process name for backend (default: trip-backend)
-  FRONTEND_PM2_NAME  PM2 process name for frontend (default: trip-frontend)
-  FRONTEND_PORT      Port for `pm2 serve` frontend static build (default: 5173)
+  BACKEND_PM2_NAME   PM2 process name for backend (default: backend)
 EOF
 }
 
@@ -82,9 +80,30 @@ else
   cd "${APP_DIR}"
 fi
 
-git fetch origin "${BRANCH}"
-git checkout "${BRANCH}"
-git pull --ff-only origin "${BRANCH}"
+sync_repository() {
+  local timestamp=""
+  local stash_name=""
+
+  git fetch origin "${BRANCH}"
+
+  if [[ -n "$(git status --porcelain)" ]]; then
+    timestamp="$(date +%Y%m%d-%H%M%S)"
+    stash_name="deploy-auto-stash-${timestamp}"
+    echo "Detected local changes in EC2 working tree. Creating stash: ${stash_name}"
+    git stash push --include-untracked --message "${stash_name}" >/dev/null || true
+  fi
+
+  if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+    git checkout -f "${BRANCH}"
+  else
+    git checkout -b "${BRANCH}" "origin/${BRANCH}"
+  fi
+
+  # Force-sync to remote branch to avoid merge failures in CI deploy.
+  git reset --hard "origin/${BRANCH}"
+}
+
+sync_repository
 
 echo "Installing backend dependencies..."
 cd backend

@@ -158,10 +158,11 @@ SSH key notes:
 
 - Path: `scripts/deploy.sh`
 - Responsibilities:
-  - Pull latest `main`
+  - Fetch remote branch and force-sync local checkout to `origin/<branch>`
+  - Auto-stash dirty EC2 working tree changes before sync (`deploy-auto-stash-<timestamp>`)
   - Install backend deps (`npm ci --omit=dev`)
   - Install frontend deps + build
-  - Restart/start PM2 backend and frontend processes
+  - Restart/start PM2 backend process
   - Save PM2 state
 
 ## Deployment Link
