@@ -4,6 +4,7 @@ import { getMockResponse } from '../mocks/index.js'
 const API_CONFIG = getApiConfig()
 const API_BASE_URL = API_CONFIG.baseUrl
 const USE_API_MOCKS = API_CONFIG.useMocks
+const ALLOW_MOCKS_IN_PRODUCTION = API_CONFIG.allowMocksInProd === true
 const DEFAULT_TIMEOUT_MS = Number(API_CONFIG.timeoutMs || 15000)
 const DEFAULT_MOCK_DELAY_MS = Number(import.meta.env.VITE_MOCK_DELAY_MS || 120)
 
@@ -93,8 +94,21 @@ const sleep = (durationMs) =>
 const buildUrl = (path, query = {}) => {
   const finalPath = path.startsWith('/') ? path : `/${path}`
   const hasApiPrefix = finalPath.startsWith('/api/v1')
-  const baseUrl = hasApiPrefix ? API_BASE_URL.replace(/\/api\/v1\/?$/, '') : API_BASE_URL
-  const url = new URL(finalPath, `${baseUrl.replace(/\/$/, '')}/`)
+  const normalizedApiBase = String(API_BASE_URL || '').trim()
+  const resolvedBaseRoot = (() => {
+    if (/^https?:\/\//i.test(normalizedApiBase)) {
+      return hasApiPrefix
+        ? normalizedApiBase.replace(/\/api\/v1\/?$/, '')
+        : normalizedApiBase
+    }
+
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      return window.location.origin
+    }
+
+    return 'http://localhost'
+  })()
+  const url = new URL(finalPath, `${resolvedBaseRoot.replace(/\/$/, '')}/`)
 
   for (const [key, value] of Object.entries(query || {})) {
     if (value === undefined || value === null) {
@@ -353,8 +367,11 @@ const request = async ({
   }
 
   const normalizedMethod = method.toUpperCase()
+  const isProductionRuntime = Boolean(import.meta.env.PROD)
+  const shouldUseMock =
+    Boolean(useMock) && (!isProductionRuntime || ALLOW_MOCKS_IN_PRODUCTION)
 
-  if (useMock) {
+  if (shouldUseMock) {
     return requestViaMock({
       method: normalizedMethod,
       path,

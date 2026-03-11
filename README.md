@@ -154,6 +154,15 @@ SSH key notes:
 - Use an unencrypted PEM/OpenSSH private key.
 - If line breaks are altered in GitHub secrets, prefer `EC2_SSH_KEY_B64`.
 
+Frontend runtime/build env on EC2:
+- Vite injects env at build time, so set frontend env values before `npm run build`.
+- Create `frontend/.env.production` on EC2 with:
+  - `VITE_API_BASE_URL=/api/v1` (recommended when frontend + backend are on same host)
+  - `VITE_USE_API_MOCKS=false`
+  - `VITE_ALLOW_PROD_MOCKS=false`
+  - `VITE_API_HEALTH_PATH=/health`
+  - `VITE_API_TIMEOUT_MS=15000`
+
 ### Deploy script
 
 - Path: `scripts/deploy.sh`
@@ -166,5 +175,4 @@ SSH key notes:
   - Save PM2 state
 
 ## Deployment Link
-- Frontend: _TBD_
-- Backend: _TBD_
+- [Live Demo](http://http://13.235.94.47/) (EC2 public IP)
