@@ -1,63 +1,100 @@
-import {
-  ArrowRightIcon,
-  CalendarCheck2Icon,
-  ChartNoAxesCombinedIcon,
-  CircleCheckBigIcon,
-  CoinsIcon,
-  FileStackIcon,
-  MessageSquareMoreIcon,
-  SparklesIcon,
-  UsersRoundIcon,
-} from 'lucide-react'
+import { ArrowRightIcon, CameraIcon, CpuIcon, GlobeIcon, PaletteIcon, QuoteIcon, SparklesIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
 import { APP_TITLE } from '../config/index.js'
-import { Heading, Text } from '../components/typography/index.js'
 
-const FEATURE_PILLARS = [
+const PARTNER_LOGOS = ['Trips', 'Itinerary', 'Activities', 'Invites', 'Comments', 'Budget', 'Reports']
+
+const CAPABILITY_CARDS = [
   {
-    id: 'planning',
-    title: 'Trip Planning Workspace',
-    description: 'Build day-wise itineraries and reorder activities without losing timeline context.',
-    icon: CalendarCheck2Icon,
-    highlights: ['Trip creation + dates', 'Day timeline + cards', 'Drag reorder workflow'],
+    id: 'web',
+    title: 'Trip Planning',
+    description:
+      'Create trips, build day-wise itineraries, add activity cards, and reorder plans in seconds.',
+    icon: GlobeIcon,
   },
   {
-    id: 'collaboration',
-    title: 'Collaboration Control',
-    description: 'Run owner/editor/viewer workflows with invitation and contextual comments.',
-    icon: UsersRoundIcon,
-    highlights: ['Role-resolved access', 'Invite + acceptance flow', 'Day/activity comments'],
-  },
-  {
-    id: 'organization',
-    title: 'Operations + Budget',
-    description: 'Track files, reservations, checklists, expenses, settlements, and analytics in one place.',
-    icon: CoinsIcon,
-    highlights: ['Checklist + attachments', 'Budget + settlements', 'Forecast + report snapshots'],
+    id: 'brand',
+    title: 'Collaboration',
+    description:
+      'Invite members, assign Owner/Editor/Viewer roles, and keep decisions synced through comments.',
+    icon: PaletteIcon,
   },
 ]
 
-const LIVE_METRICS = [
+const FEATURE_MOSAIC = [
   {
-    label: 'Modules Unified',
-    value: '12+',
+    id: 'ai',
+    title: 'Organization',
+    description: 'Manage checklists, files, and manual reservations without breaking planning flow.',
+    icon: CpuIcon,
   },
   {
-    label: 'Role-safe Actions',
-    value: 'Owner / Editor / Viewer',
+    id: 'hub',
+    title: 'One Workspace for the Whole Journey',
+    description: 'Planning, collaboration, organization, and analytics in one shared command center.',
+    icon: SparklesIcon,
+    center: true,
   },
   {
-    label: 'Core Areas Covered',
-    value: 'Planning · Collaboration · Organization · Analytics',
+    id: 'motion',
+    title: 'Budget & Insights',
+    description: 'Track expenses, review summaries, and monitor trends to stay ahead of total cost.',
+    icon: CameraIcon,
+    wide: true,
   },
 ]
+
+const WEBSITE_LINKS = [
+  { label: 'Home', href: '/' },
+  { label: 'Trips', href: '/trips' },
+  { label: 'Invitations', href: '/invitations' },
+  { label: 'Create Account', href: '/register' },
+]
+
+const LEGAL_LINKS = [
+  { label: 'Terms Of Service', href: '/' },
+  { label: 'Privacy Policy', href: '/' },
+  { label: 'Support', href: '/' },
+]
+
+const HeroVisual = () => (
+  <div className="relative mx-auto w-full max-w-[32rem]">
+    <div className="relative aspect-[1.12/1] rounded-[2rem] border border-line/65 bg-panel/70 p-lg shadow-card">
+      <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_65%_35%,rgb(var(--color-warning)/0.24),transparent_55%),radial-gradient(circle_at_25%_70%,rgb(var(--color-neutral)/0.42),transparent_58%)]" />
+      <div className="absolute inset-[10%] rounded-[1.5rem] border border-line/75 bg-canvas/90 shadow-[inset_0_0_0_1px_rgb(var(--color-ink)/0.06)]" />
+      <div className="absolute inset-[17%] rounded-[1.15rem] border border-line/70 bg-gradient-to-br from-panel via-panel-muted to-canvas p-md">
+        <div className="h-full rounded-xl border border-line/60 bg-[radial-gradient(circle_at_75%_20%,rgb(var(--color-warning)/0.38),transparent_52%),linear-gradient(150deg,rgb(var(--color-panel-muted)/0.88),rgb(var(--color-canvas)/0.95))]" />
+      </div>
+      <div className="absolute right-[14%] top-[18%] h-2 w-2 rounded-full bg-warning shadow-[0_0_0_8px_rgb(var(--color-warning)/0.16)]" />
+      <div className="absolute left-[13%] top-[25%] h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_0_6px_rgb(var(--color-primary)/0.14)]" />
+      <div className="absolute bottom-[12%] right-[18%] h-20 w-20 rounded-full border border-line/55 bg-panel/60 blur-[1px]" />
+    </div>
+  </div>
+)
+
+const CTAButtons = ({ primaryPath, isAuthenticated }) => (
+  <div className="mt-xl flex flex-wrap items-center gap-md">
+    <Link
+      to={primaryPath}
+      className="inline-flex items-center rounded-full border border-warning/70 bg-gradient-to-r from-[#be6a45] to-[#d18a5a] px-xl py-sm text-body-sm font-semibold text-ink-inverse shadow-[0_8px_28px_rgb(var(--color-warning)/0.28)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning/40"
+    >
+      {isAuthenticated ? 'Open Trips' : 'Create Account'}
+    </Link>
+    <Link
+      to={isAuthenticated ? '/trips' : '/login'}
+      className="inline-flex items-center gap-xs text-body-sm font-semibold text-ink hover:text-primary"
+    >
+      {isAuthenticated ? 'Go to Dashboard' : 'Explore Features'}
+      <ArrowRightIcon className="size-4" aria-hidden="true" />
+    </Link>
+  </div>
+)
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuth()
   const primaryPath = isAuthenticated ? '/trips' : '/register'
-  const primaryLabel = isAuthenticated ? 'Open Dashboard' : 'Start Planning'
 
   return (
     <div className="min-h-screen text-ink">
@@ -83,233 +120,260 @@ const LandingPage = () => {
               to={primaryPath}
               className="inline-flex items-center gap-xs rounded-md bg-primary px-lg py-sm text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
-              {primaryLabel}
+              {isAuthenticated ? 'Open Dashboard' : 'Start Planning'}
               <ArrowRightIcon className="size-4" aria-hidden="true" />
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-layout px-lg pb-4xl pt-2xl sm:px-xl sm:pt-3xl">
-        <section className="grid gap-xl lg:grid-cols-[1.2fr,0.8fr]">
-          <div className="surface-glass rounded-2xl border border-line/80 p-xl sm:p-2xl">
-            <Text
-              as="p"
-              size="caption"
-              weight="semibold"
-              className="mb-md inline-flex items-center gap-xs rounded-full border border-primary/25 bg-primary/10 px-md py-xs uppercase tracking-[0.12em] text-primary"
-            >
-              Built For Collaborative Travel Teams
-            </Text>
+      <main className="relative isolate overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-0 [background-image:linear-gradient(to_right,rgb(var(--color-line)/0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgb(var(--color-line)/0.12)_1px,transparent_1px)] [background-size:4.5rem_4.5rem]" />
+          <div className="absolute -top-32 left-[12%] h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-[130px]" />
+          <div className="absolute top-40 right-[10%] h-[24rem] w-[24rem] rounded-full bg-warning/20 blur-[125px]" />
+          <div className="absolute bottom-10 left-[22%] h-[20rem] w-[20rem] rounded-full bg-neutral/30 blur-[120px]" />
+        </div>
 
-            <Heading level={1} size="display" className="max-w-[15ch]">
-              Plan. Collaborate. <span className="text-gradient-primary">Execute.</span>
-            </Heading>
-
-            <Text tone="muted" className="mt-md max-w-[60ch]">
-              {APP_TITLE} unifies itinerary planning, member roles, files, reservations, and
-              budget analytics in one focused workspace for your whole travel team.
-            </Text>
-
-            <div className="mt-xl flex flex-wrap gap-sm">
-              <Link
-                to={primaryPath}
-                className="inline-flex items-center gap-xs rounded-md bg-primary px-xl py-md text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-              >
-                {primaryLabel}
-                <ArrowRightIcon className="size-4" aria-hidden="true" />
-              </Link>
-              {!isAuthenticated ? (
-                <Link
-                  to="/login"
-                  className="inline-flex items-center rounded-md border border-line bg-panel/80 px-xl py-md text-body-sm font-semibold text-ink transition-colors hover:bg-panel-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-                >
-                  I already have an account
-                </Link>
-              ) : null}
+        <section className="mx-auto max-w-layout px-lg pb-xl pt-2xl sm:px-xl sm:pt-3xl">
+          <div className="grid items-center gap-2xl lg:grid-cols-[1fr,0.95fr]">
+            <div className="max-w-[34rem]">
+              <p className="mb-lg inline-flex items-center gap-xs rounded-full border border-line/65 bg-panel/70 px-md py-xs text-caption text-ink-muted">
+                <span className="size-2 rounded-full bg-warning" />
+                Built for teams planning trips together
+              </p>
+              <h1 className="break-words text-display font-semibold leading-[1.06] tracking-tight text-ink">
+                Plan Better
+                <br />
+                Trips Together
+              </h1>
+              <p className="mt-lg max-w-[38ch] text-title-sm leading-relaxed text-ink-muted">
+                Create day-wise itineraries, invite collaborators with clear roles, and manage
+                files, reservations, and budgets in one shared workspace.
+              </p>
+              <CTAButtons primaryPath={primaryPath} isAuthenticated={isAuthenticated} />
             </div>
-
-            <div className="mt-xl grid gap-sm sm:grid-cols-3">
-              <div className="rounded-xl border border-line/75 bg-panel/65 p-md">
-                <Text size="caption" className="mb-2xs text-primary">
-                  Core Planning
-                </Text>
-                <Text size="body-sm" tone="muted">
-                  Trips, days, activity cards, reordering
-                </Text>
-              </div>
-              <div className="rounded-xl border border-line/75 bg-panel/65 p-md">
-                <Text size="caption" className="mb-2xs text-primary">
-                  Team Controls
-                </Text>
-                <Text size="body-sm" tone="muted">
-                  Invitation, role policy, comments
-                </Text>
-              </div>
-              <div className="rounded-xl border border-line/75 bg-panel/65 p-md">
-                <Text size="caption" className="mb-2xs text-primary">
-                  Ops Analytics
-                </Text>
-                <Text size="body-sm" tone="muted">
-                  Budget, settlement, forecasting reports
-                </Text>
-              </div>
-            </div>
+            <HeroVisual />
           </div>
-
-          <aside className="surface-glass rounded-2xl border border-line/80 p-lg sm:p-xl">
-            <div className="flex items-center justify-between">
-              <Heading level={2} size="title-sm">
-                Live Workspace Snapshot
-              </Heading>
-              <ChartNoAxesCombinedIcon className="size-5 text-primary" aria-hidden="true" />
-            </div>
-
-            <Text tone="muted" size="body-sm" className="mt-xs">
-              A shared trip space where planning, updates, and decisions stay in sync.
-            </Text>
-
-            <div className="mt-lg space-y-sm">
-              {LIVE_METRICS.map((metric) => (
-                <article
-                  key={metric.label}
-                  className="rounded-lg border border-line/75 bg-panel/70 p-md"
-                >
-                  <Text size="caption" tone="muted">
-                    {metric.label}
-                  </Text>
-                  <Text as="p" weight="semibold" className="mt-xs">
-                    {metric.value}
-                  </Text>
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-lg rounded-lg border border-primary/25 bg-primary/10 p-md">
-              <Text size="caption" weight="semibold" className="text-primary">
-                Included Flows
-              </Text>
-              <ul className="mt-sm space-y-xs">
-                <li className="flex items-start gap-xs text-body-sm text-ink-muted">
-                  <CircleCheckBigIcon className="mt-2xs size-4 shrink-0 text-primary" />
-                  Invitation acceptance + role sync
-                </li>
-                <li className="flex items-start gap-xs text-body-sm text-ink-muted">
-                  <CircleCheckBigIcon className="mt-2xs size-4 shrink-0 text-primary" />
-                  Budget summaries + settlement reports
-                </li>
-                <li className="flex items-start gap-xs text-body-sm text-ink-muted">
-                  <CircleCheckBigIcon className="mt-2xs size-4 shrink-0 text-primary" />
-                  Export-ready analytics snapshots
-                </li>
-              </ul>
-            </div>
-          </aside>
         </section>
 
-        <section className="mt-3xl">
-          <div className="mb-lg flex flex-wrap items-end justify-between gap-md">
-            <div>
-              <Heading level={2}>Platform Capability Map</Heading>
-              <Text tone="muted" className="mt-xs">
-                Modular architecture designed to scale from one trip to operational trip programs.
-              </Text>
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="grid grid-cols-2 gap-md rounded-2xl border border-line/60 bg-canvas/35 px-lg py-md text-ink-muted sm:grid-cols-4 lg:grid-cols-7">
+            {PARTNER_LOGOS.map((logo) => (
+              <p key={logo} className="text-center text-body-sm font-semibold tracking-wide opacity-85">
+                {logo}
+              </p>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="mx-auto max-w-[56rem] text-center">
+            <h2 className="break-words text-display font-semibold tracking-tight text-ink">
+              Everything your trip team needs
+            </h2>
+            <p className="mx-auto mt-md max-w-[46ch] text-title-sm text-ink-muted">
+              From itinerary planning to expense analytics, organize every trip phase with one
+              focused platform.
+            </p>
+            <div className="mt-lg flex justify-center">
+              <CTAButtons primaryPath={primaryPath} isAuthenticated={isAuthenticated} />
             </div>
-            <Link
-              to={primaryPath}
-              className="inline-flex items-center gap-xs text-body-sm font-semibold text-primary hover:underline"
-            >
-              Explore workspace
-              <ArrowRightIcon className="size-4" />
-            </Link>
           </div>
 
-          <div className="grid gap-md md:grid-cols-3">
-            {FEATURE_PILLARS.map((pillar) => {
-              const Icon = pillar.icon
+          <div className="mt-2xl grid gap-lg lg:grid-cols-[1.25fr,0.75fr]">
+            {CAPABILITY_CARDS.map((card, index) => {
+              const Icon = card.icon
               return (
                 <article
-                  key={pillar.id}
-                  className="surface-glass rounded-xl border border-line/80 p-lg"
+                  key={card.id}
+                  className={[
+                    'group relative overflow-hidden rounded-2xl border border-line/60 p-xl shadow-card',
+                    index === 0 ? 'bg-panel/80' : 'bg-canvas/75',
+                  ].join(' ')}
                 >
-                  <span className="mb-md inline-flex size-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <Heading level={3} size="title-sm">
-                    {pillar.title}
-                  </Heading>
-                  <Text tone="muted" size="body-sm" className="mt-xs">
-                    {pillar.description}
-                  </Text>
-                  <ul className="mt-md space-y-xs">
-                    {pillar.highlights.map((item) => (
-                      <li key={item} className="flex items-start gap-xs text-body-sm text-ink-muted">
-                        <CircleCheckBigIcon className="mt-2xs size-4 shrink-0 text-primary" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_70%,rgb(var(--color-neutral)/0.34),transparent_58%),radial-gradient(circle_at_80%_20%,rgb(var(--color-warning)/0.2),transparent_52%)] opacity-85 transition duration-300 group-hover:opacity-100" />
+                  <div className="relative z-10 max-w-[28rem]">
+                    <Icon className="size-5 text-ink-muted" />
+                    <h3 className="mt-md text-title font-semibold text-ink">{card.title}</h3>
+                    <p className="mt-sm text-body text-ink-muted">{card.description}</p>
+                    <Link
+                      to={primaryPath}
+                      className="mt-lg inline-flex items-center gap-xs text-body-sm font-semibold text-ink-muted transition hover:text-ink"
+                    >
+                      See More
+                      <ArrowRightIcon className="size-4" />
+                    </Link>
+                  </div>
                 </article>
               )
             })}
           </div>
         </section>
 
-        <section className="mt-3xl rounded-2xl border border-line/80 bg-panel/75 p-xl sm:p-2xl">
-          <div className="grid gap-lg md:grid-cols-[1.15fr,0.85fr]">
-            <div>
-              <Heading level={2} className="max-w-[20ch]">
-                Ready to run end-to-end trip operations?
-              </Heading>
-              <Text tone="muted" className="mt-sm max-w-[60ch]">
-                Start with secure authentication, then manage planning, collaboration, and budget
-                execution from one dashboard.
-              </Text>
-              <div className="mt-lg flex flex-wrap gap-sm">
-                <Link
-                  to={primaryPath}
-                  className="inline-flex items-center rounded-md bg-primary px-xl py-md text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-primary/90"
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="grid gap-lg lg:grid-cols-3">
+            {FEATURE_MOSAIC.map((item) => {
+              const Icon = item.icon
+              return (
+                <article
+                  key={item.id}
+                  className={[
+                    'group relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 p-xl shadow-card',
+                    item.wide ? 'lg:col-span-2' : '',
+                  ].join(' ')}
                 >
-                  {primaryLabel}
-                </Link>
-                {!isAuthenticated ? (
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center rounded-md border border-line px-xl py-md text-body-sm font-semibold text-ink hover:bg-panel-muted/75"
-                  >
-                    Sign in
-                  </Link>
-                ) : null}
-              </div>
-            </div>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgb(var(--color-primary)/0.32),transparent_58%),radial-gradient(circle_at_20%_25%,rgb(var(--color-neutral)/0.28),transparent_52%)] transition duration-300 group-hover:opacity-90" />
+                  <div className="relative z-10">
+                    <Icon className="size-5 text-ink-muted" />
+                    <h3 className="mt-md text-display font-semibold leading-[1.08] text-ink">
+                      {item.title}
+                    </h3>
+                    <p className="mt-sm max-w-[35ch] text-body text-ink-muted">{item.description}</p>
+                    <Link
+                      to={primaryPath}
+                      className="mt-lg inline-flex items-center gap-xs text-body-sm font-semibold text-ink-muted transition hover:text-ink"
+                    >
+                      See More
+                      <ArrowRightIcon className="size-4" />
+                    </Link>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
 
-            <div className="grid gap-sm sm:grid-cols-2 md:grid-cols-1">
-              <div className="rounded-xl border border-line/75 bg-panel/75 p-md">
-                <div className="mb-xs inline-flex size-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                  <MessageSquareMoreIcon className="size-4" />
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="mx-auto max-w-[56rem] text-center">
+            <h2 className="break-words text-display font-semibold tracking-tight text-ink">
+              Built for real travel workflows
+            </h2>
+            <p className="mt-md text-title-sm text-ink-muted">
+              Teams use this workspace to coordinate complex trips without losing context, ownership,
+              or budget visibility.
+            </p>
+            <div className="mt-lg flex justify-center">
+              <CTAButtons primaryPath={primaryPath} isAuthenticated={isAuthenticated} />
+            </div>
+          </div>
+          <div className="mt-2xl grid gap-lg lg:grid-cols-[1.15fr,0.85fr]">
+            <article className="rounded-2xl border border-line/60 bg-panel/85 p-xl shadow-card">
+              <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">
+                Sample Workspace
+              </p>
+              <h3 className="mt-md break-words text-display font-semibold leading-[1.04] text-ink">
+                From Chaos
+                <br />
+                to Clear Itinerary
+              </h3>
+              <div className="mt-lg h-48 rounded-xl border border-line/60 bg-[linear-gradient(135deg,rgb(var(--color-panel-muted)),rgb(var(--color-primary)/0.4))]" />
+            </article>
+            <article className="rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card">
+              <p className="text-title-sm font-semibold tracking-tight text-neutral">Member Roles</p>
+              <p className="mt-xl text-title-sm leading-relaxed text-ink-muted">
+                Owner controls strategy. Editors execute updates. Viewers stay informed with full
+                context and zero confusion.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <article className="relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 px-xl py-2xl shadow-card sm:px-2xl sm:py-3xl">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgb(var(--color-neutral)/0.3),transparent_50%),radial-gradient(circle_at_75%_20%,rgb(var(--color-primary)/0.25),transparent_58%)]" />
+            <div className="relative z-10 mx-auto max-w-[54rem] text-center">
+              <QuoteIcon className="mx-auto mb-md size-8 text-ink-muted/75" />
+              <p className="text-title leading-relaxed text-ink">
+                This platform helped our team coordinate itinerary updates, member responsibilities,
+                and budget tracking without chasing messages across multiple tools.
+              </p>
+              <div className="mx-auto mt-xl inline-flex items-center gap-sm rounded-full border border-line/75 bg-canvas/45 px-lg py-sm">
+                <span className="inline-flex size-10 items-center justify-center rounded-full bg-panel-muted text-body-sm font-semibold text-ink">
+                  TK
+                </span>
+                <div className="text-left">
+                  <p className="text-body font-semibold text-ink">Travel Team Lead</p>
+                  <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">
+                    Coordinated Group Departure
+                  </p>
                 </div>
-                <Text as="p" weight="semibold">
-                  Discussion-first workflow
-                </Text>
-                <Text tone="muted" size="body-sm" className="mt-2xs">
-                  Keep day-level and activity-level comments attached to planning context.
-                </Text>
-              </div>
-              <div className="rounded-xl border border-line/75 bg-panel/75 p-md">
-                <div className="mb-xs inline-flex size-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                  <FileStackIcon className="size-4" />
-                </div>
-                <Text as="p" weight="semibold">
-                  Evidence-ready records
-                </Text>
-                <Text tone="muted" size="body-sm" className="mt-2xs">
-                  Store files, reservations, and report snapshots for operations and audit trails.
-                </Text>
               </div>
             </div>
+          </article>
+        </section>
+
+        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="grid items-center gap-xl rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card lg:grid-cols-[1fr,0.95fr]">
+            <div>
+              <h2 className="break-words text-display font-semibold leading-[1.04] tracking-tight text-ink">
+                Ready to plan
+                <br />
+                your next trip?
+              </h2>
+              <p className="mt-md max-w-[34ch] text-title-sm text-ink-muted">
+                Start with one trip, invite your team, and turn planning into a calm, shared
+                workflow.
+              </p>
+              <CTAButtons primaryPath={primaryPath} isAuthenticated={isAuthenticated} />
+            </div>
+            <HeroVisual />
           </div>
         </section>
       </main>
+
+      <footer className="relative overflow-hidden border-t border-line/60 bg-canvas/70">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_8%,rgb(var(--color-primary)/0.28),transparent_48%),radial-gradient(circle_at_20%_78%,rgb(var(--color-neutral)/0.3),transparent_54%)]" />
+        </div>
+        <div className="relative mx-auto max-w-layout px-lg pb-2xl pt-3xl sm:px-xl">
+          <p className="break-words text-center text-[clamp(2.4rem,10.5vw,6.4rem)] font-semibold leading-none tracking-tight text-transparent [text-stroke:1px_rgb(var(--color-warning)/0.8)] [-webkit-text-stroke:1px_rgb(var(--color-warning)/0.8)] bg-[radial-gradient(circle_at_50%_20%,rgb(var(--color-warning)),rgb(var(--color-primary)))] bg-clip-text">
+            TRIP PLANNER
+          </p>
+
+          <div className="mt-2xl grid gap-xl sm:grid-cols-2">
+            <div>
+              <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">Website</p>
+              <ul className="mt-md space-y-sm">
+                {WEBSITE_LINKS.map((item) => (
+                  <li key={item.label}>
+                    <Link to={item.href} className="text-title-sm font-medium text-ink hover:text-primary">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">Legal</p>
+              <ul className="mt-md space-y-sm">
+                {LEGAL_LINKS.map((item) => (
+                  <li key={item.label}>
+                    <Link to={item.href} className="text-title-sm font-medium text-ink hover:text-primary">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-2xl flex flex-wrap items-center justify-between gap-sm border-t border-line/60 pt-md text-body-sm text-ink-muted">
+            <p>
+              Copyright © 2026 {APP_TITLE}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-md">
+              <span>Twitter</span>
+              <span>LinkedIn</span>
+              <span>Instagram</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <aside className="fixed right-2 top-1/2 z-20 hidden -translate-y-1/2 rounded-xl border border-line/60 bg-canvas/80 px-sm py-lg text-caption font-semibold uppercase tracking-[0.18em] text-ink-muted lg:block [writing-mode:vertical-rl]">
+        Trip Ready
+      </aside>
     </div>
   )
 }
