@@ -142,13 +142,17 @@ npm run build
 
 ### Required GitHub configuration
 
-- Secret:
-  - `EC2_SSH_KEY`
+- Secrets:
+  - `EC2_SSH_KEY` (raw private key content) or `EC2_SSH_KEY_B64` (base64 encoded private key)
 - Variables (or secrets as fallback in workflow):
   - `EC2_HOST`
   - `EC2_USER`
   - `EC2_PORT`
   - `EC2_APP_DIR` (absolute app path on EC2; defaults handled by script)
+
+SSH key notes:
+- Use an unencrypted PEM/OpenSSH private key.
+- If line breaks are altered in GitHub secrets, prefer `EC2_SSH_KEY_B64`.
 
 ### Deploy script
 
