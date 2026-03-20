@@ -1,6 +1,7 @@
 :root {
   /* Color tokens */
   --color-primary: 83 53 49; /* #533531 */
+  --color-primary-strong: 56 35 33;
   --color-neutral: 39 45 88; /* #272D58 */
   --color-success: 76 175 123;
   --color-danger: 220 96 117;
@@ -68,6 +69,7 @@
 
 :root[data-theme='light'] {
   --color-primary: 133 96 91;
+  --color-primary-strong: 102 70 66;
   --color-neutral: 97 108 171;
   --color-success: 34 134 94;
   --color-danger: 191 56 81;

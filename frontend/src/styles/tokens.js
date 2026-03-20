@@ -48,6 +48,7 @@ const designTokens = Object.freeze({
   colors: {
     // Primary token set used by Tailwind theme and CSS custom properties.
     primary: '83 53 49',
+    primaryStrong: '56 35 33',
     neutral: '39 45 88',
     success: '76 175 123',
     danger: '220 96 117',

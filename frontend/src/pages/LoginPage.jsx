@@ -92,7 +92,7 @@ const LoginPage = () => {
             search: location.search,
           }}
           state={location.state}
-          className="font-medium text-primary hover:underline"
+          className="font-medium text-primary transition-colors hover:text-warning hover:underline"
         >
           Register
         </Link>

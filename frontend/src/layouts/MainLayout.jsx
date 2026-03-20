@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 
 import { useAuth } from '../app/AuthProvider/index.js'
-import { UserProfileSettingsDialog } from '../components/common/index.js'
+import { SiteFooter, UserProfileSettingsDialog } from '../components/common/index.js'
 import {
   Avatar,
   AvatarFallback,
@@ -29,7 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../components/ui/index.js'
-import { APP_TITLE } from '../config/index.js'
+import { APP_TITLE } from '../config/site.js'
 import { useUpdateUserProfile, useUIStore } from '../hooks/index.js'
 
 const NAV_LINKS = [
@@ -179,7 +179,9 @@ const MainLayout = ({ children }) => {
           <div className="flex items-center gap-lg">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger
-                render={<Button type="button" size="icon" variant="outline" className="md:hidden" aria-label="Open menu" />}
+                type="button"
+                aria-label="Open menu"
+                className="inline-flex size-10 items-center justify-center rounded-md border border-line bg-panel text-ink transition-colors hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 md:hidden"
               >
                 <MenuIcon className="size-4" />
               </SheetTrigger>
@@ -387,12 +389,7 @@ const MainLayout = ({ children }) => {
       />
 
       <main className="mx-auto max-w-layout px-lg py-2xl sm:px-xl sm:py-3xl">{children}</main>
-      <footer className="border-t border-line bg-panel/85">
-        <div className="mx-auto flex max-w-layout flex-wrap items-center justify-between gap-sm px-lg py-md text-caption text-ink-muted sm:px-xl">
-          <span>{APP_TITLE}</span>
-          <span>Plan together and keep every trip detail in one place.</span>
-        </div>
-      </footer>
+      <SiteFooter mode="app" />
     </div>
   )
 }

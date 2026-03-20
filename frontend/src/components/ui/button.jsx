@@ -8,12 +8,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-ink-inverse hover:bg-primary/90',
+        default: 'bg-primary text-ink-inverse hover:bg-primary-strong',
         outline: 'border-line bg-panel text-ink hover:bg-panel-muted',
         secondary: 'bg-panel-muted text-ink hover:bg-line/30',
         ghost: 'text-ink hover:bg-panel-muted',
         destructive: 'bg-danger text-ink-inverse hover:bg-danger/90',
-        link: 'h-auto border-0 px-0 text-primary underline-offset-4 hover:underline',
+        link: 'h-auto border-0 px-0 text-warning underline-offset-4 hover:text-warning/80 hover:underline',
       },
       size: {
         default: 'h-10 px-lg',

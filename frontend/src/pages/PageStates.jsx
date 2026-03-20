@@ -7,7 +7,7 @@ import { Heading, Text } from '../components/typography/index.js'
 function PageLoadingState({ title = 'Loading data...', description = 'Please wait while we fetch the latest trip data.' }) {
   return (
     <section className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-sm py-lg sm:px-md">
-      <div className="w-full max-w-xl rounded-xl border border-line bg-panel p-xl shadow-card sm:p-2xl">
+      <div className="surface-card w-full max-w-xl p-xl sm:p-2xl">
         <TravelLoader title={title} description={description} />
       </div>
     </section>
@@ -21,7 +21,7 @@ function PageErrorState({
   onRetry,
 }) {
   return (
-    <section className="rounded-xl border border-danger/30 bg-danger/10 p-xl shadow-card">
+    <section className="status-surface status-surface-error">
       <div className="flex items-start gap-md">
         <AlertTriangleIcon className="mt-1 size-5 text-danger" />
         <div className="space-y-xs">
@@ -53,7 +53,7 @@ function PageEmptyState({
   action,
 }) {
   return (
-    <section className="rounded-xl border border-dashed border-line bg-panel-muted p-xl">
+    <section className="status-surface status-surface-info border-dashed bg-panel-muted/50">
       <div className="space-y-xs">
         <Heading level={2} size="title-sm">
           {title}

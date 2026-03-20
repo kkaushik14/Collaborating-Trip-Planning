@@ -33,6 +33,7 @@ export default {
       colors: {
         // Authoritative design token palette
         primary: toColor('--color-primary'),
+        'primary-strong': toColor('--color-primary-strong'),
         neutral: toColor('--color-neutral'),
         success: toColor('--color-success'),
         danger: toColor('--color-danger'),

@@ -2,7 +2,9 @@ import { ArrowRightIcon, CameraIcon, CpuIcon, GlobeIcon, PaletteIcon, QuoteIcon,
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
-import { APP_TITLE } from '../config/index.js'
+import { SiteFooter } from '../components/common/index.js'
+import { APP_TITLE } from '../config/site.js'
+import { useScrollReveal } from '../hooks/index.js'
 
 const PARTNER_LOGOS = ['Trips', 'Itinerary', 'Activities', 'Invites', 'Comments', 'Budget', 'Reports']
 
@@ -46,21 +48,8 @@ const FEATURE_MOSAIC = [
   },
 ]
 
-const WEBSITE_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'Trips', href: '/trips' },
-  { label: 'Invitations', href: '/invitations' },
-  { label: 'Create Account', href: '/register' },
-]
-
-const LEGAL_LINKS = [
-  { label: 'Terms Of Service', href: '/' },
-  { label: 'Privacy Policy', href: '/' },
-  { label: 'Support', href: '/' },
-]
-
 const HeroVisual = () => (
-  <div className="relative mx-auto w-full max-w-[32rem]">
+  <div className="hover-lift relative mx-auto w-full max-w-[32rem]">
     <div className="relative aspect-[1.12/1] rounded-[2rem] border border-line/65 bg-panel/70 p-lg shadow-card">
       <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_65%_35%,rgb(var(--color-warning)/0.24),transparent_55%),radial-gradient(circle_at_25%_70%,rgb(var(--color-neutral)/0.42),transparent_58%)]" />
       <div className="absolute inset-[10%] rounded-[1.5rem] border border-line/75 bg-canvas/90 shadow-[inset_0_0_0_1px_rgb(var(--color-ink)/0.06)]" />
@@ -84,7 +73,7 @@ const CTAButtons = ({ primaryPath, isAuthenticated }) => (
     </Link>
     <Link
       to={isAuthenticated ? '/trips' : '/login'}
-      className="inline-flex items-center gap-xs text-body-sm font-semibold text-ink hover:text-primary"
+      className="inline-flex items-center gap-xs text-body-sm font-semibold text-ink transition-colors hover:text-warning"
     >
       {isAuthenticated ? 'Go to Dashboard' : 'Explore Features'}
       <ArrowRightIcon className="size-4" aria-hidden="true" />
@@ -95,14 +84,15 @@ const CTAButtons = ({ primaryPath, isAuthenticated }) => (
 const LandingPage = () => {
   const { isAuthenticated } = useAuth()
   const primaryPath = isAuthenticated ? '/trips' : '/register'
+  useScrollReveal()
 
   return (
-    <div className="min-h-screen text-ink">
+    <div className="landing-page min-h-screen text-ink">
       <header className="sticky top-0 z-30 border-b border-line/70 bg-canvas/70 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-layout items-center justify-between px-lg py-md sm:px-xl">
           <Link to="/" className="inline-flex items-center gap-sm">
             <span className="inline-flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
-              <SparklesIcon className="size-4" aria-hidden="true" />
+              <p className='text-[#be6a45] font-bold'>CTP</p>
             </span>
             <span className="text-body font-semibold tracking-tight">{APP_TITLE}</span>
           </Link>
@@ -118,7 +108,7 @@ const LandingPage = () => {
             ) : null}
             <Link
               to={primaryPath}
-              className="inline-flex items-center gap-xs rounded-md bg-primary px-lg py-sm text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              className="inline-flex items-center gap-xs rounded-md bg-[#be6a45] px-lg py-sm text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-[#d18a5a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               {isAuthenticated ? 'Open Dashboard' : 'Start Planning'}
               <ArrowRightIcon className="size-4" aria-hidden="true" />
@@ -130,12 +120,12 @@ const LandingPage = () => {
       <main className="relative isolate overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute inset-0 [background-image:linear-gradient(to_right,rgb(var(--color-line)/0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgb(var(--color-line)/0.12)_1px,transparent_1px)] [background-size:4.5rem_4.5rem]" />
-          <div className="absolute -top-32 left-[12%] h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-[130px]" />
-          <div className="absolute top-40 right-[10%] h-[24rem] w-[24rem] rounded-full bg-warning/20 blur-[125px]" />
-          <div className="absolute bottom-10 left-[22%] h-[20rem] w-[20rem] rounded-full bg-neutral/30 blur-[120px]" />
+          <div className="floating-glow absolute -top-32 left-[12%] h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-[130px]" />
+          <div className="floating-glow absolute top-40 right-[10%] h-[24rem] w-[24rem] rounded-full bg-warning/20 blur-[125px]" />
+          <div className="floating-glow absolute bottom-10 left-[22%] h-[20rem] w-[20rem] rounded-full bg-neutral/30 blur-[120px]" />
         </div>
 
-        <section className="mx-auto max-w-layout px-lg pb-xl pt-2xl sm:px-xl sm:pt-3xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-xl pt-2xl sm:px-xl sm:pt-3xl">
           <div className="grid items-center gap-2xl lg:grid-cols-[1fr,0.95fr]">
             <div className="max-w-[34rem]">
               <p className="mb-lg inline-flex items-center gap-xs rounded-full border border-line/65 bg-panel/70 px-md py-xs text-caption text-ink-muted">
@@ -157,7 +147,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
           <div className="grid grid-cols-2 gap-md rounded-2xl border border-line/60 bg-canvas/35 px-lg py-md text-ink-muted sm:grid-cols-4 lg:grid-cols-7">
             {PARTNER_LOGOS.map((logo) => (
               <p key={logo} className="text-center text-body-sm font-semibold tracking-wide opacity-85">
@@ -167,7 +157,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
           <div className="mx-auto max-w-[56rem] text-center">
             <h2 className="break-words text-display font-semibold tracking-tight text-ink">
               Everything your trip team needs
@@ -188,7 +178,7 @@ const LandingPage = () => {
                 <article
                   key={card.id}
                   className={[
-                    'group relative overflow-hidden rounded-2xl border border-line/60 p-xl shadow-card',
+                    'hover-lift group relative overflow-hidden rounded-2xl border border-line/60 p-xl shadow-card',
                     index === 0 ? 'bg-panel/80' : 'bg-canvas/75',
                   ].join(' ')}
                 >
@@ -211,7 +201,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
           <div className="grid gap-lg lg:grid-cols-3">
             {FEATURE_MOSAIC.map((item) => {
               const Icon = item.icon
@@ -219,7 +209,7 @@ const LandingPage = () => {
                 <article
                   key={item.id}
                   className={[
-                    'group relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 p-xl shadow-card',
+                    'hover-lift group relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 p-xl shadow-card',
                     item.wide ? 'lg:col-span-2' : '',
                   ].join(' ')}
                 >
@@ -244,7 +234,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
           <div className="mx-auto max-w-[56rem] text-center">
             <h2 className="break-words text-display font-semibold tracking-tight text-ink">
               Built for real travel workflows
@@ -258,7 +248,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="mt-2xl grid gap-lg lg:grid-cols-[1.15fr,0.85fr]">
-            <article className="rounded-2xl border border-line/60 bg-panel/85 p-xl shadow-card">
+            <article className="hover-lift rounded-2xl border border-line/60 bg-panel/85 p-xl shadow-card">
               <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">
                 Sample Workspace
               </p>
@@ -269,7 +259,7 @@ const LandingPage = () => {
               </h3>
               <div className="mt-lg h-48 rounded-xl border border-line/60 bg-[linear-gradient(135deg,rgb(var(--color-panel-muted)),rgb(var(--color-primary)/0.4))]" />
             </article>
-            <article className="rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card">
+            <article className="hover-lift rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card">
               <p className="text-title-sm font-semibold tracking-tight text-neutral">Member Roles</p>
               <p className="mt-xl text-title-sm leading-relaxed text-ink-muted">
                 Owner controls strategy. Editors execute updates. Viewers stay informed with full
@@ -279,8 +269,8 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
-          <article className="relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 px-xl py-2xl shadow-card sm:px-2xl sm:py-3xl">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <article className="hover-lift relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 px-xl py-2xl shadow-card sm:px-2xl sm:py-3xl">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgb(var(--color-neutral)/0.3),transparent_50%),radial-gradient(circle_at_75%_20%,rgb(var(--color-primary)/0.25),transparent_58%)]" />
             <div className="relative z-10 mx-auto max-w-[54rem] text-center">
               <QuoteIcon className="mx-auto mb-md size-8 text-ink-muted/75" />
@@ -303,8 +293,8 @@ const LandingPage = () => {
           </article>
         </section>
 
-        <section className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
-          <div className="grid items-center gap-xl rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card lg:grid-cols-[1fr,0.95fr]">
+        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+          <div className="hover-lift grid items-center gap-xl rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card lg:grid-cols-[1fr,0.95fr]">
             <div>
               <h2 className="break-words text-display font-semibold leading-[1.04] tracking-tight text-ink">
                 Ready to plan
@@ -322,54 +312,7 @@ const LandingPage = () => {
         </section>
       </main>
 
-      <footer className="relative overflow-hidden border-t border-line/60 bg-canvas/70">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_8%,rgb(var(--color-primary)/0.28),transparent_48%),radial-gradient(circle_at_20%_78%,rgb(var(--color-neutral)/0.3),transparent_54%)]" />
-        </div>
-        <div className="relative mx-auto max-w-layout px-lg pb-2xl pt-3xl sm:px-xl">
-          <p className="break-words text-center text-[clamp(2.4rem,10.5vw,6.4rem)] font-semibold leading-none tracking-tight text-transparent [text-stroke:1px_rgb(var(--color-warning)/0.8)] [-webkit-text-stroke:1px_rgb(var(--color-warning)/0.8)] bg-[radial-gradient(circle_at_50%_20%,rgb(var(--color-warning)),rgb(var(--color-primary)))] bg-clip-text">
-            TRIP PLANNER
-          </p>
-
-          <div className="mt-2xl grid gap-xl sm:grid-cols-2">
-            <div>
-              <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">Website</p>
-              <ul className="mt-md space-y-sm">
-                {WEBSITE_LINKS.map((item) => (
-                  <li key={item.label}>
-                    <Link to={item.href} className="text-title-sm font-medium text-ink hover:text-primary">
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">Legal</p>
-              <ul className="mt-md space-y-sm">
-                {LEGAL_LINKS.map((item) => (
-                  <li key={item.label}>
-                    <Link to={item.href} className="text-title-sm font-medium text-ink hover:text-primary">
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-2xl flex flex-wrap items-center justify-between gap-sm border-t border-line/60 pt-md text-body-sm text-ink-muted">
-            <p>
-              Copyright © 2026 {APP_TITLE}. All rights reserved.
-            </p>
-            <div className="flex items-center gap-md">
-              <span>Twitter</span>
-              <span>LinkedIn</span>
-              <span>Instagram</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter mode="marketing" />
 
       <aside className="fixed right-2 top-1/2 z-20 hidden -translate-y-1/2 rounded-xl border border-line/60 bg-canvas/80 px-sm py-lg text-caption font-semibold uppercase tracking-[0.18em] text-ink-muted lg:block [writing-mode:vertical-rl]">
         Trip Ready
