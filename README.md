@@ -188,4 +188,4 @@ Frontend runtime/build env on EC2:
   - Save PM2 state
 
 ## Deployment Link
-- [Live Demo](http://http://13.235.94.47/) (EC2 public IP)
+- [Live Demo](http://http://13.235.94.47/) (EC2 public IP) – Currently not working
