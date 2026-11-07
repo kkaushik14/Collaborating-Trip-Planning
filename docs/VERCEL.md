@@ -1,5 +1,19 @@
 # Deploy to Vercel
 
+## Current production deployment
+
+- Application: https://trip-plan.kkos.in
+- Health: https://trip-plan.kkos.in/health
+- Vercel project: collaborating-trip-planning-xhra
+- DNS: CNAME `trip-plan` points to `09bf5ba8647a815e.vercel-dns-017.com`
+  in Hostinger, with TTL 300. Other kkos.in records are unchanged.
+- FRONTEND_BASE_URL and CORS_ORIGIN: `https://trip-plan.kkos.in`.
+  VITE_API_BASE_URL remains `/api/v1` for same-origin requests.
+- Future domain changes require updating both backend URL variables and
+  redeploying so invitation and notification emails use the correct origin.
+
+## Project configuration
+
 Deploy this repository as **one Vercel project**, with Root Directory set to the
 repository root (not frontend or backend), Application Preset **Services**, and Node.js
 **26.x**. The root and both service package.json files pin this Node.js major;

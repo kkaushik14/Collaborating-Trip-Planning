@@ -196,4 +196,5 @@ Frontend runtime/build env on EC2:
   - Save PM2 state
 
 ## Deployment Link
-- [Live Demo](http://http://13.235.94.47/) (EC2 public IP) – Currently not working
+- [Live application](https://trip-plan.kkos.in/) (Vercel Services)
+- Backend runtime: Mumbai (`bom1`), Node.js 26.x. Frontend assets use Vercel's CDN.
