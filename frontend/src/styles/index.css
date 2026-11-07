@@ -22,7 +22,7 @@
 
   body {
     margin: 0;
-    min-width: 320px;
+    min-width: 0;
     background:
       radial-gradient(
         45rem 45rem at 92% -8%,
@@ -53,11 +53,11 @@
 
 @layer components {
   .surface-card {
-    @apply rounded-xl border border-line bg-panel shadow-card;
+    @apply min-w-0 rounded-xl border border-line bg-panel shadow-card;
   }
 
   .surface-card-muted {
-    @apply rounded-xl border border-line bg-panel-muted/65 shadow-card;
+    @apply min-w-0 rounded-xl border border-line bg-panel-muted/65 shadow-card;
   }
 
   .status-surface {
@@ -185,6 +185,12 @@
   }
 }
 
+/* Keep keyboard focus visible, including links without a component wrapper. */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -201,5 +207,14 @@
   .landing-page .floating-glow,
   .toast-enter {
     animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

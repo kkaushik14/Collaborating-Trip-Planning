@@ -58,6 +58,18 @@ const userSchema = new Schema(
       default: null,
       select: false,
     },
+    authVersion: {
+      type: Number,
+      // Missing means zero; a default could be saved by a stale legacy profile after reset.
+    },
+    passwordResetTokenHash: {
+      type: String,
+      select: false,
+      index: true,
+    },
+    passwordResetExpiresAt: { type: Date, select: false },
+    passwordResetRequestedAt: { type: Date, select: false },
+    passwordResetEmail: { type: String, select: false },
     lastLoginAt: {
       type: Date,
       default: null,

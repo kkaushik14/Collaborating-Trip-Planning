@@ -135,7 +135,7 @@ const buildPlainText = ({ heading, intro, bullets = [], primaryCta = null, secon
   return `${heading}\n\n${intro}${bulletText}${primary}${secondary}${closing ? `\n${closing}\n` : ''}`
 }
 
-const sendEmail = async ({ to, subject, text, html }) => {
+const sendEmail = async ({ to, subject, text, html, sensitive = false }) => {
   const mailTransporter = getTransporter()
 
   const delivery = mailTransporter.sendMail({
@@ -145,10 +145,10 @@ const sendEmail = async ({ to, subject, text, html }) => {
     text,
     html,
   })
-  keepAlive(delivery.catch((error) => console.error('Email delivery failed:', error.message)))
+  keepAlive(delivery.catch((error) => console.error('Email delivery failed:', sensitive ? 'Sensitive email delivery failed' : error.message)))
   const info = await delivery
 
-  if (env.nodeEnv !== 'production') {
+  if (!sensitive && env.nodeEnv !== 'production') {
     const debugPayload =
       info?.message ||
       info?.response ||
@@ -158,6 +158,23 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 
   return info
+}
+
+const sendPasswordResetEmail = async ({ email, resetUrl }) => {
+  const content = {
+    heading: 'Reset your password',
+    intro: 'A password reset was requested for your Collaborating Trip Planning account.',
+    bullets: ['This link expires in 30 minutes and can only be used once.'],
+    primaryCta: { label: 'Reset Password', url: resetUrl },
+    closing: 'If you did not request this, ignore this email. Your password has not changed.',
+  }
+  return sendEmail({
+    to: email,
+    subject: 'Reset your Collaborating Trip Planning password',
+    text: buildPlainText(content),
+    html: buildEmailTemplate({ ...content, eyebrow: 'Account Security' }),
+    sensitive: true,
+  })
 }
 
 const sendWelcomeEmail = async ({ email, recipientName = 'Traveler', appUrl = env.frontendBaseUrl }) => {
@@ -317,6 +334,7 @@ const sendCommentUpdateEmail = async ({
 }
 
 export {
+  sendPasswordResetEmail,
   sendCommentUpdateEmail,
   sendInvitationEmail,
   sendTripCreatedEmail,

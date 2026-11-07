@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
 import { getRedirectPathFromLocation } from '../app/AuthProvider/redirect-utils.js'
+import { usePublicTheme } from '../hooks/index.js'
 import { AuthPageShell } from '../components/common/index.js'
 import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
 import { Button } from '../components/ui/index.js'
@@ -12,6 +13,7 @@ import { Text } from '../components/typography/index.js'
 import { signInSchema } from '../validators/index.js'
 
 const LoginPage = () => {
+  const publicTheme = usePublicTheme()
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -45,9 +47,10 @@ const LoginPage = () => {
 
   return (
     <AuthPageShell
-      panelLabel="Operator Access"
-      panelTitle="Securely enter your trip operations workspace."
-      panelDescription="Authenticate once to continue planning, collaboration, and budget actions with role-based access."
+      {...publicTheme}
+      panelLabel="Your next adventure"
+      panelTitle="Great trips start with a shared plan."
+      panelDescription="Pick up where you left off. Your itinerary, travel companions, and trip budget are waiting for you."
       formLabel="Welcome Back"
       formTitle="Sign in to your account"
       formDescription="Use your credentials to continue planning and collaborating on your trips."
@@ -65,7 +68,7 @@ const LoginPage = () => {
           type="email"
           required
           autoComplete="email"
-          placeholder="owner@example.com"
+          placeholder="you@example.com"
         />
 
         <RHFTextField
@@ -78,6 +81,10 @@ const LoginPage = () => {
         />
 
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
+
+        <div className="text-right text-body-sm">
+          <Link to={{ pathname: '/forgot-password', search: location.search }} state={location.state} className="font-medium text-primary hover:underline">Forgot password?</Link>
+        </div>
 
         <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
           {loginForm.formState.isSubmitting ? 'Signing in...' : 'Sign In'}

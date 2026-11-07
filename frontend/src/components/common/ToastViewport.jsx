@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AlertTriangleIcon, CircleXIcon, CircleCheckBigIcon, InfoIcon, XIcon } from 'lucide-react'
 
 import { useUIStore } from '@/hooks/useUIStore.js'
 import { cn } from '@/lib/utils'
 
 const toneClassMap = Object.freeze({
-  info: 'toast-card border-line bg-panel text-ink',
-  success: 'toast-card border-success/40 bg-success/12 text-ink',
-  warning: 'toast-card border-warning/40 bg-warning/12 text-ink',
-  error: 'toast-card border-danger/40 bg-danger/12 text-ink',
+  info: 'border-line',
+  success: 'border-success',
+  warning: 'border-warning',
+  error: 'border-danger',
 })
 
 const iconMap = Object.freeze({
@@ -18,95 +18,81 @@ const iconMap = Object.freeze({
   error: CircleXIcon,
 })
 
-function ToastViewport() {
-  const {
-    state: { toasts },
-    dismissToast,
-  } = useUIStore()
-  const timeoutMapRef = useRef(new Map())
-  const toastIds = useMemo(() => new Set(toasts.map((toast) => toast.id)), [toasts])
+function ToastItem({ toast, dismissToast }) {
+  const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const remainingMs = useRef(toast.durationMs)
+  const paused = hovered || focused
+  const Icon = iconMap[toast.type] || iconMap.info
 
   useEffect(() => {
-    for (const toast of toasts) {
-      if (timeoutMapRef.current.has(toast.id)) {
-        continue
-      }
-
-      const timerId = setTimeout(() => {
-        dismissToast(toast.id)
-        timeoutMapRef.current.delete(toast.id)
-      }, Math.max(1000, Number(toast.durationMs || 4000)))
-
-      timeoutMapRef.current.set(toast.id, timerId)
+    // Zero means a persistent notification, dismissed explicitly by the user.
+    if (paused || toast.durationMs === 0) return
+    const startedAt = Date.now()
+    const timer = setTimeout(() => dismissToast(toast.id), remainingMs.current)
+    return () => {
+      clearTimeout(timer)
+      remainingMs.current = Math.max(0, remainingMs.current - (Date.now() - startedAt))
     }
-
-    for (const [toastId, timerId] of timeoutMapRef.current.entries()) {
-      if (toastIds.has(toastId)) {
-        continue
-      }
-
-      clearTimeout(timerId)
-      timeoutMapRef.current.delete(toastId)
-    }
-  }, [dismissToast, toastIds, toasts])
-
-  useEffect(
-    () => () => {
-      for (const timerId of timeoutMapRef.current.values()) {
-        clearTimeout(timerId)
-      }
-      timeoutMapRef.current.clear()
-    },
-    [],
-  )
-
-  if (!toasts.length) {
-    return null
-  }
+  }, [dismissToast, paused, toast.durationMs, toast.id])
 
   return (
-    <section
-      className="pointer-events-none fixed left-sm right-sm top-sm z-[90] flex w-auto flex-col gap-sm sm:left-auto sm:right-lg sm:top-lg sm:w-full sm:max-w-sm"
-      aria-live="polite"
-      aria-label="Notifications"
+    <article
+      className={cn('toast-card toast-enter bg-panel text-ink [overflow-wrap:anywhere]', toneClassMap[toast.type] || toneClassMap.info)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false)
+      }}
     >
-      {toasts.map((toast) => {
-        const Icon = iconMap[toast.type] || iconMap.info
+      <div className="flex items-start justify-between gap-sm">
+        <div className="flex min-w-0 items-start gap-xs">
+          <Icon className="mt-[0.125rem] size-4 shrink-0 text-primary" aria-hidden="true" />
+          <div className="min-w-0">
+            {toast.title ? <p className="text-body-sm font-semibold">{toast.title}</p> : null}
+            {toast.message ? <p className="mt-2xs text-caption text-ink-muted">{toast.message}</p> : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink"
+          aria-label={toast.title ? `Dismiss notification: ${toast.title}` : 'Dismiss notification'}
+          onClick={() => dismissToast(toast.id)}
+        >
+          <XIcon className="size-4" />
+        </button>
+      </div>
+    </article>
+  )
+}
 
-        return (
-          <article
-            key={toast.id}
-            role={toast.type === 'error' ? 'alert' : 'status'}
-            className={cn('toast-enter', toneClassMap[toast.type] || toneClassMap.info)}
-          >
-            <div className="flex items-start justify-between gap-sm">
-              <div className="min-w-0">
-                <div className="flex items-start gap-xs">
-                  <Icon className="mt-[0.125rem] size-4 shrink-0 text-primary" aria-hidden="true" />
-                  <div className="min-w-0">
-                    {toast.title ? (
-                      <p className="text-body-sm font-semibold">{toast.title}</p>
-                    ) : null}
-                    {toast.message ? (
-                      <p className="mt-2xs text-caption text-ink-muted">{toast.message}</p>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
+function ToastViewport() {
+  const { state: { toasts }, dismissToast } = useUIStore()
 
-              <button
-                type="button"
-                className="inline-flex size-6 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink"
-                aria-label="Dismiss notification"
-                onClick={() => dismissToast(toast.id)}
-              >
-                <XIcon className="size-4" />
-              </button>
-            </div>
-          </article>
-        )
-      })}
-    </section>
+  return (
+    <>
+      {/* These regions exist before a notification arrives; avoid nested live regions. */}
+      <div role="status" aria-atomic="true" className="sr-only">
+        {toasts.filter((toast) => toast.type !== 'error').map((toast) => (
+          <p key={toast.id}>{toast.title} {toast.message}</p>
+        ))}
+      </div>
+      <div role="alert" aria-atomic="true" className="sr-only">
+        {toasts.filter((toast) => toast.type === 'error').map((toast) => (
+          <p key={toast.id}>{toast.title} {toast.message}</p>
+        ))}
+      </div>
+      <section
+        className={cn(
+          'fixed left-sm right-sm top-sm z-[90] flex max-h-[calc(100dvh-2rem)] w-auto flex-col gap-sm overflow-y-auto overscroll-contain sm:left-auto sm:right-lg sm:top-lg sm:w-full sm:max-w-sm',
+          toasts.length ? 'pointer-events-auto' : 'pointer-events-none',
+        )}
+        aria-label="Notifications"
+      >
+        {toasts.map((toast) => <ToastItem key={toast.id} toast={toast} dismissToast={dismissToast} />)}
+      </section>
+    </>
   )
 }
 

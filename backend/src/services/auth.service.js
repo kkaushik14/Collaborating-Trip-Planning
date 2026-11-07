@@ -3,10 +3,13 @@ import crypto from 'node:crypto'
 import jwt from 'jsonwebtoken'
 
 import { env } from '../config/index.js'
+import { User } from '../models/index.js'
+import { ApiError } from '../utils/index.js'
 
 const buildTokenPayload = (user) => ({
   sub: user._id.toString(),
   email: user.email,
+  ver: user.authVersion || 0,
 })
 
 const signAccessToken = (user) => {
@@ -29,8 +32,23 @@ const issueAuthTokens = async (user) => {
   const accessToken = signAccessToken(user)
   const refreshToken = signRefreshToken(user)
 
-  user.refreshTokenHash = hashToken(refreshToken)
-  await user.save({ validateBeforeSave: false })
+  // Do not let a login/refresh that started before a reset restore a revoked session.
+  const version = user.authVersion || 0
+  const result = await User.updateOne({
+    _id: user._id,
+    isActive: true,
+    ...(version === 0
+      ? { $or: [{ authVersion: 0 }, { authVersion: { $exists: false } }] }
+      : { authVersion: version }),
+  }, {
+    $set: {
+      refreshTokenHash: hashToken(refreshToken),
+      ...(user.isModified('lastLoginAt') ? { lastLoginAt: user.lastLoginAt } : {}),
+    },
+  })
+  if (!result.matchedCount) {
+    throw ApiError.unauthorized('Credentials changed; please log in again')
+  }
 
   return { accessToken, refreshToken }
 }
@@ -42,6 +60,9 @@ const verifyAccessToken = (token) => {
 const verifyRefreshToken = (token) => {
   return jwt.verify(token, env.jwtRefreshSecret)
 }
+
+// Tokens issued before credential versioning are valid only until the first reset.
+const isAuthVersionValid = (user, payload) => (payload.ver ?? 0) === (user.authVersion || 0)
 
 const isRefreshTokenValid = (user, refreshToken) => {
   if (!user.refreshTokenHash) {
@@ -58,6 +79,7 @@ const clearRefreshToken = async (user) => {
 
 export {
   clearRefreshToken,
+  isAuthVersionValid,
   isRefreshTokenValid,
   issueAuthTokens,
   signAccessToken,

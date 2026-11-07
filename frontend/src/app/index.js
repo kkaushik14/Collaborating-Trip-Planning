@@ -1,4 +1,5 @@
 export { default as App } from './App.jsx'
+export * from './AppErrorBoundary.jsx'
 export * from './AuthProvider/index.js'
 export * from './QueryProvider/index.js'
 export * from './clientStore/index.js'

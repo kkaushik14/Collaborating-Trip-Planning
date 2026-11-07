@@ -1,6 +1,8 @@
 import express from 'express'
 
 import {
+  forgotPassword,
+  resetPassword,
   getCurrentUser,
   login,
   logout,
@@ -8,10 +10,20 @@ import {
   register,
   updateCurrentUserProfile,
 } from '../controllers/index.js'
-import { authRateLimiter, authenticate } from '../middlewares/index.js'
+import { authRateLimiter, authenticate, passwordRecoveryRateLimiter } from '../middlewares/index.js'
 import { authSchemas, validateRequest } from '../validators/index.js'
 
 const authRouter = express.Router()
+
+authRouter.use(['/forgot-password', '/reset-password'], (_req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  res.set('Referrer-Policy', 'no-referrer')
+  next()
+})
+authRouter.post('/forgot-password', passwordRecoveryRateLimiter,
+  validateRequest({ body: authSchemas.forgotPassword }), forgotPassword)
+authRouter.post('/reset-password', passwordRecoveryRateLimiter,
+  validateRequest({ body: authSchemas.resetPassword }), resetPassword)
 
 authRouter.post(
   '/register',

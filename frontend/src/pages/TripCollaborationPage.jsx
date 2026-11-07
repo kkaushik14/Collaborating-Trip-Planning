@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
@@ -35,9 +35,13 @@ const TripCollaborationPage = () => {
   const { tripId, trip } = useOutletContext()
   const { currentUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [newOwnerId, setNewOwnerId] = useState('')
+  const actorRole = normalizeActorRole(trip?.actorRole)
+  const canManageMembers = canManageTripCollaboration(actorRole)
+  const canInviteMembers = canEditTripContent(actorRole)
 
   const membersQuery = useTripMembers({ tripId })
-  const invitationsQuery = useTripInvitations({ tripId })
+  const invitationsQuery = useTripInvitations({ tripId, queryOptions: { enabled: canInviteMembers } })
   const commentsQuery = useTripComments({ tripId })
   const itineraryDaysQuery = useItineraryDays({ tripId })
 
@@ -48,19 +52,18 @@ const TripCollaborationPage = () => {
   const transferOwnershipMutation = useCreateTripOwnershipTransfer()
   const updateMyCommentEmailPreferenceMutation = useUpdateMyTripCommentEmailPreference()
   const createCommentMutation = useCreateTripComment()
-  const actorRole = normalizeActorRole(trip?.actorRole)
-  const canManageMembers = canManageTripCollaboration(actorRole)
-  const canInviteMembers = canEditTripContent(actorRole)
+  const isMemberUpdating = updateMemberRoleMutation.isPending || deactivateMemberMutation.isPending || reactivateMemberMutation.isPending || transferOwnershipMutation.isPending
+  const memberUpdateError = getPrimaryError(updateMemberRoleMutation.error, deactivateMemberMutation.error, reactivateMemberMutation.error)
 
   const isLoading =
     membersQuery.isPending ||
-    invitationsQuery.isPending ||
+    (canInviteMembers && invitationsQuery.isPending) ||
     commentsQuery.isPending ||
     itineraryDaysQuery.isPending
 
   const combinedError = getPrimaryError(
     membersQuery.error,
-    invitationsQuery.error,
+    canInviteMembers && invitationsQuery.error,
     commentsQuery.error,
     itineraryDaysQuery.error,
   )
@@ -70,7 +73,7 @@ const TripCollaborationPage = () => {
     const members = membersQuery.data?.members || []
 
     for (const member of members) {
-      const rawUser = member.user
+      const rawUser = member.user || member.userId
       const id = typeof rawUser === 'object' ? rawUser?._id : rawUser
       if (!id) {
         continue
@@ -93,7 +96,7 @@ const TripCollaborationPage = () => {
     const members = membersQuery.data?.members || []
 
     return members.map((member) => {
-      const rawUser = member.user
+      const rawUser = member.user || member.userId
       const userIdRaw = typeof rawUser === 'object' ? rawUser?._id : rawUser
       const userId = userIdRaw ? String(userIdRaw) : ''
       const knownUser = memberMap.get(userId)
@@ -105,22 +108,22 @@ const TripCollaborationPage = () => {
         email: knownUser?.email || 'Email unavailable',
         role: member.role || 'VIEWER',
         isActive: Boolean(member.isActive),
-        commentEmailOptIn: String(member.commentEmailOptIn || 'true').toLowerCase() === 'false' ? 'false' : 'true',
+        commentEmailOptIn: String(member.commentEmailOptIn ?? 'true').toLowerCase() === 'false' ? 'false' : 'true',
       }
     })
   }, [memberMap, membersQuery.data?.members])
 
   const mappedInvitations = useMemo(() => {
-    const invitations = invitationsQuery.data?.invitations || []
+    const invitations = canInviteMembers ? invitationsQuery.data?.invitations || [] : []
 
     return invitations.map((invitation) => ({
       id: invitation._id,
-      email: invitation.email || 'unknown@example.com',
+      email: invitation.email || 'Email unavailable',
       role: invitation.role || 'VIEWER',
       status: String(invitation.status || 'pending').toUpperCase(),
       expiresAtLabel: formatDateLabel(invitation.expiresAt),
     }))
-  }, [invitationsQuery.data?.invitations])
+  }, [canInviteMembers, invitationsQuery.data?.invitations])
 
   const mappedComments = useMemo(() => {
     const comments = commentsQuery.data?.comments || []
@@ -137,7 +140,8 @@ const TripCollaborationPage = () => {
     )
 
     return comments.map((comment) => {
-      const author = memberMap.get(comment.author)
+      const authorId = typeof comment.author === 'object' ? comment.author?._id : comment.author
+      const author = memberMap.get(String(authorId))
       const targetLabel =
         comment.targetType === 'activity'
           ? activityLookup.get(comment.activity) || `Activity ${comment.activity ? String(comment.activity).slice(-4) : ''}`
@@ -145,7 +149,7 @@ const TripCollaborationPage = () => {
 
       return {
         id: comment._id,
-        authorName: author?.name || fallbackMemberName(comment.author),
+        authorName: author?.name || comment.author?.name || fallbackMemberName(authorId),
         body: comment.body || '',
         targetLabel,
         createdAtLabel: formatDateLabel(comment.createdAt, {
@@ -234,7 +238,7 @@ const TripCollaborationPage = () => {
         onRetry={() =>
           Promise.all([
             membersQuery.refetch(),
-            invitationsQuery.refetch(),
+            ...(canInviteMembers ? [invitationsQuery.refetch()] : []),
             commentsQuery.refetch(),
             itineraryDaysQuery.refetch(),
           ])
@@ -244,26 +248,27 @@ const TripCollaborationPage = () => {
   }
 
   return (
-    <div className="space-y-md">
+    <div className="min-w-0 max-w-full space-y-md">
       <section className="grid gap-sm sm:grid-cols-3">
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Active Members</p>
           <p className="mt-2xs text-title font-semibold text-ink">{activeMembersCount}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Pending Invites</p>
-          <p className="mt-2xs text-title font-semibold text-ink">{pendingInvitationsCount}</p>
+          <p className="mt-2xs text-title font-semibold text-ink">{canInviteMembers ? pendingInvitationsCount : 'Owners and editors only'}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Comments</p>
           <p className="mt-2xs text-title font-semibold text-ink">{mappedComments.length}</p>
         </article>
       </section>
 
-      <section className="rounded-xl border border-line bg-panel p-lg shadow-card">
-        <h3 className="text-title-sm font-semibold text-ink">Transfer Ownership</h3>
+      <section className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+        <h2 className="text-title-sm font-semibold text-ink">Transfer Ownership</h2>
         <p className="mt-xs text-body-sm text-ink-muted">
           Transfer ownership to another active member when trip leadership changes.
+          You will become an editor and lose owner-only controls.
         </p>
         {!canManageMembers ? (
           <p className="mt-sm text-body-sm text-ink-muted">
@@ -271,24 +276,13 @@ const TripCollaborationPage = () => {
           </p>
         ) : null}
         <div className="mt-md flex flex-wrap items-center gap-sm">
+          <label htmlFor="ownership-candidate" className="text-body-sm font-medium text-ink">New owner</label>
           <select
-            className="h-10 min-w-[15rem] rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
-            defaultValue=""
+            className="h-10 min-w-0 w-full rounded-md border border-line-strong bg-panel px-sm text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
+            value={newOwnerId}
             id="ownership-candidate"
-            disabled={!canManageMembers}
-            onChange={(event) => {
-              const userId = event.target.value
-              if (!userId || !canManageMembers) {
-                return
-              }
-
-              transferOwnershipMutation.mutate({
-                tripId,
-                body: {
-                  newOwnerUserId: userId,
-                },
-              })
-            }}
+            disabled={!canManageMembers || isMemberUpdating || !ownershipCandidates.length}
+            onChange={(event) => setNewOwnerId(event.target.value)}
           >
             <option value="">Select member to transfer ownership</option>
             {ownershipCandidates.map((member) => (
@@ -300,13 +294,19 @@ const TripCollaborationPage = () => {
           <Button
             type="button"
             variant="outline"
-            disabled
-            title="Choose member from dropdown to trigger transfer"
+            disabled={!canManageMembers || isMemberUpdating || !ownershipCandidates.some((member) => member.userId === newOwnerId)}
+            onClick={() => {
+              if (!canManageMembers || isMemberUpdating || !ownershipCandidates.some((member) => member.userId === newOwnerId)) return
+              transferOwnershipMutation.mutate({ tripId, body: { newOwnerUserId: newOwnerId } }, { onSuccess: () => setNewOwnerId('') })
+            }}
           >
-            Transfer via Selection
+            {transferOwnershipMutation.isPending ? 'Transferring...' : 'Transfer Ownership'}
           </Button>
         </div>
+        {canManageMembers && !ownershipCandidates.length ? <p className="mt-sm text-body-sm text-ink-muted">Invite another traveler and wait for them to join before transferring ownership.</p> : null}
       </section>
+
+      {memberUpdateError ? <PageErrorState title="Member update failed" description="The member change was not saved. Please try again." errorMessage={memberUpdateError.message} /> : null}
 
       {createInvitationMutation.error ? (
         <PageErrorState
@@ -314,6 +314,7 @@ const TripCollaborationPage = () => {
           description="Invite could not be created."
           errorMessage={createInvitationMutation.error?.message}
           onRetry={() => createInvitationMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -323,6 +324,7 @@ const TripCollaborationPage = () => {
           description="Your comment was not posted. Please try again."
           errorMessage={createCommentMutation.error?.message}
           onRetry={() => createCommentMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -332,6 +334,7 @@ const TripCollaborationPage = () => {
           description="We could not update your email preference for comment notifications."
           errorMessage={updateMyCommentEmailPreferenceMutation.error?.message}
           onRetry={() => updateMyCommentEmailPreferenceMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -341,6 +344,7 @@ const TripCollaborationPage = () => {
           description="We could not transfer ownership right now."
           errorMessage={transferOwnershipMutation.error?.message}
           onRetry={() => transferOwnershipMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -351,8 +355,8 @@ const TripCollaborationPage = () => {
         comments={mappedComments}
         dayTargets={dayTargets}
         activityTargets={activityTargets}
-        canManageMembers={canManageMembers}
-        canInviteMembers={canInviteMembers}
+        canManageMembers={canManageMembers && !isMemberUpdating}
+        canInviteMembers={canInviteMembers && !createInvitationMutation.isPending}
         canComment={canComment}
         commentEmailOptIn={isCommentEmailOptIn}
         isCommentEmailPreferenceUpdating={updateMyCommentEmailPreferenceMutation.isPending}
@@ -365,10 +369,10 @@ const TripCollaborationPage = () => {
                 tripId,
                 body: payload,
               })
-            : Promise.resolve(null)
+            : Promise.reject(new Error('Only owners and editors can invite travelers.'))
         }
         onMemberRoleChange={(memberId, role) =>
-          canManageMembers
+          canManageMembers && !isMemberUpdating && mappedMembers.some((member) => member.id === memberId && member.role !== 'OWNER') && role !== 'OWNER'
             ? updateMemberRoleMutation.mutate({
                 tripId,
                 memberId,
@@ -377,7 +381,7 @@ const TripCollaborationPage = () => {
             : null
         }
         onMemberActiveToggle={(memberId, nextActive) => {
-          if (!canManageMembers) {
+          if (!canManageMembers || isMemberUpdating || !mappedMembers.some((member) => member.id === memberId && member.role !== 'OWNER')) {
             return
           }
 
@@ -398,8 +402,8 @@ const TripCollaborationPage = () => {
           const hasDayTarget = targetType === 'day' && Boolean(dayId)
           const hasActivityTarget = targetType === 'activity' && Boolean(activityId)
 
-          if (!hasDayTarget && !hasActivityTarget) {
-            return Promise.resolve(null)
+          if ((!hasDayTarget && !hasActivityTarget) || !body?.trim()) {
+            return Promise.reject(new Error('Choose a day or activity and enter a comment.'))
           }
 
           return createCommentMutation.mutateAsync({

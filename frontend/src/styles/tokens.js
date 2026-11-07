@@ -47,22 +47,28 @@ const designTokens = Object.freeze({
 
   colors: {
     // Primary token set used by Tailwind theme and CSS custom properties.
-    primary: '83 53 49',
-    primaryStrong: '56 35 33',
+    primary: '222 164 139',
+    primaryStrong: '204 145 119',
+    actionPrimary: '215 154 119',
+    actionPrimaryHover: '231 176 140',
+    onPrimary: '32 22 21',
+    actionDisabled: '44 47 60',
+    onDisabled: '166 163 177',
     neutral: '39 45 88',
-    success: '76 175 123',
-    danger: '220 96 117',
+    success: '95 190 139',
+    danger: '235 124 144',
     warning: '214 164 89',
 
     // Semantic surfaces and text tokens.
-    canvas: '17 19 38',
-    panel: '28 31 59',
-    panelMuted: '40 44 78',
+    canvas: '10 11 15',
+    panel: '17 19 26',
+    panelMuted: '26 29 39',
     ink: '245 239 236',
-    inkMuted: '182 171 177',
+    inkMuted: '190 188 196',
     inkInverse: '32 22 21',
-    line: '67 71 109',
-    lineStrong: '101 106 152',
+    line: '100 104 121',
+    lineStrong: '139 145 164',
+    overlay: '17 19 38',
   },
 })
 

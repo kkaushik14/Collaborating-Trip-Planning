@@ -56,4 +56,16 @@ const profileSettingsSchema = z.object({
   avatarUrl: profileAvatarSchema.optional().default(''),
 })
 
-export { profileSettingsSchema, refreshTokenSchema, signInSchema, signUpSchema }
+const forgotPasswordSchema = z.object({ email: emailSchema })
+
+const resetPasswordSchema = z.object({
+  password: signUpSchema.shape.password.refine((value) => new TextEncoder().encode(value).length <= 72, {
+    message: 'Password is too long. Use at most 72 bytes (fewer characters when using emoji).',
+  }),
+  confirmPassword: z.string().min(1, 'Confirm your new password'),
+}).refine((values) => values.password === values.confirmPassword, {
+  message: 'Passwords must match',
+  path: ['confirmPassword'],
+})
+
+export { forgotPasswordSchema, resetPasswordSchema, profileSettingsSchema, refreshTokenSchema, signInSchema, signUpSchema }

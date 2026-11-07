@@ -2,11 +2,17 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import mongoose from 'mongoose'
+import nodemailer from 'nodemailer'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
 
 import { app } from '../src/app.js'
+import { User } from '../src/models/index.js'
 import { drainCommentNotifications } from '../src/services/index.js'
+
+// Integration fixtures must never deliver mail through credentials from the local .env.
+const testMailTransport = nodemailer.createTransport({ jsonTransport: true })
+test.mock.method(nodemailer, 'createTransport', () => testMailTransport)
 
 let mongoServer
 
@@ -42,6 +48,7 @@ test.after(async () => {
   await drainCommentNotifications()
   await mongoose.disconnect()
   await mongoServer.stop()
+  test.mock.restoreAll()
 })
 
 test.beforeEach(async () => {
@@ -202,6 +209,16 @@ test('Collaboration flow: invite + accept + role update + ownership transfer + m
     password: 'Password123!',
   })
 
+  await User.updateOne({ _id: owner.user._id }, { $set: {
+    avatarUrl: 'https://example.com/owner.png',
+    authVersion: 0,
+    passwordResetTokenHash: 'private-reset-hash',
+    passwordResetExpiresAt: new Date(Date.now() + 60000),
+    passwordResetRequestedAt: new Date(),
+    passwordResetEmail: owner.user.email,
+    mobileNumber: 'private-mobile',
+  } })
+
   const tripResponse = await request(app)
     .post('/api/v1/trips')
     .set(buildAuthHeader(owner.accessToken))
@@ -263,6 +280,23 @@ test('Collaboration flow: invite + accept + role update + ownership transfer + m
     (member) => member.user === owner.user._id,
   )
   assert.equal(ownerMembershipFromList.commentEmailOptIn, 'true')
+  assert.deepEqual(ownerMembershipFromList.userId, {
+    _id: owner.user._id,
+    name: 'Owner User',
+    email: owner.user.email,
+    avatarUrl: 'https://example.com/owner.png',
+  })
+  assert.deepEqual(collabMembershipFromList.userId, {
+    _id: collaborator.user._id,
+    name: 'Collab User',
+    email: collaborator.user.email,
+    avatarUrl: null,
+  })
+  for (const member of membersBeforeTransfer.body.data.members) {
+    assert.deepEqual(Object.keys(member.userId).sort(), ['_id', 'avatarUrl', 'email', 'name'])
+  }
+  assert.ok(!membersBeforeTransfer.text.includes('private-reset-hash'))
+  assert.ok(!membersBeforeTransfer.text.includes('private-mobile'))
 
   const collabMember = collabMembershipFromList
 

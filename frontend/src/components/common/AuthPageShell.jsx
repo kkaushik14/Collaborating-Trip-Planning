@@ -10,18 +10,19 @@ import { Link } from 'react-router-dom'
 import { APP_TITLE } from '@/config/site.js'
 import { Heading, Text } from '@/components/typography/index.js'
 import SiteFooter from './SiteFooter.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 
 const VALUE_POINTS = [
   {
     id: 'secure',
-    title: 'Secure Session Flow',
-    description: 'Secure sign-in keeps your account protected while you move across pages.',
+    title: 'Your plans, protected',
+    description: 'Keep your travel details in an account shared only with the people you invite.',
     icon: ShieldCheckIcon,
   },
   {
     id: 'planning',
-    title: 'Live Planning Sync',
-    description: 'Trips, days, activities, and collaboration actions stay role-aware in real time.',
+    title: 'Plan together',
+    description: 'Bring everyone into the itinerary, share ideas, and decide who can make changes.',
     icon: RouteIcon,
   },
   {
@@ -39,13 +40,16 @@ function AuthPageShell({
   formLabel,
   formTitle,
   formDescription,
+  theme,
+  onToggle,
+  themeToggleDisabled = false,
   children,
 }) {
   return (
     <div className="bg-auth-pattern min-h-screen text-ink">
       <main className="px-lg py-xl sm:px-xl sm:py-2xl">
         <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:grid-cols-[1.08fr,0.92fr]">
-          <section className="surface-glass hidden rounded-2xl border border-line/75 p-2xl lg:block">
+          <section className="surface-glass min-w-0 [overflow-wrap:anywhere] hidden rounded-2xl border border-line/75 p-2xl lg:block">
             <Link to="/" className="inline-flex items-center gap-sm">
               <span className="inline-flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
                 <LockKeyholeIcon className="size-4" />
@@ -64,7 +68,7 @@ function AuthPageShell({
               {panelLabel}
             </Text>
 
-            <Heading level={1} size="display" className="mt-md max-w-[16ch]">
+            <Heading level={2} size="display" className="mt-md max-w-[16ch]">
               {panelTitle}
             </Heading>
             <Text tone="muted" className="mt-md max-w-[56ch]">
@@ -94,15 +98,18 @@ function AuthPageShell({
             </div>
           </section>
 
-          <section className="surface-glass rounded-2xl border border-line/75 p-lg sm:p-xl lg:p-2xl">
-            <Link to="/" className="inline-flex items-center gap-sm">
-              <span className="inline-flex size-8 items-center justify-center rounded-md bg-primary/15 text-primary">
-                <LockKeyholeIcon className="size-4" />
-              </span>
-              <Text as="span" size="body-sm" weight="semibold">
-                {APP_TITLE}
-              </Text>
-            </Link>
+          <section className="surface-glass min-w-0 [overflow-wrap:anywhere] rounded-2xl border border-line/75 p-lg sm:p-xl lg:p-2xl">
+            <div className="flex flex-wrap items-center justify-between gap-sm">
+              <Link to="/" className="inline-flex items-center gap-sm">
+                <span className="inline-flex size-8 items-center justify-center rounded-md bg-primary/15 text-primary">
+                  <LockKeyholeIcon className="size-4" />
+                </span>
+                <Text as="span" size="body-sm" weight="semibold">
+                  {APP_TITLE}
+                </Text>
+              </Link>
+              {onToggle ? <ThemeToggle theme={theme} onToggle={onToggle} disabled={themeToggleDisabled} /> : null}
+            </div>
 
             <div className="mt-xl">
               <Text
@@ -113,7 +120,7 @@ function AuthPageShell({
               >
                 {formLabel}
               </Text>
-              <Heading level={2} size="title" className="mt-sm">
+              <Heading level={1} size="title" className="mt-sm">
                 {formTitle}
               </Heading>
               <Text tone="muted" className="mt-xs">

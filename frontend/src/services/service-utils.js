@@ -37,6 +37,8 @@ class ServiceError extends Error {
     errors = [],
     requestId = null,
     details = null,
+    isNetworkError = false,
+    isTimeout = false,
     cause,
   }) {
     super(message)
@@ -48,6 +50,8 @@ class ServiceError extends Error {
     this.errors = ensureArray(errors)
     this.requestId = requestId
     this.details = details
+    this.isNetworkError = isNetworkError
+    this.isTimeout = isTimeout
 
     if (cause) {
       this.cause = cause
@@ -74,6 +78,8 @@ const toServiceError = (error, { resource = 'unknown', operation = 'request' } =
       errors: ensureArray(meta.errors),
       requestId: ensureString(meta.requestId, null),
       details: payload?.data ?? payload ?? null,
+      isNetworkError: error.isNetworkError,
+      isTimeout: error.isTimeout,
       cause: error,
     })
   }

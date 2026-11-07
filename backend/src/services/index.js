@@ -1,6 +1,7 @@
 export * from './analytics.service.js'
 export * from './authorization.service.js'
 export * from './auth.service.js'
+export * from './password-reset.service.js'
 export * from './budget.service.js'
 export * from './comment-notification.service.js'
 export * from './currency.service.js'

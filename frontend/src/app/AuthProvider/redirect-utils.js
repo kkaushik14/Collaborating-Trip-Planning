@@ -1,8 +1,16 @@
-const AUTH_ROUTE_PATHS = new Set(['/login', '/register'])
+const AUTH_ROUTE_PATHS = new Set(['/login', '/register', '/forgot-password', '/reset-password'])
 
 const isSafeInternalPath = (value = '') => {
   const path = String(value || '').trim()
-  return Boolean(path) && path.startsWith('/') && !path.startsWith('//')
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\') || [...path].some((char) => char.charCodeAt(0) <= 32)) {
+    return false
+  }
+  try {
+    const url = new URL(path, 'https://trip-planner.invalid')
+    return url.origin === 'https://trip-planner.invalid' && !AUTH_ROUTE_PATHS.has(url.pathname)
+  } catch {
+    return false
+  }
 }
 
 const normalizeRedirectPath = (pathname = '', search = '', hash = '') => {

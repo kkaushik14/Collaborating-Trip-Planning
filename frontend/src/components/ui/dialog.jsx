@@ -24,7 +24,7 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm transition-opacity duration-200 ease-out',
+        'fixed inset-0 z-50 bg-[rgb(var(--color-overlay)/0.65)] backdrop-blur-sm transition-opacity duration-200 ease-out',
         'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
         className,
       )}
@@ -45,7 +45,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-panel p-xl text-body-sm text-ink shadow-card outline-none',
+          'fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain [overflow-wrap:anywhere] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-panel p-xl text-body-sm text-ink shadow-card outline-none',
           'will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out',
           'data-[starting-style]:opacity-0 data-[starting-style]:scale-95',
           'data-[ending-style]:opacity-0 data-[ending-style]:scale-95',
@@ -57,7 +57,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-md top-md inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="absolute right-md top-md inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <XIcon className="size-4" />
             <span className="sr-only">Close</span>
@@ -69,7 +69,7 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }) {
-  return <div data-slot="dialog-header" className={cn('flex flex-col gap-sm', className)} {...props} />
+  return <div data-slot="dialog-header" className={cn('flex min-w-0 flex-col gap-sm pr-10 [overflow-wrap:anywhere]', className)} {...props} />
 }
 
 function DialogFooter({
@@ -87,7 +87,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close
-          className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-panel px-md text-body-sm font-medium text-ink transition-colors hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-panel px-md text-body-sm font-medium text-ink transition-colors hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           Close
         </DialogPrimitive.Close>

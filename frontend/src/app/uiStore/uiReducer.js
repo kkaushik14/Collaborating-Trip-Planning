@@ -1,7 +1,9 @@
 import { DEFAULT_THEME } from './initialState.js'
 import { UI_ACTION_TYPES } from './uiActionTypes.js'
+import { isTheme } from './theme.js'
 
 const buildToastRecord = (payload = {}) => {
+  const durationMs = Number(payload.durationMs ?? 4000)
   const fallbackId = `${Date.now()}-${Math.random().toString(16).slice(2)}`
   const generatedId =
     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -13,7 +15,7 @@ const buildToastRecord = (payload = {}) => {
     type: payload.type || 'info',
     title: payload.title || '',
     message: payload.message || '',
-    durationMs: Number(payload.durationMs || 4000),
+    durationMs: Number.isFinite(durationMs) && durationMs >= 0 ? durationMs : 4000,
     createdAt: payload.createdAt || new Date().toISOString(),
   }
 }
@@ -24,7 +26,7 @@ const uiReducer = (state, action) => {
       const nextTheme = action.payload?.theme
       return {
         ...state,
-        theme: nextTheme || DEFAULT_THEME,
+        theme: isTheme(nextTheme) ? nextTheme : DEFAULT_THEME,
       }
     }
 

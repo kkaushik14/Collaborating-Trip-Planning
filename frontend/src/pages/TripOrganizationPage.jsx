@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useOutletContext } from 'react-router-dom'
 
 import { OrganizationPanel } from '../components/features/index.js'
-import { Form, FormMessage, RHFTextField, RHFTextareaField } from '../components/forms/index.js'
+import { FormMessage, RHFTextField, RHFTextareaField } from '../components/forms/index.js'
 import {
   useAttachments,
   useChecklists,
@@ -33,6 +33,8 @@ import {
   PageEmptyState,
   PageErrorState,
   PageLoadingState,
+  PageForm,
+  PageSelectField,
 } from './PageStates.jsx'
 import {
   canEditTripContent,
@@ -40,7 +42,9 @@ import {
   formatDateLabel,
   formatDateTimeLabel,
   formatFileSize,
+  getTripCurrency,
   normalizeActorRole,
+  toDateInputValue,
 } from './tripPageUtils.js'
 
 const BUDGET_TONES = ['primary', 'warning', 'success', 'neutral', 'danger']
@@ -66,6 +70,9 @@ const TripOrganizationPage = () => {
   const [selectedChecklistId, setSelectedChecklistId] = useState('')
   const actorRole = normalizeActorRole(trip?.actorRole)
   const canEdit = canEditTripContent(actorRole)
+  const currency = getTripCurrency(trip)
+  const [uploadFile, setUploadFile] = useState(null)
+  const [uploadInputKey, setUploadInputKey] = useState(0)
   const checklistDefaultValues = {
     title: '',
     type: 'todo',
@@ -89,20 +96,20 @@ const TripOrganizationPage = () => {
     startDateTime: '',
     endDateTime: '',
     amount: 0,
-    currency: 'USD',
+    currency,
     notes: '',
   }
   const expenseDefaultValues = {
     title: '',
     category: 'food',
     amount: 0,
-    currency: 'USD',
-    expenseDate: '',
+    currency,
+    expenseDate: toDateInputValue(),
     notes: '',
   }
   const budgetDefaultValues = {
-    currency: 'USD',
-    totalBudget: 1000,
+    currency: budgetQuery.data?.budget?.currency || currency,
+    totalBudget: budgetQuery.data?.budget?.totalBudget ?? 0,
   }
 
   const checklistForm = useForm({
@@ -232,7 +239,10 @@ const TripOrganizationPage = () => {
     (count, checklist) => count + checklist.items.length,
     0,
   )
-  const totalExpenses = mappedExpenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0)
+  const totalExpenses = budgetQuery.data?.summary?.spentTotal ?? 0
+  const effectiveChecklistId = mappedChecklists.some((checklist) => checklist.id === selectedChecklistId)
+    ? selectedChecklistId
+    : mappedChecklists[0]?.id || ''
 
   if (isLoading) {
     return (
@@ -263,19 +273,19 @@ const TripOrganizationPage = () => {
   }
 
   return (
-    <div className="space-y-md">
+    <div className="min-w-0 max-w-full space-y-md">
       <section className="grid gap-sm sm:grid-cols-3">
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Checklist Progress</p>
           <p className="mt-2xs text-title font-semibold text-ink">
             {completedChecklistItems}/{totalChecklistItems || 0}
           </p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Attachments</p>
           <p className="mt-2xs text-title font-semibold text-ink">{mappedAttachments.length}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Total Expenses</p>
           <p className="mt-2xs text-title font-semibold text-ink">
             {formatCurrency(totalExpenses, mappedBudget.currency)}
@@ -291,10 +301,11 @@ const TripOrganizationPage = () => {
       ) : null}
 
       <section className="grid gap-md lg:grid-cols-2">
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Checklist</h3>
-          <Form
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Create Checklist</h2>
+          <PageForm
             methods={checklistForm}
+            disabled={!canEdit || createChecklistMutation.isPending}
             onSubmit={(values) => {
               if (!canEdit) {
                 return
@@ -312,25 +323,26 @@ const TripOrganizationPage = () => {
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
-            <RHFTextField name="type" label="Type" required />
+            <PageSelectField name="type" label="Type" options={['todo', 'packing', 'documents', 'custom']} />
             {createChecklistMutation.error ? (
               <FormMessage>{createChecklistMutation.error?.message}</FormMessage>
             ) : null}
             <Button type="submit" disabled={createChecklistMutation.isPending || !canEdit}>
               {createChecklistMutation.isPending ? 'Creating...' : 'Create Checklist'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
 
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Add Checklist Item</h3>
-          <Form
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Add Checklist Item</h2>
+          <PageForm
             methods={checklistItemForm}
+            disabled={!canEdit || !mappedChecklists.length || createChecklistItemMutation.isPending}
             onSubmit={(values) => {
               if (!canEdit) {
                 return
               }
-              const checklistId = selectedChecklistId || mappedChecklists[0]?.id
+              const checklistId = effectiveChecklistId
               if (!checklistId) {
                 return
               }
@@ -358,8 +370,8 @@ const TripOrganizationPage = () => {
               </label>
               <select
                 id="checklist-id"
-                className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
-                value={selectedChecklistId || mappedChecklists[0]?.id || ''}
+                className="h-10 w-full rounded-md border border-line-strong bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
+                value={effectiveChecklistId}
                 disabled={!canEdit || !mappedChecklists.length}
                 onChange={(event) => setSelectedChecklistId(event.target.value)}
               >
@@ -374,91 +386,106 @@ const TripOrganizationPage = () => {
             {createChecklistItemMutation.error ? (
               <FormMessage>{createChecklistItemMutation.error?.message}</FormMessage>
             ) : null}
-            <Button type="submit" disabled={createChecklistItemMutation.isPending || !canEdit}>
+            {!mappedChecklists.length ? <p className="text-body-sm text-ink-muted">Create a checklist before adding items.</p> : null}
+            <Button type="submit" disabled={createChecklistItemMutation.isPending || !canEdit || !mappedChecklists.length}>
               {createChecklistItemMutation.isPending ? 'Adding...' : 'Add Item'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
       </section>
 
       <section className="grid gap-md lg:grid-cols-2">
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Attachment Metadata</h3>
-          <Form
-            methods={attachmentMetaForm}
-            onSubmit={(values) => {
-              if (!canEdit) {
-                return
-              }
-              createAttachmentMutation.mutate(
-                { tripId, body: values },
-                {
-                  onSuccess: () => {
-                    attachmentMetaForm.reset(attachmentMetaDefaultValues)
-                  },
-                },
-              )
-            }}
-            persistKey={`trip:${tripId}:organization:create-attachment-meta`}
-            className="mt-sm space-y-sm"
-          >
-            <RHFTextField name="fileName" label="File Name" required />
-            <RHFTextField name="mimeType" label="MIME Type" required />
-            <RHFTextField name="sizeBytes" label="File Size (bytes)" type="number" required />
-            <RHFTextField name="url" label="File URL" required />
-            {createAttachmentMutation.error ? (
-              <FormMessage>{createAttachmentMutation.error?.message}</FormMessage>
-            ) : null}
-            <Button type="submit" disabled={createAttachmentMutation.isPending || !canEdit}>
-              {createAttachmentMutation.isPending ? 'Creating...' : 'Create Metadata'}
-            </Button>
-          </Form>
-        </article>
-
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Upload Attachment</h3>
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Upload Attachment</h2>
           <p className="mt-xs text-body-sm text-ink-muted">
             Upload tickets, documents, or images to keep trip records in one place.
           </p>
           <div className="mt-sm space-y-sm">
+            <label htmlFor="attachment-file" className="text-body-sm font-medium text-ink">Choose a file</label>
             <input
+              id="attachment-file"
+              key={uploadInputKey}
               type="file"
               className="w-full rounded-md border border-line bg-panel px-md py-sm text-body-sm text-ink"
-              disabled={!canEdit}
+              disabled={!canEdit || createAttachmentUploadMutation.isPending}
               onChange={(event) => {
-                if (!canEdit) {
-                  return
-                }
-
-                const file = event.target.files?.[0]
-                if (!file) {
-                  return
-                }
-
-                const formData = new FormData()
-                formData.append('file', file)
-                formData.append('targetType', 'trip')
-                createAttachmentUploadMutation.mutate({ tripId, formData })
+                setUploadFile(event.target.files?.[0] || null)
               }}
             />
+            <Button
+              type="button"
+              disabled={!canEdit || !uploadFile || createAttachmentUploadMutation.isPending}
+              onClick={() => {
+                if (!canEdit || !uploadFile || createAttachmentUploadMutation.isPending) return
+                const formData = new FormData()
+                formData.append('file', uploadFile)
+                formData.append('targetType', 'trip')
+                createAttachmentUploadMutation.mutate({ tripId, formData }, {
+                  onSuccess: () => {
+                    setUploadFile(null)
+                    setUploadInputKey((key) => key + 1)
+                  },
+                })
+              }}
+            >
+              {createAttachmentUploadMutation.isPending ? 'Uploading...' : 'Upload File'}
+            </Button>
             {createAttachmentUploadMutation.error ? (
               <FormMessage>{createAttachmentUploadMutation.error?.message}</FormMessage>
             ) : null}
           </div>
         </article>
+
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <details>
+            <summary className="cursor-pointer text-title-sm font-semibold text-ink">Link an Existing File</summary>
+            <p className="mt-xs text-body-sm text-ink-muted">Add a link to a file already stored online, or use Upload Attachment.</p>
+            <PageForm
+              methods={attachmentMetaForm}
+              disabled={!canEdit || createAttachmentMutation.isPending}
+              onSubmit={(values) => {
+                if (!canEdit) {
+                  return
+                }
+                createAttachmentMutation.mutate(
+                  { tripId, body: values },
+                  {
+                    onSuccess: () => {
+                      attachmentMetaForm.reset(attachmentMetaDefaultValues)
+                    },
+                  },
+                )
+              }}
+              persistKey={`trip:${tripId}:organization:create-attachment-meta`}
+              className="mt-sm space-y-sm"
+            >
+              <RHFTextField name="fileName" label="File Name" required />
+              <RHFTextField name="mimeType" label="File Content Type" placeholder="application/pdf" required />
+              <RHFTextField name="sizeBytes" label="File Size (bytes)" type="number" required />
+              <RHFTextField name="url" label="File URL" required />
+              {createAttachmentMutation.error ? (
+                <FormMessage>{createAttachmentMutation.error?.message}</FormMessage>
+              ) : null}
+              <Button type="submit" disabled={createAttachmentMutation.isPending || !canEdit}>
+                {createAttachmentMutation.isPending ? 'Adding...' : 'Add File Link'}
+              </Button>
+            </PageForm>
+          </details>
+        </article>
       </section>
 
       <section className="grid gap-md lg:grid-cols-2">
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Reservation</h3>
-          <Form
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Create Reservation</h2>
+          <PageForm
             methods={reservationForm}
+            disabled={!canEdit || createReservationMutation.isPending}
             onSubmit={(values) => {
               if (!canEdit) {
                 return
               }
               createReservationMutation.mutate(
-                { tripId, body: values },
+                { tripId, body: { ...values, startDateTime: new Date(values.startDateTime).toISOString(), endDateTime: new Date(values.endDateTime).toISOString() } },
                 {
                   onSuccess: () => {
                     reservationForm.reset({
@@ -474,12 +501,12 @@ const TripOrganizationPage = () => {
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
-            <RHFTextField name="reservationType" label="Type" required />
+            <PageSelectField name="reservationType" label="Type" options={['hotel', 'flight', 'train', 'bus', 'car-rental', 'event', 'restaurant', 'other']} />
             <RHFTextField name="providerName" label="Provider" />
             <RHFTextField name="confirmationCode" label="Confirmation" />
             <RHFTextField name="startDateTime" label="Start" type="datetime-local" required />
             <RHFTextField name="endDateTime" label="End" type="datetime-local" required />
-            <RHFTextField name="amount" label="Amount" type="number" />
+            <RHFTextField name="amount" label="Amount" type="number" min="0" step="0.01" />
             <RHFTextField name="currency" label="Currency" />
             <RHFTextareaField name="notes" label="Notes" rows={2} />
             {createReservationMutation.error ? (
@@ -488,13 +515,14 @@ const TripOrganizationPage = () => {
             <Button type="submit" disabled={createReservationMutation.isPending || !canEdit}>
               {createReservationMutation.isPending ? 'Creating...' : 'Create Reservation'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
 
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Expense</h3>
-          <Form
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Create Expense</h2>
+          <PageForm
             methods={expenseForm}
+            disabled={!canEdit || createExpenseMutation.isPending}
             onSubmit={(values) => {
               if (!canEdit) {
                 return
@@ -516,8 +544,8 @@ const TripOrganizationPage = () => {
             className="mt-sm space-y-sm"
           >
             <RHFTextField name="title" label="Title" required />
-            <RHFTextField name="category" label="Category" required />
-            <RHFTextField name="amount" label="Amount" type="number" required />
+            <PageSelectField name="category" label="Category" options={['food', 'transport', 'stay', 'activities', 'shopping', 'documents', 'other']} />
+            <RHFTextField name="amount" label="Amount" type="number" min="0" step="0.01" required />
             <RHFTextField name="currency" label="Currency" required />
             <RHFTextField name="expenseDate" label="Expense Date" type="date" required />
             <RHFTextareaField name="notes" label="Notes" rows={2} />
@@ -527,14 +555,16 @@ const TripOrganizationPage = () => {
             <Button type="submit" disabled={createExpenseMutation.isPending || !canEdit}>
               {createExpenseMutation.isPending ? 'Creating...' : 'Create Expense'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
       </section>
 
-      <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-        <h3 className="text-title-sm font-semibold text-ink">Update Trip Budget</h3>
-        <Form
+      <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+        <h2 className="text-title-sm font-semibold text-ink">Update Trip Budget</h2>
+        <PageForm
           methods={budgetForm}
+          initialValues={budgetDefaultValues}
+            disabled={!canEdit || updateTripBudgetMutation.isPending}
           onSubmit={(values) => {
             if (!canEdit) {
               return
@@ -555,7 +585,7 @@ const TripOrganizationPage = () => {
           className="mt-sm grid gap-sm sm:grid-cols-3"
         >
           <RHFTextField name="currency" label="Currency" required />
-          <RHFTextField name="totalBudget" label="Total Budget" type="number" required />
+          <RHFTextField name="totalBudget" label="Total Budget" type="number" min="0" step="0.01" required />
           <div className="sm:pt-lg">
             <Button type="submit" disabled={updateTripBudgetMutation.isPending || !canEdit}>
               {updateTripBudgetMutation.isPending ? 'Updating...' : 'Update Budget'}
@@ -566,15 +596,16 @@ const TripOrganizationPage = () => {
               <FormMessage>{updateTripBudgetMutation.error?.message}</FormMessage>
             </div>
           ) : null}
-        </Form>
+        </PageForm>
       </article>
 
       {updateChecklistItemMutation.error ? (
         <PageErrorState
           title="Checklist update failed"
-          description="Could not persist checklist item status."
+          description="The checklist change was not saved. Please try again."
           errorMessage={updateChecklistItemMutation.error?.message}
           onRetry={() => updateChecklistItemMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -584,9 +615,9 @@ const TripOrganizationPage = () => {
         reservations={mappedReservations}
         expenses={mappedExpenses}
         budget={mappedBudget}
-        canEdit={canEdit}
+        canEdit={canEdit && !updateChecklistItemMutation.isPending}
         onChecklistToggle={(checklistId, itemId, nextChecked) =>
-          canEdit
+          canEdit && !updateChecklistItemMutation.isPending
             ? updateChecklistItemMutation.mutate({
                 tripId,
                 checklistId,

@@ -11,10 +11,13 @@ import { ProtectedRoute, useAuth } from './app/AuthProvider/index.js'
 import { getRedirectPathFromLocation } from './app/AuthProvider/redirect-utils.js'
 import { TravelLoader } from './components/common/index.js'
 import { MainLayout } from './layouts/index.js'
+import { useRouteScroll } from './hooks/index.js'
 import {
   InvitationsPage,
   LandingPage,
   LoginPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
   NotFoundPage,
   RegisterPage,
   TripAnalyticsPage,
@@ -64,11 +67,19 @@ function PublicOnlyRoute({ children }) {
   return children
 }
 
+function RouteScroll() {
+  useRouteScroll()
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <RouteScroll />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           path="/login"

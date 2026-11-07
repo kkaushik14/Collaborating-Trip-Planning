@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { Input } from '@/components/ui/index.js'
@@ -24,26 +25,28 @@ function RHFTextField({
     formState: { errors },
   } = useFormContext()
 
+  const uniqueId = useId()
   const errorMessage = getFieldMessage(errors, name)
-  const fieldId = inputId || toInputId(name)
+  const fieldId = inputId || inputProps.id || toInputId(name, uniqueId)
   const descriptionId = description ? `${fieldId}-description` : undefined
   const errorId = errorMessage ? `${fieldId}-error` : undefined
-  const ariaDescribedBy = [descriptionId, errorId].filter(Boolean).join(' ')
+  const ariaDescribedBy = [inputProps['aria-describedby'], descriptionId, errorId].filter(Boolean).join(' ')
 
   return (
     <FormFieldLayout>
-      {!hideLabel ? (
-        <FormLabel htmlFor={fieldId} required={required}>
+      {label ? (
+        <FormLabel htmlFor={fieldId} required={required} className={hideLabel ? 'sr-only' : undefined}>
           {label}
         </FormLabel>
       ) : null}
 
       <Input
-        id={fieldId}
-        aria-invalid={Boolean(errorMessage)}
-        aria-describedby={ariaDescribedBy || undefined}
         {...register(name)}
         {...inputProps}
+        id={fieldId}
+        required={required}
+        aria-invalid={Boolean(errorMessage) || inputProps['aria-invalid']}
+        aria-describedby={ariaDescribedBy || undefined}
       />
 
       {description ? (

@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 function FormFieldLayout({ className, ...props }) {
-  return <div className={cn('space-y-xs', className)} {...props} />
+  return <div className={cn('min-w-0 space-y-xs [overflow-wrap:anywhere]', className)} {...props} />
 }
 
 function FormLabel({
@@ -17,9 +17,7 @@ function FormLabel({
     >
       {children}
       {required ? (
-        <span className="ml-2xs text-danger" aria-hidden="true">
-          *
-        </span>
+        <span className="ml-2xs text-danger after:content-['*']" aria-hidden="true" />
       ) : null}
     </label>
   )

@@ -3,14 +3,6 @@ import { Link } from 'react-router-dom'
 import { APP_TITLE } from '../../config/site.js'
 import { cn } from '../../lib/utils.js'
 
-const baseColumns = {
-  legal: [
-    { label: 'Terms Of Service', href: '/' },
-    { label: 'Privacy Policy', href: '/' },
-    { label: 'Support', href: '/' },
-  ],
-}
-
 const footerConfig = {
   marketing: {
     headline: 'TRIP PLANNER',
@@ -25,23 +17,17 @@ const footerConfig = {
           { label: 'Create Account', href: '/register' },
         ],
       },
-      {
-        label: 'Legal',
-        links: baseColumns.legal,
-      },
     ],
   },
   app: {
     headline: APP_TITLE.toUpperCase(),
-    summary: 'Secure workspace for planning, collaboration, organization, and analytics.',
+    summary: 'Your workspace for planning, collaboration, organization, and analytics.',
     columns: [
       {
         label: 'Workspace',
         links: [
           { label: 'Trips', href: '/trips' },
           { label: 'Invitations', href: '/invitations' },
-          { label: 'Planning', href: '/trips' },
-          { label: 'Analytics', href: '/trips' },
         ],
       },
       {
@@ -50,14 +36,13 @@ const footerConfig = {
           { label: 'Login', href: '/login' },
           { label: 'Register', href: '/register' },
           { label: 'Home', href: '/' },
-          { label: 'Support', href: '/' },
         ],
       },
     ],
   },
   auth: {
     headline: APP_TITLE.toUpperCase(),
-    summary: 'Sign in securely and continue your trip workflow without context switching.',
+    summary: 'Sign in and continue planning your next trip.',
     columns: [
       {
         label: 'Access',
@@ -66,10 +51,6 @@ const footerConfig = {
           { label: 'Register', href: '/register' },
           { label: 'Home', href: '/' },
         ],
-      },
-      {
-        label: 'Legal',
-        links: baseColumns.legal,
       },
     ],
   },
@@ -84,10 +65,6 @@ const footerConfig = {
           { label: 'Trips', href: '/trips' },
           { label: 'Login', href: '/login' },
         ],
-      },
-      {
-        label: 'Legal',
-        links: baseColumns.legal,
       },
     ],
   },
@@ -113,7 +90,7 @@ function SiteFooter({ mode = 'app', className }) {
           </p>
         </div>
 
-        <div className="mt-2xl grid gap-xl sm:grid-cols-2">
+        <nav aria-label="Footer" className="mt-2xl grid gap-xl sm:grid-cols-2">
           {config.columns.map((column) => (
             <div key={column.label}>
               <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">
@@ -130,17 +107,12 @@ function SiteFooter({ mode = 'app', className }) {
               </ul>
             </div>
           ))}
-        </div>
+        </nav>
 
         <div className="mt-2xl flex flex-wrap items-center justify-between gap-sm border-t border-line/60 pt-md text-body-sm text-ink-muted">
           <p>
             Copyright © {year} {APP_TITLE}. All rights reserved.
           </p>
-          <div className="flex items-center gap-md">
-            <span>Twitter</span>
-            <span>LinkedIn</span>
-            <span>Instagram</span>
-          </div>
         </div>
       </div>
     </footer>

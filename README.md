@@ -40,11 +40,19 @@ The project is split into:
 - Comment emails are recipient-driven: only opted-in members receive updates when someone else comments
 
 ### Email Notifications
+- Password recovery via a single-use reset link to the registered email (30-minute expiry)
 - Branded welcome email on first-time registration
 - Branded trip creation email (includes professional congratulatory copy and journey sign-off)
 - Enhanced invitation email template with role/context language
 - Comment update email with direct collaboration link and opt-out link
-- Email links auto-resolve local/prod frontend base URL from request origin (localhost in local dev, deployed host/IP in production)
+- General notification links resolve the local/production frontend URL; password recovery strictly uses the configured `FRONTEND_BASE_URL` (HTTPS in production), never caller-supplied headers.
+
+### UI Audit and Account Recovery
+- Shared light/dark tokens, near-black dark surfaces with restrained navy accents, and bright copper enabled actions
+- Responsive forms, bounded dialogs, accessible field associations, keyboard controls, and persisted theme preferences
+- Public `/forgot-password` and `/reset-password` pages; single-use hashed tokens, generic request responses, rate limits, and revocation of previous sessions after reset
+- API contracts, deterministic mocks, and regression tests updated with these flows
+- See [audit scope and verification](docs/FRONTEND_AUDIT.md) and [shared theme notes](frontend/src/styles/README.md).
 
 ### 3. Organization
 - Checklists and checklist items

@@ -131,6 +131,18 @@ const updateUserProfile = (body, options = {}) =>
     },
   )
 
+const requestPasswordReset = (body, options = {}) =>
+  apiRequest(
+    { ...options, path: '/api/v1/auth/forgot-password', method: 'POST', body, skipAuth: true },
+    { resource: 'auth', operation: 'requestPasswordReset', normalize: () => ({ success: true }) },
+  )
+
+const resetPassword = (body, options = {}) =>
+  apiRequest(
+    { ...options, path: '/api/v1/auth/reset-password', method: 'POST', body, skipAuth: true },
+    { resource: 'auth', operation: 'resetPassword', normalize: () => ({ success: true }) },
+  )
+
 export {
   createUserAccount,
   createUserSession,
@@ -138,4 +150,6 @@ export {
   getUserProfile,
   updateUserProfile,
   updateUserSession,
+  requestPasswordReset,
+  resetPassword,
 }

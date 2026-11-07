@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useParams } from 'react-router-dom'
+import { Link, NavLink, Outlet, useParams } from 'react-router-dom'
 
 import { useTrip } from '../hooks/index.js'
 import { Heading, Text } from '../components/typography/index.js'
@@ -19,8 +19,8 @@ const TripRouteLayout = () => {
   if (tripQuery.isPending) {
     return (
       <PageLoadingState
-        title="Loading trip context..."
-        description="Fetching trip metadata before opening feature sections."
+        title="Loading trip..."
+        description="Fetching your trip details."
       />
     )
   }
@@ -29,7 +29,7 @@ const TripRouteLayout = () => {
     return (
       <PageErrorState
         title="Trip not available"
-        description="Trip details could not be loaded for this route."
+        description="This trip may be unavailable, or you may no longer have access."
         errorMessage={tripQuery.error?.message}
         onRetry={() => tripQuery.refetch()}
       />
@@ -45,11 +45,12 @@ const TripRouteLayout = () => {
   }
 
   return (
-    <div className="space-y-lg">
+    <div className="min-w-0 max-w-full space-y-lg">
+      <Link to="/trips" className="inline-block text-body-sm text-primary underline">Back to My Trips</Link>
       <section className="rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
         <div className="space-y-sm">
           <div className="space-y-xs">
-            <Heading level={1} size="title">
+            <Heading level={1} size="title" className="break-words">
               {tripSummary.title}
             </Heading>
             <Text tone="muted" className="break-words">
@@ -60,7 +61,7 @@ const TripRouteLayout = () => {
             </span>
           </div>
 
-          <nav className="overflow-x-auto" aria-label="Trip feature navigation">
+          <nav className="min-w-0 max-w-full overflow-x-auto" aria-label="Trip feature navigation">
             <div className="inline-flex min-w-full gap-xs rounded-lg bg-panel-muted p-xs sm:min-w-0">
               {TRIP_ROUTE_LINKS.map((routeLink) => (
                 <NavLink
@@ -84,7 +85,7 @@ const TripRouteLayout = () => {
         </div>
       </section>
 
-      <Outlet context={{ tripId, trip: tripContext }} />
+      <Outlet key={tripId} context={{ tripId, trip: tripContext }} />
     </div>
   )
 }

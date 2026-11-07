@@ -10,13 +10,14 @@ import {
 } from 'lucide-react'
 
 import { useAuth } from '../app/AuthProvider/index.js'
-import { SiteFooter, UserProfileSettingsDialog } from '../components/common/index.js'
+import { SiteFooter, ThemeToggle, UserProfileSettingsDialog } from '../components/common/index.js'
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   Button,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -47,28 +48,6 @@ const getUserInitials = (name = '', email = '') => {
     .join('')
 }
 
-const ThemeToggleSwitch = ({ checked, onChange, disabled = false }) => (
-  <button
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    disabled={disabled}
-    onClick={(event) => onChange?.(event)}
-    className={[
-      'relative inline-flex h-6 w-11 items-center rounded-full border border-line transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-      checked ? 'bg-primary/70' : 'bg-panel-muted',
-    ].join(' ')}
-  >
-    <span
-      className={[
-        'inline-block size-4 rounded-full bg-panel shadow-sm transition-transform',
-        checked ? 'translate-x-5' : 'translate-x-1',
-      ].join(' ')}
-    />
-    <span className="sr-only">{checked ? 'Switch to light mode' : 'Switch to dark mode'}</span>
-  </button>
-)
-
 const MainLayout = ({ children }) => {
   const { currentUser, setCurrentUserProfile, signOut } = useAuth()
   const { addToast, setTheme, state } = useUIStore()
@@ -87,14 +66,7 @@ const MainLayout = ({ children }) => {
       setTheme(userTheme)
       return
     }
-    setTheme('dark')
   }, [currentUser?._id, currentUser?.themePreference, setTheme])
-
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', currentTheme)
-    }
-  }, [currentTheme])
 
   const handleSignOut = async () => {
     try {
@@ -125,7 +97,9 @@ const MainLayout = ({ children }) => {
 
       if (nextUser) {
         setCurrentUserProfile(nextUser)
-        setTheme(nextUser.themePreference === 'light' ? 'light' : 'dark')
+        setTheme(nextUser.themePreference === 'light' || nextUser.themePreference === 'dark'
+          ? nextUser.themePreference
+          : nextTheme)
       } else if (currentUser) {
         setCurrentUserProfile({ ...currentUser, themePreference: nextTheme })
       }
@@ -174,14 +148,17 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-lg focus:top-lg focus:z-[100] focus:rounded-md focus:bg-panel focus:p-md">
+        Skip to content
+      </a>
       <header className="border-b border-line bg-panel/95 backdrop-blur">
         <div className="mx-auto flex max-w-layout items-center justify-between gap-md px-lg py-md sm:px-xl">
-          <div className="flex items-center gap-lg">
+          <div className="flex min-w-0 items-center gap-sm sm:gap-lg">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger
                 type="button"
                 aria-label="Open menu"
-                className="inline-flex size-10 items-center justify-center rounded-md border border-line bg-panel text-ink transition-colors hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 md:hidden"
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-line bg-panel text-ink transition-colors hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
               >
                 <MenuIcon className="size-4" />
               </SheetTrigger>
@@ -212,7 +189,7 @@ const MainLayout = ({ children }) => {
                   </div>
                 </div>
 
-                <nav className="space-y-xs">
+                <nav aria-label="Mobile navigation" className="space-y-xs">
                   {NAV_LINKS.map((item) => (
                     <NavLink
                       key={item.to}
@@ -236,10 +213,10 @@ const MainLayout = ({ children }) => {
                       {isDarkTheme ? <MoonStarIcon className="size-4" /> : <SunIcon className="size-4" />}
                       Theme
                     </div>
-                    <ThemeToggleSwitch
-                      checked={isDarkTheme}
+                    <ThemeToggle
+                      theme={currentTheme}
                       disabled={updateThemePreferenceMutation.isPending}
-                      onChange={() => {
+                      onToggle={() => {
                         void handleThemeToggle()
                       }}
                     />
@@ -272,10 +249,10 @@ const MainLayout = ({ children }) => {
               </SheetContent>
             </Sheet>
 
-            <Link to="/trips" className="text-title-sm font-semibold tracking-tight text-ink">
+            <Link to="/trips" className="min-w-0 break-words text-body-sm font-semibold tracking-tight text-ink sm:text-title-sm">
               {APP_TITLE}
             </Link>
-            <nav className="hidden items-center gap-xs md:flex">
+            <nav aria-label="Main navigation" className="hidden shrink-0 items-center gap-xs md:flex">
               {NAV_LINKS.map((item) => (
                 <NavLink
                   key={item.to}
@@ -293,14 +270,15 @@ const MainLayout = ({ children }) => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-sm">
+          <div className="flex shrink-0 items-center gap-sm">
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger
+                  aria-label="Account menu"
                   openOnHover
-                  delay={60}
-                  closeDelay={100}
-                  className="inline-flex items-center rounded-full p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
+                  delay={100}
+                  closeDelay={150}
+                  className="inline-flex items-center rounded-full p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <Avatar title={currentUser?.name || currentUser?.email || 'User'}>
                     {currentUser?.avatarUrl ? (
@@ -342,20 +320,14 @@ const MainLayout = ({ children }) => {
                     {isSigningOut ? 'Signing out...' : 'Sign Out'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <div className="flex items-center justify-between gap-sm px-md py-sm">
-                    <span className="inline-flex items-center gap-xs text-body-sm text-ink">
-                      {isDarkTheme ? <MoonStarIcon className="size-4" /> : <SunIcon className="size-4" />}
-                      Theme
-                    </span>
-                    <ThemeToggleSwitch
-                      checked={isDarkTheme}
-                      disabled={updateThemePreferenceMutation.isPending}
-                      onChange={(event) => {
-                        event.stopPropagation()
-                        void handleThemeToggle()
-                      }}
-                    />
-                  </div>
+                  <DropdownMenuCheckboxItem
+                    checked={isDarkTheme}
+                    disabled={updateThemePreferenceMutation.isPending}
+                    onCheckedChange={() => { void handleThemeToggle() }}
+                  >
+                    <MoonStarIcon className="size-4" />
+                    Dark mode
+                  </DropdownMenuCheckboxItem>
                   <DropdownMenuSeparator />
                   <p className="px-md pb-sm text-caption text-ink-muted">
                     Your theme is saved to your profile.
@@ -388,7 +360,7 @@ const MainLayout = ({ children }) => {
         }}
       />
 
-      <main className="mx-auto max-w-layout px-lg py-2xl sm:px-xl sm:py-3xl">{children}</main>
+      <main id="main-content" tabIndex={-1} className="mx-auto min-w-0 max-w-layout px-lg py-2xl sm:px-xl sm:py-3xl">{children}</main>
       <SiteFooter mode="app" />
     </div>
   )

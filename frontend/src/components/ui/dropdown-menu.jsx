@@ -30,12 +30,13 @@ function DropdownMenuContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
+        collisionPadding={8}
         className="z-50"
       >
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-content"
           className={cn(
-            'min-w-40 rounded-md border border-line bg-panel p-xs text-body-sm text-ink shadow-card outline-none',
+            'min-w-[min(10rem,var(--available-width))] max-w-[var(--available-width)] max-h-[var(--available-height)] overflow-y-auto overscroll-contain [overflow-wrap:anywhere] rounded-md border border-line bg-panel p-xs text-body-sm text-ink shadow-card outline-none',
             'origin-[var(--transform-origin)] will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out',
             'data-[starting-style]:opacity-0 data-[starting-style]:scale-95',
             'data-[ending-style]:opacity-0 data-[ending-style]:scale-95',
@@ -75,7 +76,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        'relative flex cursor-default items-center gap-sm rounded-sm px-md py-sm text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:text-danger data-[variant=destructive]:focus:bg-danger/10',
+        'relative flex cursor-default items-center gap-sm rounded-sm px-md py-sm text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[highlighted]:bg-panel-muted data-[highlighted]:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:text-danger data-[variant=destructive]:focus:bg-danger/10',
         className,
       )}
       {...props}
@@ -98,7 +99,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        'flex cursor-default items-center gap-sm rounded-sm px-md py-sm text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[inset=true]:pl-xl data-[popup-open]:bg-panel-muted',
+        'flex cursor-default items-center gap-sm rounded-sm px-md py-sm text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[highlighted]:bg-panel-muted data-[highlighted]:text-ink data-[inset=true]:pl-xl data-[popup-open]:bg-panel-muted',
         className,
       )}
       {...props}
@@ -142,7 +143,7 @@ function DropdownMenuCheckboxItem({
       data-slot="dropdown-menu-checkbox-item"
       data-inset={inset}
       className={cn(
-        'relative flex cursor-default items-center gap-sm rounded-sm py-sm pr-xl pl-md text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'relative flex cursor-default items-center gap-sm rounded-sm py-sm pr-xl pl-md text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[highlighted]:bg-panel-muted data-[highlighted]:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       checked={checked}
@@ -168,7 +169,7 @@ function DropdownMenuRadioItem({ className, children, inset, ...props }) {
       data-slot="dropdown-menu-radio-item"
       data-inset={inset}
       className={cn(
-        'relative flex cursor-default items-center gap-sm rounded-sm py-sm pr-xl pl-md text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'relative flex cursor-default items-center gap-sm rounded-sm py-sm pr-xl pl-md text-body-sm outline-none transition-colors focus:bg-panel-muted focus:text-ink data-[highlighted]:bg-panel-muted data-[highlighted]:text-ink data-[inset=true]:pl-xl data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       {...props}

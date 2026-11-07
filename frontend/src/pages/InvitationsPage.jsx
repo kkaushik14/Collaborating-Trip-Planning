@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
+import { FormMessage, RHFTextField } from '../components/forms/index.js'
 import { useCreateInvitationAcceptance, useMyInvitations, useUIStore } from '../hooks/index.js'
 import { Button } from '../components/ui/index.js'
 import { Heading, Text } from '../components/typography/index.js'
-import { PageErrorState, PageLoadingState } from './PageStates.jsx'
+import { PageErrorState, PageLoadingState, PageForm } from './PageStates.jsx'
 import { formatDateLabel } from './tripPageUtils.js'
 
 const invitationAcceptSchema = z.object({
@@ -21,7 +21,7 @@ const InvitationsPage = () => {
   const { addToast } = useUIStore()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const autoAcceptRequestedRef = useRef(false)
+  const autoAcceptRequestedRef = useRef(new Set())
 
   const acceptForm = useForm({
     resolver: zodResolver(invitationAcceptSchema),
@@ -33,6 +33,7 @@ const InvitationsPage = () => {
 
   const handleAcceptSubmit = useCallback(
     (values, { clearTokenFromUrl = false } = {}) => {
+      if (acceptInvitationMutation.isPending) return
       acceptInvitationMutation.mutate(values, {
         onSuccess: (data) => {
           acceptForm.reset({
@@ -52,7 +53,7 @@ const InvitationsPage = () => {
             setSearchParams(nextSearchParams, { replace: true })
           }
 
-          const tripId = data?.invitation?.trip
+          const tripId = data?.invitation?.trip?._id || data?.invitation?.trip
           if (tripId) {
             navigate(`/trips/${tripId}/collaboration`, { replace: true })
             return
@@ -86,39 +87,19 @@ const InvitationsPage = () => {
   }, [acceptForm, tokenFromQuery])
 
   useEffect(() => {
-    if (!tokenFromQuery || autoAcceptRequestedRef.current) {
+    if (!tokenFromQuery || autoAcceptRequestedRef.current.has(tokenFromQuery) || acceptInvitationMutation.isPending) {
       return
     }
 
-    autoAcceptRequestedRef.current = true
+    autoAcceptRequestedRef.current.add(tokenFromQuery)
     handleAcceptSubmit({ token: tokenFromQuery }, { clearTokenFromUrl: true })
-  }, [handleAcceptSubmit, tokenFromQuery])
+  }, [acceptInvitationMutation.isPending, handleAcceptSubmit, tokenFromQuery])
 
   const invitations = invitationsQuery.data?.invitations || []
   const pendingInvitations = invitations.filter((invitation) => invitation.status === 'pending')
 
-  if (invitationsQuery.isPending) {
-    return (
-      <PageLoadingState
-        title="Loading invitations..."
-        description="Fetching invitations for your account."
-      />
-    )
-  }
-
-  if (invitationsQuery.error) {
-    return (
-      <PageErrorState
-        title="Unable to load invitations"
-        description="We could not load your invitations right now."
-        errorMessage={invitationsQuery.error?.message}
-        onRetry={() => invitationsQuery.refetch()}
-      />
-    )
-  }
-
   return (
-    <section className="space-y-lg">
+    <section className="min-w-0 max-w-full space-y-lg">
       <header className="space-y-xs">
         <Heading level={1} size="title">
           My Invitations
@@ -128,28 +109,28 @@ const InvitationsPage = () => {
         </Text>
       </header>
 
-      <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-        <h2 className="text-title-sm font-semibold text-ink">Accept Invitation Token</h2>
+      <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+        <h2 className="text-title-sm font-semibold text-ink">Join a Shared Trip</h2>
         {tokenFromQuery ? (
           <Text size="body-sm" tone="muted" className="mt-sm">
-            Invitation token detected from email link. Accepting automatically.
+            {acceptInvitationMutation.isPending ? 'Accepting the invitation from your email link...' : 'Invitation loaded from your email link. If it was not accepted, check the message below and try again.'}
           </Text>
         ) : null}
-        <Form
+        <PageForm
           methods={acceptForm}
+          disabled={acceptInvitationMutation.isPending}
           onSubmit={(values) =>
             handleAcceptSubmit(values, {
               clearTokenFromUrl: Boolean(tokenFromQuery),
             })
           }
-          persistKey="invitations:accept-token"
           className="mt-md space-y-sm"
         >
           <RHFTextField
             name="token"
-            label="Token"
+            label="Invitation Code"
             required
-            placeholder="Paste invitation token from invite URL"
+            placeholder="Paste the invitation code from your email link"
           />
           {acceptInvitationMutation.error ? (
             <FormMessage>{acceptInvitationMutation.error?.message}</FormMessage>
@@ -157,10 +138,12 @@ const InvitationsPage = () => {
           <Button type="submit" disabled={acceptInvitationMutation.isPending}>
             {acceptInvitationMutation.isPending ? 'Accepting...' : 'Accept Invitation'}
           </Button>
-        </Form>
+        </PageForm>
       </article>
 
-      <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
+      {invitationsQuery.isPending ? <PageLoadingState title="Loading invitations..." description="Fetching invitations for your account." /> : invitationsQuery.error ? (
+        <PageErrorState title="Unable to load invitations" description="You can still accept an invitation using its code above." errorMessage={invitationsQuery.error.message} onRetry={() => invitationsQuery.refetch()} />
+      ) : <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
         <h2 className="text-title-sm font-semibold text-ink">Pending Invitations</h2>
         {pendingInvitations.length ? (
           <ul className="mt-md space-y-sm">
@@ -174,17 +157,17 @@ const InvitationsPage = () => {
                   Role: {invitation.role} · Expires: {formatDateLabel(invitation.expiresAt)}
                 </Text>
                 <Text size="caption" tone="muted">
-                  Trip ID: {invitation.trip}
+                  {invitation.trip?.title || 'Open the invitation email sent to this address to join the trip.'}
                 </Text>
               </li>
             ))}
           </ul>
         ) : (
           <Text tone="muted" className="mt-sm">
-            No pending invitations found for this account.
+            No pending invitations. Ask a trip owner or editor to invite your account email, or <Link className="text-primary underline" to="/trips">create your own trip</Link>.
           </Text>
         )}
-      </article>
+      </article>}
     </section>
   )
 }

@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
 import { getRedirectPathFromLocation } from '../app/AuthProvider/redirect-utils.js'
+import { usePublicTheme } from '../hooks/index.js'
 import { AuthPageShell } from '../components/common/index.js'
 import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
 import { Button } from '../components/ui/index.js'
@@ -12,6 +13,7 @@ import { Text } from '../components/typography/index.js'
 import { signUpSchema } from '../validators/index.js'
 
 const RegisterPage = () => {
+  const publicTheme = usePublicTheme()
   const { signUp } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -47,9 +49,10 @@ const RegisterPage = () => {
 
   return (
     <AuthPageShell
-      panelLabel="New Workspace Setup"
-      panelTitle="Create your account and launch collaborative trip planning."
-      panelDescription="Onboarding is lightweight and gives you immediate access to trips, roles, organization, and analytics modules."
+      {...publicTheme}
+      panelLabel="Travel together"
+      panelTitle="Less planning apart. More exploring together."
+      panelDescription="Bring your travel ideas, friends, and plans into one place. Create an account to start your first trip."
       formLabel="Get Started"
       formTitle="Create your account"
       formDescription="Register once and start managing trip planning, collaboration, and budgets."
@@ -75,7 +78,7 @@ const RegisterPage = () => {
           type="email"
           required
           autoComplete="email"
-          placeholder="owner@example.com"
+          placeholder="you@example.com"
         />
 
         <RHFTextField

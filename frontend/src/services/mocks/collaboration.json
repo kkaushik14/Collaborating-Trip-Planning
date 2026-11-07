@@ -82,7 +82,13 @@
               "joinedAt": "2026-03-08T10:00:00.000Z",
               "isActive": true,
               "createdAt": "2026-03-08T10:00:00.000Z",
-              "updatedAt": "2026-03-08T10:00:00.000Z"
+              "updatedAt": "2026-03-08T10:00:00.000Z",
+              "userId": {
+                "_id": "64f100000000000000000001",
+                "name": "Owner User",
+                "email": "owner@example.com",
+                "avatarUrl": null
+              }
             },
             {
               "_id": "67d100000000000000000002",
@@ -94,7 +100,13 @@
               "joinedAt": "2026-03-08T10:05:00.000Z",
               "isActive": true,
               "createdAt": "2026-03-08T10:05:00.000Z",
-              "updatedAt": "2026-03-08T10:05:00.000Z"
+              "updatedAt": "2026-03-08T10:05:00.000Z",
+              "userId": {
+                "_id": "64f100000000000000000002",
+                "name": "Editor User",
+                "email": "editor@example.com",
+                "avatarUrl": null
+              }
             }
           ]
         }

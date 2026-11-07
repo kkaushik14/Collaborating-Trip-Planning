@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useOutletContext } from 'react-router-dom'
 
 import { TripPlanningPanel } from '../components/features/index.js'
-import { Form, FormMessage, RHFTextField, RHFTextareaField } from '../components/forms/index.js'
+import { FormMessage, RHFTextField, RHFTextareaField } from '../components/forms/index.js'
 import {
   useCreateActivityCard,
   useCreateItineraryDay,
@@ -17,6 +17,7 @@ import {
   PageEmptyState,
   PageErrorState,
   PageLoadingState,
+  PageForm,
 } from './PageStates.jsx'
 import {
   canEditTripContent,
@@ -24,8 +25,10 @@ import {
   formatCurrency,
   formatTimeLabel,
   getActivityLocationLabel,
+  getTripCurrency,
   mapTripSummary,
   normalizeActorRole,
+  toDateInputValue,
 } from './tripPageUtils.js'
 
 const orderActivitiesByList = (activities = [], orderedIds = []) => {
@@ -46,7 +49,6 @@ const orderActivitiesByList = (activities = [], orderedIds = []) => {
   return [...ordered, ...missing]
 }
 
-const toDateInputValue = (value = new Date()) => value.toISOString().slice(0, 10)
 const toIsoStringOrUndefined = (value) => (value ? new Date(value).toISOString() : undefined)
 
 const TripPlanningPage = () => {
@@ -56,8 +58,10 @@ const TripPlanningPage = () => {
   const createActivityMutation = useCreateActivityCard()
   const updateActivityOrderMutation = useUpdateActivityOrder()
   const [selectedDayId, setSelectedDayId] = useState('')
+  const activitySectionRef = useRef(null)
   const actorRole = normalizeActorRole(trip?.actorRole)
   const canEdit = canEditTripContent(actorRole)
+  const currency = getTripCurrency(trip)
 
   const mappedDays = useMemo(() => {
     const days = itineraryDaysQuery.data?.days || []
@@ -79,12 +83,12 @@ const TripPlanningPage = () => {
           endTime: formatTimeLabel(activity.endTime),
           location: getActivityLocationLabel(activity),
           category: activity.category || activity.reservationType || 'general',
-          estimatedCost: Number(activity.estimatedCost?.amount || activity.estimatedCost || 0),
-          currency: activity.estimatedCost?.currency || 'USD',
+          estimatedCost: Number(activity.estimatedCost?.amount ?? activity.estimatedCost ?? 0),
+          currency: activity.estimatedCost?.currency || currency,
         })),
       }
     })
-  }, [itineraryDaysQuery.data?.days])
+  }, [itineraryDaysQuery.data?.days, currency])
 
   const effectiveSelectedDayId = useMemo(() => {
     if (!mappedDays.length) {
@@ -95,7 +99,16 @@ const TripPlanningPage = () => {
     return hasSelectedDay ? selectedDayId : mappedDays[0].id
   }, [mappedDays, selectedDayId])
 
-  const nextDayNumber = mappedDays.length + 1
+  const nextDayNumber = Math.max(0, ...mappedDays.map((day) => day.dayNumber)) + 1
+  const dateForDay = (dayNumber) => {
+    // Trip dates are calendar dates, not local instants.
+    const start = trip?.startDate?.slice(0, 10)
+    if (!start) return toDateInputValue()
+    const date = new Date(`${start}T12:00:00`)
+    date.setDate(date.getDate() + dayNumber - 1)
+    const value = toDateInputValue(date)
+    return trip?.endDate && value > trip.endDate.slice(0, 10) ? '' : value
+  }
   const planningSummary = useMemo(() => {
     const totalActivities = mappedDays.reduce(
       (count, day) => count + (Array.isArray(day.activities) ? day.activities.length : 0),
@@ -122,7 +135,7 @@ const TripPlanningPage = () => {
     resolver: zodResolver(itineraryDaySchema),
     defaultValues: {
       dayNumber: nextDayNumber,
-      date: toDateInputValue(),
+      date: dateForDay(nextDayNumber),
       title: `Day ${nextDayNumber}`,
       notes: '',
     },
@@ -140,7 +153,7 @@ const TripPlanningPage = () => {
       startTime: '',
       endTime: '',
       estimatedCost: 0,
-      currency: 'USD',
+      currency,
     },
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -171,7 +184,7 @@ const TripPlanningPage = () => {
   }
 
   const handleActivitiesReorder = (dayId, reorderedActivities) => {
-    if (!canEdit) {
+    if (!canEdit || updateActivityOrderMutation.isPending) {
       return
     }
 
@@ -190,26 +203,23 @@ const TripPlanningPage = () => {
   }
 
   const handleAddActivity = (dayId) => {
-    if (!dayId || !canEdit) {
+    if (!dayId || !canEdit || createActivityMutation.isPending) {
       return
     }
 
-    const day = mappedDays.find((item) => item.id === dayId)
-    const position = day?.activities?.length || 0
-
-    createActivityMutation.mutate({
-      tripId,
-      dayId,
-      body: {
-        title: `New Activity ${position + 1}`,
-        description: 'Draft activity created from planning page.',
-        position,
-      },
-    })
+    setSelectedDayId(dayId)
+    activityForm.setValue('dayId', dayId, { shouldDirty: true })
+    activitySectionRef.current?.querySelector('input[name="title"]')?.focus()
   }
 
   const handleCreateDay = (values) => {
-    if (!canEdit) {
+    if (!canEdit || createItineraryDayMutation.isPending) {
+      return
+    }
+
+    if ((trip?.startDate && values.date < trip.startDate.slice(0, 10)) ||
+        (trip?.endDate && values.date > trip.endDate.slice(0, 10))) {
+      itineraryDayForm.setError('date', { message: 'Choose a date within the trip dates.' })
       return
     }
 
@@ -223,10 +233,15 @@ const TripPlanningPage = () => {
       },
       {
         onSuccess: () => {
-          const upcomingDayNumber = nextDayNumber + 1
+          const upcomingDayNumber = Math.max(nextDayNumber, Number(values.dayNumber) + 1)
           itineraryDayForm.reset({
             dayNumber: upcomingDayNumber,
-            date: toDateInputValue(),
+            date: (() => {
+              const date = new Date(`${values.date.slice(0, 10)}T12:00:00`)
+              date.setDate(date.getDate() + 1)
+              const value = toDateInputValue(date)
+              return trip?.endDate && value > trip.endDate.slice(0, 10) ? '' : value
+            })(),
             title: `Day ${upcomingDayNumber}`,
             notes: '',
           })
@@ -236,12 +251,13 @@ const TripPlanningPage = () => {
   }
 
   const handleCreateActivityFromForm = (values) => {
-    if (!canEdit) {
+    if (!canEdit || createActivityMutation.isPending) {
       return
     }
 
     const dayId = values.dayId || effectiveSelectedDayId
-    if (!dayId) {
+    if (!mappedDays.some((day) => day.id === dayId)) {
+      activityForm.setError('dayId', { message: 'Choose an available itinerary day.' })
       return
     }
 
@@ -259,7 +275,7 @@ const TripPlanningPage = () => {
             values.estimatedCost !== undefined && values.estimatedCost !== ''
               ? {
                   amount: Number(values.estimatedCost || 0),
-                  currency: values.currency || 'USD',
+                  currency: values.currency || currency,
                 }
               : undefined,
         },
@@ -274,7 +290,7 @@ const TripPlanningPage = () => {
             startTime: '',
             endTime: '',
             estimatedCost: 0,
-            currency: 'USD',
+            currency: values.currency || currency,
           })
         },
       },
@@ -282,20 +298,22 @@ const TripPlanningPage = () => {
   }
 
   return (
-    <div className="space-y-md">
+    <div className="min-w-0 max-w-full space-y-md">
       <section className="grid gap-sm sm:grid-cols-3">
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Days</p>
           <p className="mt-2xs text-title font-semibold text-ink">{planningSummary.totalDays}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Activities</p>
           <p className="mt-2xs text-title font-semibold text-ink">{planningSummary.totalActivities}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Estimated Total</p>
           <p className="mt-2xs text-title font-semibold text-ink">
-            {formatCurrency(planningSummary.estimatedCost, trip?.currency || 'USD')}
+            {new Set(mappedDays.flatMap((day) => day.activities.map((activity) => activity.currency))).size > 1
+              ? 'Multiple currencies'
+              : formatCurrency(planningSummary.estimatedCost, mappedDays.flatMap((day) => day.activities)[0]?.currency || currency)}
           </p>
         </article>
       </section>
@@ -308,19 +326,21 @@ const TripPlanningPage = () => {
       ) : null}
 
       <section className="grid gap-md lg:grid-cols-2">
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Itinerary Day</h3>
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Create Itinerary Day</h2>
           <p className="mt-xs text-body-sm text-ink-muted">
-            Add day metadata before adding activity cards.
+            Add a day to your itinerary, then plan its activities.
           </p>
-          <Form
+          <PageForm
             methods={itineraryDayForm}
+            initialValues={{ dayNumber: nextDayNumber, date: dateForDay(nextDayNumber), title: `Day ${nextDayNumber}`, notes: '' }}
+            disabled={!canEdit || createItineraryDayMutation.isPending}
             onSubmit={handleCreateDay}
             persistKey={`trip:${tripId}:planning:create-day`}
             className="mt-md space-y-sm"
           >
             <RHFTextField name="dayNumber" label="Day Number" type="number" required />
-            <RHFTextField name="date" label="Date" type="date" required />
+            <RHFTextField name="date" label="Date" type="date" min={trip?.startDate?.slice(0, 10)} max={trip?.endDate?.slice(0, 10)} required />
             <RHFTextField name="title" label="Title" required />
             <RHFTextareaField name="notes" label="Notes" rows={3} />
             {createItineraryDayMutation.error ? (
@@ -329,16 +349,17 @@ const TripPlanningPage = () => {
             <Button type="submit" disabled={createItineraryDayMutation.isPending || !canEdit}>
               {createItineraryDayMutation.isPending ? 'Creating Day...' : 'Create Day'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
 
-        <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
-          <h3 className="text-title-sm font-semibold text-ink">Create Activity Card</h3>
+        <article ref={activitySectionRef} className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
+          <h2 className="text-title-sm font-semibold text-ink">Create Activity Card</h2>
           <p className="mt-xs text-body-sm text-ink-muted">
             Add activity details and place them in the day you choose.
           </p>
-          <Form
+          <PageForm
             methods={activityForm}
+            disabled={!canEdit || !mappedDays.length || createActivityMutation.isPending}
             onSubmit={handleCreateActivityFromForm}
             persistKey={`trip:${tripId}:planning:create-activity`}
             className="mt-md space-y-sm"
@@ -349,7 +370,7 @@ const TripPlanningPage = () => {
               </label>
               <select
                 id="activity-day-id"
-                className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="h-10 w-full rounded-md border border-line-strong bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 value={watchedActivityDayId || effectiveSelectedDayId || ''}
                 disabled={!canEdit || !mappedDays.length}
                 onChange={(event) =>
@@ -368,6 +389,7 @@ const TripPlanningPage = () => {
               </select>
             </div>
 
+            {activityForm.formState.errors.dayId ? <FormMessage>{activityForm.formState.errors.dayId.message}</FormMessage> : null}
             <RHFTextField name="title" label="Title" required />
             <RHFTextareaField name="description" label="Description" rows={2} />
             <RHFTextField name="locationName" label="Location" />
@@ -376,7 +398,7 @@ const TripPlanningPage = () => {
               <RHFTextField name="endTime" label="End Time" type="datetime-local" />
             </div>
             <div className="grid gap-sm sm:grid-cols-2">
-              <RHFTextField name="estimatedCost" label="Estimated Cost" type="number" />
+              <RHFTextField name="estimatedCost" label="Estimated Cost" type="number" min="0" step="0.01" />
               <RHFTextField name="currency" label="Currency" />
             </div>
             {createActivityMutation.error ? (
@@ -388,14 +410,14 @@ const TripPlanningPage = () => {
             <Button type="submit" disabled={createActivityMutation.isPending || !canEdit || !mappedDays.length}>
               {createActivityMutation.isPending ? 'Creating Activity...' : 'Create Activity'}
             </Button>
-          </Form>
+          </PageForm>
         </article>
       </section>
 
       {!mappedDays.length ? (
         <PageEmptyState
           title="No itinerary days yet"
-          description="Create your first itinerary day using the form above."
+          description={canEdit ? 'Create your first itinerary day using the form above.' : 'Ask a trip owner or editor to add the first itinerary day.'}
         />
       ) : null}
 
@@ -405,6 +427,7 @@ const TripPlanningPage = () => {
           description="We could not create this activity right now."
           errorMessage={createActivityMutation.error?.message}
           onRetry={() => createActivityMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -414,6 +437,7 @@ const TripPlanningPage = () => {
           description="We could not create this day right now."
           errorMessage={createItineraryDayMutation.error?.message}
           onRetry={() => createItineraryDayMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 
@@ -423,6 +447,7 @@ const TripPlanningPage = () => {
           description="The latest reorder action could not be saved."
           errorMessage={updateActivityOrderMutation.error?.message}
           onRetry={() => updateActivityOrderMutation.reset()}
+          retryLabel="Dismiss"
         />
       ) : null}
 

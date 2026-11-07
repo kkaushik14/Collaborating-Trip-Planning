@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -104,7 +104,50 @@ describe('TripsPage integration', () => {
         body: {
           title: 'Updated Trip',
         },
-      })
+      }, expect.objectContaining({ onSuccess: expect.any(Function) }))
     })
+  })
+
+  test('trip navigation has one interactive element per link', () => {
+    const { container } = renderTripsPage()
+    expect(container.querySelector('a button, button a')).toBeNull()
+    for (const name of ['Open Trip', 'Team', 'Budget', 'Analytics']) {
+      expect(screen.getByRole('link', { name })).toHaveAttribute('href', expect.stringContaining(defaultTrip._id))
+    }
+  })
+
+  test('read-only and unknown roles do not expose title editing', () => {
+    useTrips.mockReturnValue({ data: { trips: [{ ...defaultTrip, actorRole: 'VIEWER' }, { ...defaultTrip, _id: 'unknown-role', actorRole: undefined }] } })
+    renderTripsPage()
+    expect(screen.queryByLabelText('Quick update title')).not.toBeInTheDocument()
+  })
+
+  test('empty trip list has a page heading and actionable empty state', () => {
+    useTrips.mockReturnValue({ data: { trips: [] } })
+    renderTripsPage()
+    expect(screen.getByRole('heading', { level: 1, name: 'My Trips' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create Trip' })).toBeEnabled()
+  })
+
+  test('creation uses settings contract, retains failed input and resets only on success', async () => {
+    const user = userEvent.setup()
+    const view = renderTripsPage()
+    const title = screen.getByPlaceholderText('Summer Europe Sprint')
+    await user.type(title, 'Goa Escape')
+    await user.click(screen.getByRole('button', { name: 'Create Trip' }))
+    await waitFor(() => expect(createTripMutate).toHaveBeenCalled())
+    expect(createTripMutate.mock.calls[0][0]).toEqual(expect.objectContaining({ settings: { currency: 'USD', timezone: expect.any(String) } }))
+    useCreateTrip.mockReturnValue({ mutate: createTripMutate, isPending: false, error: new Error('Try later') })
+    view.rerender(<MemoryRouter><TripsPage /></MemoryRouter>)
+    expect(title).toHaveValue('Goa Escape')
+    act(() => createTripMutate.mock.calls[0][1].onSuccess())
+    expect(title).toHaveValue('')
+  })
+
+  test('pending creation disables all editable fields', () => {
+    useCreateTrip.mockReturnValue({ mutate: createTripMutate, isPending: true })
+    renderTripsPage()
+    expect(screen.getByLabelText(/^Title/)).toBeDisabled()
+    expect(screen.getByLabelText(/^Start Date/)).toBeDisabled()
   })
 })

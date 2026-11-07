@@ -7,14 +7,14 @@ function Tabs({ className, orientation = 'horizontal', ...props }) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      data-orientation={orientation}
-      className={cn('flex gap-sm data-[orientation=horizontal]:flex-col data-[orientation=vertical]:flex-row', className)}
+      orientation={orientation}
+      className={cn('flex min-w-0 gap-sm data-[orientation=horizontal]:flex-col data-[orientation=vertical]:flex-row', className)}
       {...props}
     />
   )
 }
 
-const tabsListVariants = cva('inline-flex w-fit items-center rounded-md p-xs', {
+const tabsListVariants = cva('inline-flex w-fit max-w-full overflow-x-auto items-center data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch rounded-md p-xs', {
   variants: {
     variant: {
       default: 'bg-panel-muted text-ink-muted',
@@ -42,7 +42,7 @@ function TabsTrigger({ className, ...props }) {
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
       className={cn(
-        'inline-flex min-w-24 items-center justify-center rounded-sm px-md py-sm text-body-sm font-medium text-ink-muted outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-panel data-[selected]:text-ink data-[selected]:shadow-sm aria-selected:bg-panel aria-selected:text-ink',
+        'inline-flex shrink-0 min-w-24 items-center justify-center rounded-sm px-md py-sm text-body-sm font-medium text-ink-muted outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-panel data-[selected]:text-ink data-[selected]:shadow-sm aria-selected:bg-panel aria-selected:text-ink',
         className,
       )}
       {...props}
@@ -54,7 +54,7 @@ function TabsContent({ className, ...props }) {
   return (
     <TabsPrimitive.Panel
       data-slot="tabs-content"
-      className={cn('outline-none', className)}
+      className={cn('min-w-0 flex-1 outline-none', className)}
       {...props}
     />
   )

@@ -2,6 +2,15 @@ import { env } from '../config/index.js'
 import { ApiError, ApiResponse } from '../utils/index.js'
 
 const errorHandler = (error, _req, res, _next) => {
+  if (/^\/api\/v1\/auth\/(forgot-password|reset-password)\/?$/i.test(_req.path)) {
+    // Parser, validation, database and SMTP errors can embed submitted secrets.
+    const status = error.statusCode || error.status || 500
+    const message = error instanceof ApiError && error.message === 'Invalid or expired password reset token'
+      ? error.message
+      : status < 500 ? 'Invalid password recovery request' : 'Unable to process password recovery request'
+    res.set('Cache-Control', 'no-store')
+    return res.status(status).json(new ApiResponse(status, null, message))
+  }
   let normalizedError
 
   if (error instanceof ApiError) {

@@ -1,5 +1,5 @@
 import { Trip, TripMember, User } from '../models/index.js'
-import { hasTripPermission, verifyAccessToken } from '../services/index.js'
+import { hasTripPermission, isAuthVersionValid, verifyAccessToken } from '../services/index.js'
 import { ApiError, asyncHandler, assertObjectId } from '../utils/index.js'
 
 const extractBearerToken = (authorizationHeader = '') => {
@@ -28,10 +28,10 @@ const authenticate = asyncHandler(async (req, _res, next) => {
   }
 
   const user = await User.findById(payload.sub)
-    .select('_id name email isActive avatarUrl mobileNumber emailUpdateCount themePreference createdAt updatedAt')
+    .select('_id name email isActive authVersion avatarUrl mobileNumber emailUpdateCount themePreference createdAt updatedAt')
     .lean()
 
-  if (!user || !user.isActive) {
+  if (!user || !user.isActive || !isAuthVersionValid(user, payload)) {
     throw ApiError.unauthorized('User account is invalid or inactive')
   }
 

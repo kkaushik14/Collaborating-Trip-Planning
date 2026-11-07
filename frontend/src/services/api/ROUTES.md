@@ -1,6 +1,6 @@
 # Route URLs Reference
 
-Last updated: 2026-03-11
+Last updated: 2026-11-08
 
 This file lists all URLs currently wired in the frontend app (UI routes + backend API routes consumed by service modules).
 
@@ -11,6 +11,8 @@ This file lists all URLs currently wired in the frontend app (UI routes + backen
 | `/` | Public | Landing page with product overview and entry CTAs. |
 | `/login` | Public | Sign-in page for user authentication. |
 | `/register` | Public | Account creation page for new users. |
+| `/forgot-password` | Public | Request an email recovery link; the confirmation does not disclose whether the account exists. |
+| `/reset-password?token=<resetToken>` | Public | Set a new password using an expiring, single-use email token, then sign in again. |
 | `/invitations` | Protected | Invitation list page with manual token acceptance form. |
 | `/invitations/accept?token=<inviteToken>` | Protected | Deep-link invitation acceptance route used in email invite URLs. |
 | `/trips` | Protected | Main trips listing page with links to each trip workspace. |
@@ -41,6 +43,8 @@ This file lists all URLs currently wired in the frontend app (UI routes + backen
 | --- | --- | --- |
 | `POST` | `/api/v1/auth/register` | Creates a new user account and session tokens. |
 | `POST` | `/api/v1/auth/login` | Authenticates user and returns access/refresh tokens. |
+| `POST` | `/api/v1/auth/forgot-password` | Sends a reset link to an active registered email, subject to cooldown and rate limits. |
+| `POST` | `/api/v1/auth/reset-password` | Consumes a valid token, changes the password, and invalidates earlier sessions. |
 | `POST` | `/api/v1/auth/refresh` | Rotates and returns fresh auth tokens. |
 | `POST` | `/api/v1/auth/logout` | Terminates user session on server/client. |
 | `GET` | `/api/v1/auth/me` | Returns currently authenticated user profile. |

@@ -9,7 +9,7 @@ describe('Button', () => {
 
     const button = screen.getByRole('button', { name: 'Save' })
     expect(button).toBeInTheDocument()
-    expect(button).toHaveClass('bg-primary')
+    expect(button).toHaveClass('bg-[rgb(var(--color-action-primary))]', 'text-[rgb(var(--color-on-primary))]')
   })
 
   test('fires click handler when enabled', async () => {
@@ -34,6 +34,7 @@ describe('Button', () => {
 
     const button = screen.getByRole('button', { name: 'Disabled' })
     expect(button).toBeDisabled()
+    expect(button).toHaveClass('disabled:bg-[rgb(var(--color-action-disabled))]', 'disabled:text-[rgb(var(--color-on-disabled))]', 'disabled:opacity-100')
 
     await user.click(button)
     expect(onClick).not.toHaveBeenCalled()

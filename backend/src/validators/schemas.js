@@ -4,6 +4,16 @@ const objectIdSchema = Joi.string().length(24).hex()
 const isoDateSchema = Joi.date().iso()
 
 const authSchemas = {
+  forgotPassword: Joi.object({
+    email: Joi.string().trim().lowercase().email().max(254).required(),
+  }).required(),
+  resetPassword: Joi.object({
+    token: Joi.string().length(64).pattern(/^[a-f0-9]{64}$/).required(),
+    password: Joi.string().min(8).max(128).custom((value, helpers) => {
+      // bcrypt silently truncates beyond 72 bytes, including multibyte characters.
+      return Buffer.byteLength(value, 'utf8') <= 72 ? value : helpers.error('any.invalid')
+    }).required(),
+  }).required(),
   register: Joi.object({
     name: Joi.string().trim().min(2).max(120).required(),
     email: Joi.string().email().required(),

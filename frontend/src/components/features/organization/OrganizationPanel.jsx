@@ -87,6 +87,7 @@ function OrganizationPanel({
                   {checklist.items.map((item) => (
                     <li key={item.id} className="flex items-center gap-sm rounded-sm bg-panel px-sm py-xs">
                       <Checkbox
+                        aria-label={item.label}
                         checked={item.isCompleted}
                         disabled={!canEdit}
                         onCheckedChange={(nextChecked) =>

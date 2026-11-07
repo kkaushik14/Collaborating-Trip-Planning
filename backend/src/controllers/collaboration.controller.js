@@ -212,11 +212,19 @@ const listMembers = asyncHandler(async (req, res) => {
     trip: tripId,
     isActive: true,
   })
+    .populate({
+      path: 'user',
+      select: '_id name email avatarUrl',
+      transform: (user, id) => user || { _id: id },
+    })
     .sort({ createdAt: 1 })
     .lean()
 
   const normalizedMembers = members.map((member) => ({
     ...member,
+    // Preserve the existing ID field while providing an allowlisted display profile.
+    user: member.user._id,
+    userId: member.user,
     commentEmailOptIn: normalizeCommentEmailOptIn(member.commentEmailOptIn),
   }))
 

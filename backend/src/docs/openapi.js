@@ -37,6 +37,31 @@ const openApiSpec = {
           password: { type: 'string' },
         },
       },
+      ForgotPasswordRequest: {
+        type: 'object',
+        required: ['email'],
+        properties: { email: { type: 'string', format: 'email', maxLength: 254 } },
+      },
+      ResetPasswordRequest: {
+        type: 'object',
+        required: ['token', 'password'],
+        properties: {
+          token: { type: 'string', pattern: '^[a-f0-9]{64}$', minLength: 64, maxLength: 64, writeOnly: true },
+          password: {
+            type: 'string', format: 'password', minLength: 8, maxLength: 128, writeOnly: true,
+            description: 'At least 8 characters and at most 72 UTF-8 bytes (bcrypt limit). Not trimmed.',
+          },
+        },
+      },
+      PasswordRecoveryResponse: {
+        type: 'object',
+        properties: {
+          statusCode: { type: 'integer', example: 200 },
+          success: { type: 'boolean', example: true },
+          data: { nullable: true, example: null, description: 'Always null; no tokens or account details returned.' },
+          message: { type: 'string' },
+        },
+      },
       CreateTripRequest: {
         type: 'object',
         required: ['title', 'startDate', 'endDate'],
@@ -92,6 +117,55 @@ const openApiSpec = {
     '/auth/refresh': {
       post: {
         summary: 'Refresh access token',
+      },
+    },
+    '/auth/forgot-password': {
+      post: {
+        summary: 'Request a password reset email',
+        externalDocs: {
+          description: 'OWASP Forgot Password Cheat Sheet',
+          url: 'https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html',
+        },
+        security: [],
+        description: 'Email is trimmed and lowercased. All valid requests return the same 200 response for active, inactive, unknown and throttled accounts, including mail failures. Delivery is background best-effort work, not a durable queue. Only the registered active account receives a link at configured frontendBaseUrl + /reset-password?token=...; request headers never choose the URL. The 256-bit random token is stored only as a SHA-256 hash and expires after 30 minutes. Requests within a 60-second per-account cooldown are ignored; a later request replaces the old link. Both recovery endpoints share an in-memory per-IP limit (AUTH_RATE_LIMIT_MAX per RATE_LIMIT_WINDOW_MS, default 20 per 15 minutes) in addition to the API limit. Multi-instance deployments need a shared rate-limit store and trusted proxy configuration.',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/ForgotPasswordRequest' } } },
+        },
+        responses: {
+          200: {
+            description: 'Generic acknowledgment; never includes a reset token or confirms delivery.',
+            content: { 'application/json': {
+              schema: { $ref: '#/components/schemas/PasswordRecoveryResponse' },
+              example: { statusCode: 200, success: true, data: null, message: 'If an active account exists for that email, a password reset link will be sent.' },
+            } },
+          },
+          400: { description: 'Missing or invalid email.' },
+          429: { description: 'Too many requests. Retry after the Retry-After interval.' },
+        },
+      },
+    },
+    '/auth/reset-password': {
+      post: {
+        summary: 'Consume a password reset token and change the password',
+        security: [],
+        description: 'Send token and password in the JSON body, never the URL. Atomically checks the hash, expiry, active account and unchanged registered email, hashes the new password, consumes the token, clears the refresh session and increments the credential version. Only one concurrent reset can succeed. All previous access and refresh tokens (including legacy tokens without a version) are rejected on subsequent authentication; already-authorized in-flight requests are not cancelled. Does not automatically sign in or issue tokens. Shares the forgot-password per-IP rate limit. Configure HTTPS FRONTEND_BASE_URL and SMTP in production; development JSON mail transport does not deliver mail and reset contents are never logged.',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/ResetPasswordRequest' } } },
+        },
+        responses: {
+          200: {
+            description: 'Password changed. Sign in again with the new password.',
+            content: { 'application/json': {
+              schema: { $ref: '#/components/schemas/PasswordRecoveryResponse' },
+              example: { statusCode: 200, success: true, data: null, message: 'Password reset successfully. Please log in.' },
+            } },
+          },
+          400: { description: 'Malformed input, invalid, expired, replaced or consumed token, inactive account, or changed email. Does not identify the account.' },
+          429: { description: 'Too many requests. Retry after the Retry-After interval.' },
+          500: { description: 'Recovery could not be processed. No secrets are included in error responses.' },
+        },
       },
     },
     '/auth/logout': {
@@ -210,6 +284,7 @@ const openApiSpec = {
     '/trips/{tripId}/members': {
       get: {
         summary: 'List trip members',
+        description: 'Each member retains user as an ID string for compatibility. userId is a display profile containing only _id, name, email and avatarUrl; deleted users return only _id. Passwords, password-reset state, refresh hashes and credential versions are never populated.',
         security: [{ bearerAuth: [] }],
       },
     },

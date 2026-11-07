@@ -8,6 +8,8 @@ import {
   getUserProfile,
   updateUserProfile,
   updateUserSession,
+  requestPasswordReset,
+  resetPassword,
 } from '../services/index.js'
 import { createMutationConfig, invalidateQueryScopes } from './hook-utils.js'
 
@@ -17,6 +19,19 @@ const useUserProfile = ({ queryOptions = {}, requestOptions = {} } = {}) =>
     queryFn: () => getUserProfile(requestOptions),
     ...queryOptions,
   })
+
+// Recovery does not sign the user in or populate authenticated query caches.
+const useRequestPasswordReset = ({ mutationOptions = {}, requestOptions = {} } = {}) =>
+  useMutation(createMutationConfig({
+    mutationFn: (body) => requestPasswordReset(body, requestOptions),
+    mutationOptions,
+  }))
+
+const useResetPassword = ({ mutationOptions = {}, requestOptions = {} } = {}) =>
+  useMutation(createMutationConfig({
+    mutationFn: (body) => resetPassword(body, requestOptions),
+    mutationOptions,
+  }))
 
 const useCreateUserAccount = ({ mutationOptions = {}, requestOptions = {} } = {}) => {
   const queryClient = useQueryClient()
@@ -102,4 +117,6 @@ export {
   useUpdateUserProfile,
   useUpdateUserSession,
   useUserProfile,
+  useRequestPasswordReset,
+  useResetPassword,
 }

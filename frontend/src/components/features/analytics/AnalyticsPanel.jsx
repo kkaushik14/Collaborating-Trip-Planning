@@ -45,14 +45,14 @@ function AnalyticsPanel({
       </header>
 
       <div className="grid gap-lg xl:grid-cols-2">
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <Heading level={3} size="title-sm">
             Expense Trend Timeline
           </Heading>
           <Timeline items={trendTimeline} />
         </article>
 
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <Heading level={3} size="title-sm">
             Forecast Projection
           </Heading>
@@ -61,7 +61,7 @@ function AnalyticsPanel({
       </div>
 
       <div className="grid gap-lg xl:grid-cols-2">
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <header className="flex items-center justify-between gap-sm">
             <Heading level={3} size="title-sm">
               Exchange Rates
@@ -91,7 +91,7 @@ function AnalyticsPanel({
           </Table>
         </article>
 
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <Heading level={3} size="title-sm">
             Report Snapshots
           </Heading>
@@ -120,7 +120,7 @@ function AnalyticsPanel({
       </div>
 
       <div className="grid gap-lg xl:grid-cols-2">
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <Heading level={3} size="title-sm">
             Settlement Balances
           </Heading>
@@ -153,7 +153,7 @@ function AnalyticsPanel({
           </Table>
         </article>
 
-        <article className="space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
+        <article className="min-w-0 space-y-md rounded-lg border border-line bg-panel p-lg shadow-card">
           <Heading level={3} size="title-sm">
             Suggested Settlements
           </Heading>

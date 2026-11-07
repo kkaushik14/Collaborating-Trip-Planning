@@ -38,7 +38,12 @@ app.use(
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use(cookieParser())
-app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'))
+// Reset links can arrive in query strings or Referer headers; never log those values.
+morgan.token('safe-url', (req) => req.originalUrl.split(/[?#]/)[0])
+morgan.token('safe-referrer', (req) => (req.headers.referer || req.headers.referrer || '').split(/[?#]/)[0])
+app.use(morgan(env.nodeEnv === 'production'
+  ? ':remote-addr - :remote-user [:date[clf]] ":method :safe-url HTTP/:http-version" :status :res[content-length] ":safe-referrer" ":user-agent"'
+  : ':method :safe-url :status :response-time ms - :res[content-length]'))
 app.use(metricsMiddleware)
 app.use(auditLogger)
 

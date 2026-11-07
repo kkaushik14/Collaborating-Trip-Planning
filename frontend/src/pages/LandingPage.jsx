@@ -2,9 +2,10 @@ import { ArrowRightIcon, CameraIcon, CpuIcon, GlobeIcon, PaletteIcon, QuoteIcon,
 import { Link } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
-import { SiteFooter } from '../components/common/index.js'
+import { SiteFooter, ThemeToggle } from '../components/common/index.js'
+import { Button } from '../components/ui/index.js'
 import { APP_TITLE } from '../config/site.js'
-import { useScrollReveal } from '../hooks/index.js'
+import { usePublicTheme, useScrollReveal } from '../hooks/index.js'
 
 const PARTNER_LOGOS = ['Trips', 'Itinerary', 'Activities', 'Invites', 'Comments', 'Budget', 'Reports']
 
@@ -65,23 +66,21 @@ const HeroVisual = () => (
 
 const CTAButtons = ({ primaryPath, isAuthenticated }) => (
   <div className="mt-xl flex flex-wrap items-center gap-md">
-    <Link
-      to={primaryPath}
-      className="inline-flex items-center rounded-full border border-warning/70 bg-gradient-to-r from-[#be6a45] to-[#d18a5a] px-xl py-sm text-body-sm font-semibold text-ink-inverse shadow-[0_8px_28px_rgb(var(--color-warning)/0.28)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning/40"
-    >
+    <Button nativeButton={false} render={<Link to={primaryPath} />} className="rounded-full px-xl">
       {isAuthenticated ? 'Open Trips' : 'Create Account'}
-    </Link>
-    <Link
-      to={isAuthenticated ? '/trips' : '/login'}
+    </Button>
+    <a
+      href="#features"
       className="inline-flex items-center gap-xs text-body-sm font-semibold text-ink transition-colors hover:text-warning"
     >
-      {isAuthenticated ? 'Go to Dashboard' : 'Explore Features'}
+      Explore features
       <ArrowRightIcon className="size-4" aria-hidden="true" />
-    </Link>
+    </a>
   </div>
 )
 
 const LandingPage = () => {
+  const publicTheme = usePublicTheme()
   const { isAuthenticated } = useAuth()
   const primaryPath = isAuthenticated ? '/trips' : '/register'
   useScrollReveal()
@@ -89,15 +88,16 @@ const LandingPage = () => {
   return (
     <div className="landing-page min-h-screen text-ink">
       <header className="sticky top-0 z-30 border-b border-line/70 bg-canvas/70 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-layout items-center justify-between px-lg py-md sm:px-xl">
-          <Link to="/" className="inline-flex items-center gap-sm">
-            <span className="inline-flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
-              <p className='text-[#be6a45] font-bold'>CTP</p>
+        <div className="mx-auto flex w-full max-w-layout flex-wrap items-center justify-between gap-md px-lg py-md sm:px-xl">
+          <Link to="/" aria-label={APP_TITLE} className="inline-flex min-w-0 items-center gap-sm">
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-bold text-primary" aria-hidden="true">
+              CTP
             </span>
-            <span className="text-body font-semibold tracking-tight">{APP_TITLE}</span>
+            <span className="hidden text-body font-semibold tracking-tight sm:inline">{APP_TITLE}</span>
           </Link>
 
-          <nav className="flex items-center gap-sm">
+          <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-sm">
+            {publicTheme.onToggle ? <ThemeToggle {...publicTheme} /> : null}
             {!isAuthenticated ? (
               <Link
                 to="/login"
@@ -106,13 +106,10 @@ const LandingPage = () => {
                 Sign In
               </Link>
             ) : null}
-            <Link
-              to={primaryPath}
-              className="inline-flex items-center gap-xs rounded-md bg-[#be6a45] px-lg py-sm text-body-sm font-semibold text-ink-inverse transition-colors hover:bg-[#d18a5a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-            >
+            <Button nativeButton={false} render={<Link to={primaryPath} />}>
               {isAuthenticated ? 'Open Dashboard' : 'Start Planning'}
               <ArrowRightIcon className="size-4" aria-hidden="true" />
-            </Link>
+            </Button>
           </nav>
         </div>
       </header>
@@ -150,14 +147,14 @@ const LandingPage = () => {
         <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
           <div className="grid grid-cols-2 gap-md rounded-2xl border border-line/60 bg-canvas/35 px-lg py-md text-ink-muted sm:grid-cols-4 lg:grid-cols-7">
             {PARTNER_LOGOS.map((logo) => (
-              <p key={logo} className="text-center text-body-sm font-semibold tracking-wide opacity-85">
+              <p key={logo} className="text-center text-body-sm font-semibold tracking-wide">
                 {logo}
               </p>
             ))}
           </div>
         </section>
 
-        <section data-reveal className="mx-auto max-w-layout px-lg pb-3xl sm:px-xl">
+        <section id="features" data-reveal className="mx-auto max-w-layout scroll-mt-4xl px-lg pb-3xl sm:px-xl">
           <div className="mx-auto max-w-[56rem] text-center">
             <h2 className="break-words text-display font-semibold tracking-tight text-ink">
               Everything your trip team needs
@@ -191,7 +188,7 @@ const LandingPage = () => {
                       to={primaryPath}
                       className="mt-lg inline-flex items-center gap-xs text-body-sm font-semibold text-ink-muted transition hover:text-ink"
                     >
-                      See More
+                      {isAuthenticated ? 'Plan a trip' : 'Start planning'}
                       <ArrowRightIcon className="size-4" />
                     </Link>
                   </div>
@@ -224,7 +221,7 @@ const LandingPage = () => {
                       to={primaryPath}
                       className="mt-lg inline-flex items-center gap-xs text-body-sm font-semibold text-ink-muted transition hover:text-ink"
                     >
-                      See More
+                      {isAuthenticated ? 'Plan a trip' : 'Start planning'}
                       <ArrowRightIcon className="size-4" />
                     </Link>
                   </div>
@@ -240,8 +237,7 @@ const LandingPage = () => {
               Built for real travel workflows
             </h2>
             <p className="mt-md text-title-sm text-ink-muted">
-              Teams use this workspace to coordinate complex trips without losing context, ownership,
-              or budget visibility.
+              Keep the details in one place, share the planning, and know what your trip will cost.
             </p>
             <div className="mt-lg flex justify-center">
               <CTAButtons primaryPath={primaryPath} isAuthenticated={isAuthenticated} />
@@ -257,13 +253,17 @@ const LandingPage = () => {
                 <br />
                 to Clear Itinerary
               </h3>
-              <div className="mt-lg h-48 rounded-xl border border-line/60 bg-[linear-gradient(135deg,rgb(var(--color-panel-muted)),rgb(var(--color-primary)/0.4))]" />
+              <ol className="mt-lg space-y-sm rounded-xl border border-line/60 bg-panel-muted/50 p-lg text-body-sm">
+                <li className="border-b border-line pb-sm">09:00 - Meet for breakfast</li>
+                <li className="border-b border-line pb-sm">11:00 - Explore the old town</li>
+                <li>18:30 - Dinner together</li>
+              </ol>
             </article>
             <article className="hover-lift rounded-2xl border border-line/60 bg-canvas/75 p-xl shadow-card">
-              <p className="text-title-sm font-semibold tracking-tight text-neutral">Member Roles</p>
+              <p className="text-title-sm font-semibold tracking-tight text-primary">Member Roles</p>
               <p className="mt-xl text-title-sm leading-relaxed text-ink-muted">
-                Owner controls strategy. Editors execute updates. Viewers stay informed with full
-                context and zero confusion.
+                Owners manage the trip and its members. Editors help organize the details.
+                Viewers follow the plan and join the conversation.
               </p>
             </article>
           </div>
@@ -273,19 +273,19 @@ const LandingPage = () => {
           <article className="hover-lift relative overflow-hidden rounded-2xl border border-line/60 bg-panel/75 px-xl py-2xl shadow-card sm:px-2xl sm:py-3xl">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgb(var(--color-neutral)/0.3),transparent_50%),radial-gradient(circle_at_75%_20%,rgb(var(--color-primary)/0.25),transparent_58%)]" />
             <div className="relative z-10 mx-auto max-w-[54rem] text-center">
-              <QuoteIcon className="mx-auto mb-md size-8 text-ink-muted/75" />
+              <QuoteIcon className="mx-auto mb-md size-8 text-ink-muted" />
               <p className="text-title leading-relaxed text-ink">
-                This platform helped our team coordinate itinerary updates, member responsibilities,
-                and budget tracking without chasing messages across multiple tools.
+                Spend less time searching through messages and more time looking forward to the journey.
+                Your itinerary, shared decisions, and budget belong together.
               </p>
               <div className="mx-auto mt-xl inline-flex items-center gap-sm rounded-full border border-line/75 bg-canvas/45 px-lg py-sm">
                 <span className="inline-flex size-10 items-center justify-center rounded-full bg-panel-muted text-body-sm font-semibold text-ink">
-                  TK
+                  CTP
                 </span>
                 <div className="text-left">
-                  <p className="text-body font-semibold text-ink">Travel Team Lead</p>
+                  <p className="text-body font-semibold text-ink">Plan together. Travel together.</p>
                   <p className="text-caption uppercase tracking-[0.12em] text-ink-muted">
-                    Coordinated Group Departure
+                    One place for your next adventure
                   </p>
                 </div>
               </div>

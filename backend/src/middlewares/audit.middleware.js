@@ -36,7 +36,7 @@ const auditLogger = (req, res, next) => {
       await AuditLog.create({
         actor: actorId,
         method: req.method,
-        path: req.originalUrl,
+        path: req.originalUrl.split(/[?#]/)[0],
         statusCode: res.statusCode,
         success: res.statusCode < 400,
         ip: req.ip,

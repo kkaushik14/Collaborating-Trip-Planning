@@ -30,12 +30,13 @@ function TooltipContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
+        collisionPadding={8}
         className="z-50"
       >
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
           className={cn(
-            'inline-flex max-w-xs items-center rounded-md bg-ink px-md py-sm text-caption text-ink-inverse shadow-card',
+            'inline-flex max-w-[min(20rem,var(--available-width))] [overflow-wrap:anywhere] items-center rounded-md bg-ink px-md py-sm text-caption text-ink-inverse shadow-card',
             'origin-[var(--transform-origin)] will-change-[opacity,transform] transition-[opacity,transform] duration-150 ease-out',
             'data-[starting-style]:opacity-0 data-[starting-style]:scale-95',
             'data-[ending-style]:opacity-0 data-[ending-style]:scale-95',

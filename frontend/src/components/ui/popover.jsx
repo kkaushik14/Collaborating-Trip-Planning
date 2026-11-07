@@ -25,12 +25,13 @@ function PopoverContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
+        collisionPadding={8}
         className="z-50"
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            'w-72 rounded-md border border-line bg-panel p-lg text-body-sm text-ink shadow-card outline-none',
+            'w-72 max-w-[var(--available-width)] max-h-[var(--available-height)] overflow-y-auto overscroll-contain [overflow-wrap:anywhere] rounded-md border border-line bg-panel p-lg text-body-sm text-ink shadow-card outline-none',
             'origin-[var(--transform-origin)] will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out',
             'data-[starting-style]:opacity-0 data-[starting-style]:scale-95',
             'data-[ending-style]:opacity-0 data-[ending-style]:scale-95',

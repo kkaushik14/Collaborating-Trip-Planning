@@ -24,7 +24,7 @@ function SheetOverlay({ className, ...props }) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm transition-opacity duration-200 ease-out',
+        'fixed inset-0 z-50 bg-[rgb(var(--color-overlay)/0.65)] backdrop-blur-sm transition-opacity duration-200 ease-out',
         'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
         className,
       )}
@@ -47,8 +47,8 @@ function SheetContent({
         data-slot="sheet-content"
         data-side={side}
         className={cn(
-          'fixed z-50 flex flex-col gap-lg border-line bg-panel p-lg text-body-sm text-ink shadow-card outline-none',
-          'will-change-[opacity,transform] transition-[opacity,transform] duration-220 ease-out',
+          'fixed z-50 flex max-h-dvh max-w-full overflow-y-auto overscroll-contain [overflow-wrap:anywhere] flex-col gap-lg border-line bg-panel p-lg text-body-sm text-ink shadow-card outline-none',
+          'will-change-[opacity,transform] transition-[opacity,transform] duration-200 ease-out',
           'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
           'data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:border-b',
           'data-[side=top]:data-[starting-style]:-translate-y-3 data-[side=top]:data-[ending-style]:-translate-y-3',
@@ -66,7 +66,7 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
-            className="absolute right-md top-md inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="absolute right-md top-md inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-panel-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <XIcon className="size-4" />
             <span className="sr-only">Close</span>
@@ -78,7 +78,7 @@ function SheetContent({
 }
 
 function SheetHeader({ className, ...props }) {
-  return <div data-slot="sheet-header" className={cn('flex flex-col gap-sm', className)} {...props} />
+  return <div data-slot="sheet-header" className={cn('flex min-w-0 flex-col gap-sm pr-10 [overflow-wrap:anywhere]', className)} {...props} />
 }
 
 function SheetFooter({ className, ...props }) {

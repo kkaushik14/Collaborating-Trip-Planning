@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
-import { BellRingIcon, MailPlusIcon, MoreHorizontalIcon, SendIcon, Users2Icon } from 'lucide-react'
+import { BellRingIcon, MailPlusIcon, SendIcon, Users2Icon } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
 
 import {
@@ -31,7 +31,7 @@ import { Heading, Text } from '@/components/typography/index.js'
 import { commentSchema, inviteMemberSchema } from '@/validators/index.js'
 import { cn } from '@/lib/utils'
 
-const ROLE_OPTIONS = ['OWNER', 'EDITOR', 'VIEWER']
+const ROLE_OPTIONS = ['EDITOR', 'VIEWER']
 
 function getInitials(value) {
   return String(value || '')
@@ -107,7 +107,7 @@ function CollaborationPanel({
   })
 
   const visibleMembers = members.filter((member) => member.isActive)
-  const hiddenCount = Math.max(0, members.length - 3)
+  const hiddenCount = Math.max(0, visibleMembers.length - 3)
   const recentComments = useMemo(() => comments.slice(0, 8), [comments])
   const activityTargetOptions = useMemo(() => {
     if (commentTargetType === 'day') {
@@ -263,6 +263,7 @@ function CollaborationPanel({
                       type="button"
                       size="sm"
                       variant={inviteRole === role ? 'default' : 'outline'}
+                      aria-pressed={inviteRole === role}
                       disabled={!canInviteMembers}
                       onClick={() => {
                         setInviteRole(role)
@@ -306,7 +307,7 @@ function CollaborationPanel({
             </Heading>
             <span className="inline-flex items-center gap-xs rounded-full bg-panel-muted px-sm py-2xs text-caption text-ink-muted">
               <Users2Icon className="size-3.5" />
-              {visibleMembers.length} online
+              {visibleMembers.length} {visibleMembers.length === 1 ? 'member' : 'members'}
             </span>
           </header>
 
@@ -330,9 +331,15 @@ function CollaborationPanel({
                 </div>
 
                 <div className="flex w-full items-center gap-xs sm:w-auto">
-                  <DropdownMenu>
+                  {member.role === 'OWNER' ? (
+                    <span className="rounded-md border border-line px-md py-sm text-body-sm font-medium">
+                      OWNER
+                      <span className="sr-only"> (use Transfer Ownership to change the owner)</span>
+                    </span>
+                  ) : <DropdownMenu>
                     <DropdownMenuTrigger
                       disabled={!canManageMembers}
+                      aria-label={`Change role for ${member.name || member.email}: ${member.role}`}
                       render={<Button size="sm" variant="outline" className="w-full sm:w-auto" />}
                     >
                       {member.role}
@@ -341,24 +348,25 @@ function CollaborationPanel({
                       {ROLE_OPTIONS.map((role) => (
                         <DropdownMenuItem
                           key={role}
-                          disabled={!canManageMembers}
+                          disabled={!canManageMembers || role === member.role}
                           onClick={() => onMemberRoleChange?.(member.id, role)}
                         >
                           {role}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu>}
 
-                  <Button
+                  {member.role !== 'OWNER' ? <Button
                     size="sm"
                     variant="ghost"
                     className="shrink-0"
                     disabled={!canManageMembers}
+                    aria-label={`${member.isActive ? 'Deactivate' : 'Reactivate'} ${member.name || member.email}`}
                     onClick={() => onMemberActiveToggle?.(member.id, !member.isActive)}
                   >
-                    <MoreHorizontalIcon className="size-4" />
-                  </Button>
+                    {member.isActive ? 'Deactivate' : 'Reactivate'}
+                  </Button> : null}
                 </div>
               </li>
             ))}
@@ -415,6 +423,7 @@ function CollaborationPanel({
               type="button"
               size="sm"
               role="switch"
+              aria-label="Email notifications for comments"
               aria-checked={commentEmailOptIn}
               variant={commentEmailOptIn ? 'default' : 'outline'}
               className="min-w-[7.5rem] whitespace-nowrap"
@@ -424,8 +433,8 @@ function CollaborationPanel({
               {isCommentEmailPreferenceUpdating
                 ? 'Saving...'
                 : commentEmailOptIn
-                  ? 'Opt-out'
-                  : 'Opt-in'}
+                  ? 'On'
+                  : 'Off'}
             </Button>
           </div>
           <Text size="caption" tone="muted" className="mt-xs">
@@ -490,7 +499,7 @@ function CollaborationPanel({
               </label>
               <select
                 id="comment-target-type"
-                className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="h-10 w-full rounded-md border border-line-strong bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 value={commentTargetType || (hasDayTargets ? 'day' : 'activity')}
                 disabled={!canComment}
                 onChange={(event) => {
@@ -523,7 +532,7 @@ function CollaborationPanel({
                 </label>
                 <select
                   id="comment-day-target"
-                  className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                  className="h-10 w-full rounded-md border border-line-strong bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                   value={selectedDayId || defaultDayTargetId}
                   disabled={!canComment || !hasDayTargets}
                   onChange={(event) =>
@@ -548,7 +557,7 @@ function CollaborationPanel({
                 </label>
                 <select
                   id="comment-activity-target"
-                  className="h-10 w-full rounded-md border border-line bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                  className="h-10 w-full rounded-md border border-line-strong bg-panel px-lg text-body-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                   value={selectedActivityId || defaultActivityTargetId}
                   disabled={!canComment || !activityTargetOptions.length}
                   onChange={(event) =>

@@ -1,6 +1,8 @@
 export { default as useAppReady } from './useAppReady.js'
 export * from './useAuth.js'
 export * from './useUIStore.js'
+export * from './usePublicTheme.js'
+export * from './useRouteScroll.js'
 export * from './useClientStore.js'
 export * from './useSystemHooks.js'
 export * from './useAuthHooks.js'

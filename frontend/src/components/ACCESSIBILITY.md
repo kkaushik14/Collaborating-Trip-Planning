@@ -2,6 +2,17 @@
 
 This checklist is mandatory for all component work under `frontend/src/components/`.
 
+## Shared primitive regression coverage
+
+- `forms/fields.test.jsx`: separate forms sharing a field name must have distinct IDs, independent labels/help/errors, and exact required-label names. Hidden labels remain in the accessibility tree.
+- `ui/checkbox.jsx`: Base UI's native-button rendering keeps `id` on the focusable labeled control, rather than only its hidden input. Checked styles use `data-checked`.
+- `ui/primitives.test.jsx`: menu arrow/activation behavior, modal Escape/focus restoration, vertical-tab keyboard behavior, popup bounds, and named table scroll regions.
+- `common/ToastViewport.test.jsx`: persistent live regions, opaque surfaces, explicit dismissal, and hover/focus timer pauses.
+- `common/common.test.jsx`: presentational theme switch behavior, public-shell optional wiring, mobile-visible primary heading, and footer destination integrity.
+- `features/collaboration/CollaborationPanel.test.jsx`: honest member counts, no owner role/deactivation shortcuts, permission-aware actions, stable email-notification switch names.
+
+DOM tests cannot verify visual overflow, focus-ring contrast after compositing, or assistive-technology announcements. Browser/manual sign-off remains a separate step owned by the main audit; it was not performed by the shared-primitives subtask.
+
 Source rules (from provided sheet):
 - Semantic HTML: use meaningful elements.
 - ARIA: add only when needed for context (for example, decorative icons use `aria-hidden="true"`).

@@ -24,4 +24,12 @@ const authRateLimiter = rateLimit({
   },
 })
 
-export { apiRateLimiter, authRateLimiter }
+const passwordRecoveryRateLimiter = rateLimit({
+  windowMs: env.rateLimitWindowMs,
+  max: env.authRateLimitMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many password recovery attempts, please try again later.' },
+})
+
+export { apiRateLimiter, authRateLimiter, passwordRecoveryRateLimiter }

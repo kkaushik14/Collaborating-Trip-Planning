@@ -2,7 +2,13 @@ import { cn } from '@/lib/utils'
 
 function Table({ className, ...props }) {
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto rounded-md border border-line">
+    <div
+      data-slot="table-container"
+      className="relative w-full min-w-0 max-w-full overflow-x-auto rounded-md border border-line"
+      role="region"
+      aria-label={props['aria-label'] || 'Scrollable table'}
+      tabIndex={0}
+    >
       <table data-slot="table" className={cn('w-full caption-bottom text-body-sm', className)} {...props} />
     </div>
   )
@@ -40,6 +46,7 @@ function TableHead({ className, ...props }) {
   return (
     <th
       data-slot="table-head"
+      scope="col"
       className={cn('h-10 px-lg text-left align-middle text-caption font-semibold tracking-wide text-ink-muted uppercase', className)}
       {...props}
     />

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 
-import { Form, FormMessage, RHFTextField } from '../components/forms/index.js'
+import { FormMessage, RHFTextField } from '../components/forms/index.js'
 import { useCreateTrip, useTrips, useUpdateTrip } from '../hooks/index.js'
 import { Button, Input } from '../components/ui/index.js'
 import { Heading, Text } from '../components/typography/index.js'
@@ -12,10 +12,10 @@ import {
   PageEmptyState,
   PageErrorState,
   PageLoadingState,
+  PageForm,
 } from './PageStates.jsx'
-import { formatCurrency, formatDateLabel } from './tripPageUtils.js'
+import { canEditTripContent, formatDateLabel, normalizeActorRole, toDateInputValue } from './tripPageUtils.js'
 
-const toDateInputValue = (date) => date.toISOString().slice(0, 10)
 const EMPTY_TRIPS = []
 
 const TripsPage = () => {
@@ -29,16 +29,9 @@ const TripsPage = () => {
       (count, trip) => count + Number(trip.travelerCount || 0),
       0,
     )
-    const totalBudget = trips.reduce(
-      (sum, trip) => sum + Number(trip.totalBudget || 0),
-      0,
-    )
-
     return {
       totalTrips: trips.length,
       totalTravelers,
-      totalBudget,
-      currency: trips[0]?.currency || 'USD',
     }
   }, [trips])
 
@@ -62,14 +55,16 @@ const TripsPage = () => {
       endDate: defaultDates.endDate,
       travelerCount: 2,
       currency: 'USD',
-      timezone: 'Asia/Kolkata',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     },
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   })
 
   const handleTripCreate = (values) => {
-    createTripMutation.mutate(values, {
+    if (createTripMutation.isPending) return
+    const { currency, timezone, ...details } = values
+    createTripMutation.mutate({ ...details, settings: { currency, timezone } }, {
       onSuccess: () => {
         tripForm.reset({
           ...values,
@@ -88,24 +83,29 @@ const TripsPage = () => {
   }
 
   const handleQuickUpdate = (trip) => {
+    if (!canEditTripContent(trip.actorRole) || updateTripMutation.isPending) return
     const nextTitle = String(tripDrafts[trip._id] ?? trip.title ?? '').trim()
-    if (!nextTitle || nextTitle === trip.title) {
+    if (nextTitle.length < 3 || nextTitle.length > 120 || nextTitle === trip.title) {
       return
     }
 
-    updateTripMutation.mutate({
-      tripId: trip._id,
-      body: {
-        title: nextTitle,
+    updateTripMutation.mutate(
+      { tripId: trip._id, body: { title: nextTitle } },
+      {
+        onSuccess: () => setTripDrafts((previous) => {
+          const next = { ...previous }
+          delete next[trip._id]
+          return next
+        }),
       },
-    })
+    )
   }
 
   if (tripsQuery.isPending) {
     return (
       <PageLoadingState
         title="Loading trips..."
-        description="Fetching your trip list and collaboration metadata."
+        description="Fetching your trips."
       />
     )
   }
@@ -123,7 +123,8 @@ const TripsPage = () => {
 
   if (!trips.length) {
     return (
-      <section className="space-y-lg">
+      <section className="min-w-0 max-w-full space-y-lg">
+        <Heading level={1} size="title">My Trips</Heading>
         <CreateTripSection
           tripForm={tripForm}
           onSubmit={handleTripCreate}
@@ -139,21 +140,24 @@ const TripsPage = () => {
   }
 
   return (
-    <section className="space-y-lg">
-      <section className="grid gap-sm sm:grid-cols-3">
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+    <section className="min-w-0 max-w-full space-y-lg">
+      <header className="space-y-xs">
+        <Heading level={1} size="title">
+          My Trips
+        </Heading>
+        <Text tone="muted">
+          Select a trip to open planning, collaboration, organization, and analytics views.
+        </Text>
+      </header>
+
+      <section className="grid gap-sm sm:grid-cols-2">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Trips</p>
           <p className="mt-2xs text-title font-semibold text-ink">{summary.totalTrips}</p>
         </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
+        <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card">
           <p className="text-caption text-ink-muted">Travelers</p>
           <p className="mt-2xs text-title font-semibold text-ink">{summary.totalTravelers}</p>
-        </article>
-        <article className="rounded-xl border border-line bg-panel p-md shadow-card">
-          <p className="text-caption text-ink-muted">Budget (Declared)</p>
-          <p className="mt-2xs text-title font-semibold text-ink">
-            {formatCurrency(summary.totalBudget, summary.currency)}
-          </p>
         </article>
       </section>
 
@@ -164,20 +168,15 @@ const TripsPage = () => {
         isSubmitting={createTripMutation.isPending}
       />
 
-      <header className="space-y-xs">
-        <Heading level={1} size="title">
-          My Trips
-        </Heading>
-        <Text tone="muted">
-          Select a trip to open planning, collaboration, organization, and analytics views.
-        </Text>
-      </header>
+      {updateTripMutation.error ? (
+        <PageErrorState title="Title update failed" description="Your title was not saved. Keep your changes and try Save again." errorMessage={updateTripMutation.error.message} />
+      ) : null}
 
       <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-3">
         {trips.map((trip) => (
           <article
             key={trip._id}
-            className="flex h-full flex-col rounded-xl border border-line bg-panel p-lg shadow-card"
+            className="flex min-w-0 h-full flex-col break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg"
           >
             <div className="space-y-xs">
               <Heading level={2} size="title-sm">
@@ -191,54 +190,52 @@ const TripsPage = () => {
             <div className="mt-md space-y-2xs text-caption text-ink-muted">
               <p>{formatDateLabel(trip.startDate)} - {formatDateLabel(trip.endDate)}</p>
               <p>{Number(trip.travelerCount || 0)} traveler(s)</p>
-              <p>Role: {trip.actorRole || 'MEMBER'}</p>
+              <p>Role: {normalizeActorRole(trip.actorRole)}</p>
             </div>
 
-            <div className="mt-md space-y-xs rounded-md border border-line bg-panel-muted p-sm">
-              <Text size="caption" tone="muted">
-                Quick update title
-              </Text>
-              <div className="flex gap-xs">
-                <Input
-                  value={tripDrafts[trip._id] ?? trip.title ?? ''}
-                  onChange={(event) => updateDraftValue(trip._id, event.target.value)}
-                  placeholder="Trip title"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={updateTripMutation.isPending}
-                  onClick={() => handleQuickUpdate(trip)}
-                >
-                  Save
-                </Button>
+            {canEditTripContent(trip.actorRole) ? (
+              <div className="mt-md space-y-xs rounded-md border border-line bg-panel-muted p-sm">
+                <label htmlFor={`trip-title-${trip._id}`} className="text-caption text-ink-muted">
+                  Quick update title
+                </label>
+                <div className="flex gap-xs">
+                  <Input
+                    id={`trip-title-${trip._id}`}
+                    className="min-w-0"
+                    disabled={updateTripMutation.isPending}
+                    maxLength={120}
+                    value={tripDrafts[trip._id] ?? trip.title ?? ''}
+                    onChange={(event) => updateDraftValue(trip._id, event.target.value)}
+                    placeholder="Trip title"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={updateTripMutation.isPending || String(tripDrafts[trip._id] ?? trip.title ?? '').trim().length < 3 || String(tripDrafts[trip._id] ?? trip.title ?? '').trim() === trip.title}
+                    onClick={() => handleQuickUpdate(trip)}
+                  >
+                    Save
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="mt-lg grid gap-xs">
-              <Link to={`/trips/${trip._id}/planning`} className="w-full">
-                <Button size="sm" className="w-full">
-                  Open Trip
-                </Button>
-              </Link>
+              <Button render={<Link to={`/trips/${trip._id}/planning`} />} nativeButton={false} role="link" size="sm" className="w-full">
+                Open Trip
+              </Button>
 
               <div className="grid grid-cols-2 gap-xs">
-                <Link to={`/trips/${trip._id}/collaboration`} className="w-full">
-                  <Button size="sm" variant="outline" className="w-full">
-                    Team
-                  </Button>
-                </Link>
-                <Link to={`/trips/${trip._id}/organization`} className="w-full">
-                  <Button size="sm" variant="outline" className="w-full">
-                    Budget
-                  </Button>
-                </Link>
-              </div>
-              <Link to={`/trips/${trip._id}/analytics`} className="w-full">
-                <Button size="sm" variant="outline" className="w-full">
-                  Analytics
+                <Button render={<Link to={`/trips/${trip._id}/collaboration`} />} nativeButton={false} role="link" size="sm" variant="outline" className="w-full">
+                  Team
                 </Button>
-              </Link>
+                <Button render={<Link to={`/trips/${trip._id}/organization`} />} nativeButton={false} role="link" size="sm" variant="outline" className="w-full">
+                  Budget
+                </Button>
+              </div>
+              <Button render={<Link to={`/trips/${trip._id}/analytics`} />} nativeButton={false} role="link" size="sm" variant="outline" className="w-full">
+                Analytics
+              </Button>
             </div>
           </article>
         ))}
@@ -253,7 +250,7 @@ const CreateTripSection = ({
   mutationError,
   isSubmitting,
 }) => (
-  <article className="rounded-xl border border-line bg-panel p-lg shadow-card">
+  <article className="min-w-0 break-words rounded-xl border border-line bg-panel p-md shadow-card sm:p-lg">
     <header className="space-y-xs">
       <Heading level={2} size="title-sm">
         Create New Trip
@@ -263,8 +260,9 @@ const CreateTripSection = ({
       </Text>
     </header>
 
-    <Form
+    <PageForm
       methods={tripForm}
+      disabled={isSubmitting}
       onSubmit={onSubmit}
       persistKey="trips:create"
       className="mt-md grid gap-md md:grid-cols-2"
@@ -324,7 +322,7 @@ const CreateTripSection = ({
           {isSubmitting ? 'Creating Trip...' : 'Create Trip'}
         </Button>
       </div>
-    </Form>
+    </PageForm>
   </article>
 )
 

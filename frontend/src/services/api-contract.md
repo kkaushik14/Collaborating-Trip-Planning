@@ -1,11 +1,62 @@
 # Collaborating Trip Planning API Contract
 
-Last synced: 2026-03-08
+Last synced: 2026-11-08 (password recovery and member profiles)
 Source of truth: backend routes/controllers/validators (`backend/src/routes/*.js`, `backend/src/controllers/*.js`, `backend/src/validators/schemas.js`).
 
 ## Base URL
 - Local backend root: `http://localhost:5000`
 - Versioned API base: `http://localhost:5000/api/v1`
+- Production API base: `https://trip-plan.kkos.in/api/v1`
+
+## Password Recovery
+
+Both endpoints are public. Required header: `Content-Type: application/json`.
+Do not attach bearer tokens. Responses have `Cache-Control: no-store`.
+
+### POST /api/v1/auth/forgot-password
+
+Body: `{ "email": "registered@example.com" }` (required valid email).
+Always returns `200` for valid email input, including unknown/inactive accounts,
+cooldown suppression, or mail-delivery failure:
+
+```json
+{"success":true,"statusCode":200,"message":"If an active account exists for that email, a password reset link will be sent.","data":null}
+```
+
+The email links to `/reset-password?token=<64-hex-token>` on the configured frontend
+origin. Tokens expire after 30 minutes, are stored only as SHA-256 hashes, and are
+single-use. Another accepted request replaces the previous token. Account email
+cooldown is 60 seconds. Email delivery is background/best-effort, not a durable queue.
+
+### POST /api/v1/auth/reset-password
+
+Body: `{ "token": "<64-hex-token>", "password": "<new-password>" }`.
+Both fields required. Password is at least 8 characters and at most 72 UTF-8 bytes;
+whitespace is preserved. Do not submit confirmation password to the API.
+
+```json
+{"success":true,"statusCode":200,"message":"Password reset successfully. Please log in.","data":null}
+```
+
+An atomic update consumes the token, changes the password, clears the refresh
+session, and increments a credential version to reject old access/refresh tokens.
+It does not automatically log the user in.
+
+### Recovery errors and limits
+
+- `400`: invalid input (`Invalid password recovery request`) or expired/used/invalid
+  token (`Invalid or expired password reset token`).
+- `429`: recovery IP limit (20 requests / 15 minutes) or global API limit, with
+  `Retry-After`. Limits are currently per serverless instance.
+- `500`/`503`: server/database unavailable. Retain fields and allow retry.
+- Recovery errors use `{success:false,statusCode,message,data:null}` without
+  submitted values, token, password, or stack. Rate limiting uses the existing
+  limiter error envelope.
+
+Frontend services: `requestPasswordReset`, `resetPassword`; corresponding hooks:
+`useRequestPasswordReset`, `useResetPassword`. Recovery does not populate the user
+cache. After reset the local session and authenticated query caches are cleared.
+Never persist recovery passwords or tokens in form drafts.
 
 ## Global Rules
 - All JSON endpoints use `Content-Type: application/json` unless explicitly noted.
@@ -138,6 +189,8 @@ type TripMember = {
   _id: ObjectId;
   trip: ObjectId;
   user: ObjectId;
+  // Included by GET members, allowlisted for display; mutations may omit it.
+  userId?: { _id: ObjectId; name?: string; email?: string; avatarUrl?: string | null };
   role: 'OWNER' | 'EDITOR' | 'VIEWER';
   commentEmailOptIn: 'true' | 'false';
   addedBy?: ObjectId;

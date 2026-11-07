@@ -2,7 +2,10 @@ import { User } from '../models/index.js'
 import {
   clearRefreshToken,
   issueAuthTokens,
+  isAuthVersionValid,
   isRefreshTokenValid,
+  requestPasswordReset,
+  resetUserPassword,
   sendWelcomeEmail,
   verifyRefreshToken,
 } from '../services/index.js'
@@ -154,7 +157,7 @@ const refreshToken = asyncHandler(async (req, res) => {
     throw ApiError.unauthorized('Invalid user for refresh token')
   }
 
-  if (!isRefreshTokenValid(user, providedToken)) {
+  if (!isAuthVersionValid(user, payload) || !isRefreshTokenValid(user, providedToken)) {
     throw ApiError.unauthorized('Refresh token is invalid')
   }
 
@@ -257,4 +260,15 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
   )
 })
 
-export { getCurrentUser, login, logout, refreshToken, register, updateCurrentUserProfile }
+const forgotPassword = asyncHandler(async (req, res) => {
+  requestPasswordReset(req.body.email)
+  return res.status(200).json(new ApiResponse(200, null,
+    'If an active account exists for that email, a password reset link will be sent.'))
+})
+
+const resetPassword = asyncHandler(async (req, res) => {
+  await resetUserPassword(req.body)
+  return res.status(200).json(new ApiResponse(200, null, 'Password reset successfully. Please log in.'))
+})
+
+export { forgotPassword, resetPassword, getCurrentUser, login, logout, refreshToken, register, updateCurrentUserProfile }

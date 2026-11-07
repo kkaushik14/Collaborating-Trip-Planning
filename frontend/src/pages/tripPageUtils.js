@@ -1,3 +1,8 @@
+const toDateInputValue = (date = new Date()) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+const getTripCurrency = (trip) => trip?.settings?.currency || trip?.currency || 'USD'
+
 const formatDateLabel = (value, options = {}) => {
   if (!value) {
     return 'TBD'
@@ -83,7 +88,8 @@ const formatCurrency = (amount, currency = 'USD', maximumFractionDigits = 0) => 
 }
 
 const getActivityLocationLabel = (activity = {}) =>
-  activity.locationName || activity.address || activity.location || 'TBD'
+  activity.locationName || activity.address ||
+  (typeof activity.location === 'string' ? activity.location : activity.location?.name || activity.location?.address) || 'TBD'
 
 const mapTripSummary = (trip = {}) => ({
   title: trip.title || 'Untitled Trip',
@@ -125,6 +131,8 @@ export {
   formatFileSize,
   formatTimeLabel,
   getActivityLocationLabel,
+  getTripCurrency,
   mapTripSummary,
   normalizeActorRole,
+  toDateInputValue,
 }

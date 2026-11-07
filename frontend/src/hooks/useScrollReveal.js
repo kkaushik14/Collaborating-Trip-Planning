@@ -22,6 +22,11 @@ function useScrollReveal({
       return
     }
 
+    // Content must stay visible in unsupported browsers and reduced-motion mode.
+    if (typeof IntersectionObserver === 'undefined' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      return
+    }
+
     targets.forEach((target, index) => {
       target.classList.add('reveal-section')
       const delay = Math.min(index * stepDelayMs, maxDelayMs)
@@ -48,7 +53,13 @@ function useScrollReveal({
 
     targets.forEach((target) => observer.observe(target))
 
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      targets.forEach((target) => {
+        target.classList.remove('reveal-section', 'is-revealed')
+        target.style.removeProperty('--reveal-delay')
+      })
+    }
   }, [enabled, maxDelayMs, rootMargin, selector, stepDelayMs, threshold])
 }
 

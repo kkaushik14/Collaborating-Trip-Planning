@@ -3,21 +3,25 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import { useAuth } from '../app/AuthProvider/index.js'
+import { UIStoreProvider } from '../app/uiStore/index.js'
 import LoginPage from './LoginPage.jsx'
 
 jest.mock('../app/AuthProvider/index.js', () => ({
   useAuth: jest.fn(),
 }))
+jest.mock('../hooks/index.js', () => ({
+  usePublicTheme: jest.requireActual('../hooks/usePublicTheme.js').usePublicTheme,
+}))
 
 const renderLoginPage = (initialEntries = ['/login']) =>
   render(
-    <MemoryRouter initialEntries={initialEntries}>
+    <UIStoreProvider><MemoryRouter initialEntries={initialEntries}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/trips" element={<div>Trips Dashboard</div>} />
         <Route path="/invitations/accept" element={<div>Invitation Accept Route</div>} />
       </Routes>
-    </MemoryRouter>,
+    </MemoryRouter></UIStoreProvider>,
   )
 
 describe('LoginPage integration', () => {

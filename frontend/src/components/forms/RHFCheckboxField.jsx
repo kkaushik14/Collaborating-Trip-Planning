@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import { Checkbox } from '@/components/ui/index.js'
@@ -23,8 +24,9 @@ function RHFCheckboxField({
     formState: { errors },
   } = useFormContext()
 
+  const uniqueId = useId()
   const errorMessage = getFieldMessage(errors, name)
-  const fieldId = inputId || toInputId(name)
+  const fieldId = inputId || toInputId(name, uniqueId)
   const descriptionId = description ? `${fieldId}-description` : undefined
   const errorId = errorMessage ? `${fieldId}-error` : undefined
   const ariaDescribedBy = [descriptionId, errorId].filter(Boolean).join(' ')
@@ -39,6 +41,7 @@ function RHFCheckboxField({
             <Checkbox
               id={fieldId}
               name={field.name}
+              required={required}
               checked={Boolean(field.value)}
               onCheckedChange={(nextChecked) => field.onChange(Boolean(nextChecked))}
               onBlur={field.onBlur}
@@ -47,7 +50,7 @@ function RHFCheckboxField({
               ref={field.ref}
             />
 
-            <div className="space-y-2xs">
+            <div className="min-w-0 space-y-2xs">
               <FormLabel htmlFor={fieldId} required={required}>
                 {label}
               </FormLabel>
