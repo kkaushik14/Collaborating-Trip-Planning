@@ -100,7 +100,7 @@ with unique JWT secrets. Fill in MongoDB/SMTP credentials and import it in Verce
 The existing EC2 deploy job is opt-in with `DEPLOY_TO_EC2=true`.
 
 ### Prerequisites
-- Node.js 20+ (recommended)
+- Node.js 26.x (matches both Vercel services and CI)
 - npm 10+
 - MongoDB running locally (or a Mongo URI – Atlas)
 

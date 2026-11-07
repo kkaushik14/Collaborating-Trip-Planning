@@ -2,7 +2,7 @@
   "name": "collaborating-trip-planning",
   "private": true,
   "type": "module",
-  "engines": { "node": "22.x" },
+  "engines": { "node": "26.x" },
   "scripts": {
     "build": "npm --prefix frontend run build",
     "env:vercel": "node scripts/generate-vercel-env.js"

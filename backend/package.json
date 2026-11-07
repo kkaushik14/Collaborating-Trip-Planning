@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": { "node": "26.x" },
   "dependencies": {
     "@vercel/functions": "^3.11.0",
     "bcryptjs": "^3.0.3",

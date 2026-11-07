@@ -2,7 +2,8 @@
 
 Deploy this repository as **one Vercel project**, with Root Directory set to the
 repository root (not frontend or backend), Application Preset **Services**, and Node.js
-**22.x**. The root vercel.json defines two independently built services:
+**26.x**. The root and both service package.json files pin this Node.js major;
+GitHub CI also uses Node.js 26. The root vercel.json defines two independently built services:
 `backend` (Express, entrypoint backend/index.js) and `frontend` (Vite, output dist).
 No PM2 or Docker is needed. Clear any old project-wide install/build/output overrides.
 
