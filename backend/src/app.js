@@ -21,6 +21,7 @@ import {
 } from './middlewares/index.js'
 import { apiRouter } from './routes/index.js'
 import { ApiResponse } from './utils/index.js'
+import { serveStoredFile } from './services/index.js'
 
 const app = express()
 
@@ -41,8 +42,12 @@ app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'))
 app.use(metricsMiddleware)
 app.use(auditLogger)
 
-fs.mkdirSync(env.uploadDir, { recursive: true })
-app.use('/uploads', express.static(env.uploadDir))
+if (env.uploadStorage === 'gridfs') {
+  app.get('/uploads/:fileName', serveStoredFile)
+} else {
+  fs.mkdirSync(env.uploadDir, { recursive: true })
+  app.use('/uploads', express.static(env.uploadDir))
+}
 
 app.get('/', (_req, res) => {
   res.status(200).json(new ApiResponse(200, null, 'Collaborating Trip Planning API'))

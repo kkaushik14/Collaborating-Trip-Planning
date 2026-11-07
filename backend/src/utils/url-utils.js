@@ -24,6 +24,7 @@ const getHeaderValue = (value) => {
 const isLocalHost = (hostValue = '') => /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(hostValue)
 
 const resolveFrontendBaseUrl = (req) => {
+  if (env.isVercel) return normalizeBaseUrl(env.frontendBaseUrl)
   const origin = normalizeBaseUrl(req?.headers?.origin)
   if (origin) {
     return origin

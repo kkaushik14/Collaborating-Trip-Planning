@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 
 import { env } from '../config/index.js'
+import { keepAlive } from '../utils/index.js'
 
 let transporter
 
@@ -24,6 +25,9 @@ const getTransporter = () => {
       host: env.smtpHost,
       port: env.smtpPort,
       secure: env.smtpPort === 465,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
       auth: {
         user: env.smtpUser,
         pass: env.smtpPass,
@@ -33,6 +37,7 @@ const getTransporter = () => {
     return transporter
   }
 
+  if (env.isVercel) throw new Error('Configure SMTP_HOST, SMTP_USER and SMTP_PASS to send email')
   transporter = nodemailer.createTransport({ jsonTransport: true })
   return transporter
 }
@@ -133,13 +138,15 @@ const buildPlainText = ({ heading, intro, bullets = [], primaryCta = null, secon
 const sendEmail = async ({ to, subject, text, html }) => {
   const mailTransporter = getTransporter()
 
-  const info = await mailTransporter.sendMail({
+  const delivery = mailTransporter.sendMail({
     from: env.smtpFrom,
     to,
     subject,
     text,
     html,
   })
+  keepAlive(delivery.catch((error) => console.error('Email delivery failed:', error.message)))
+  const info = await delivery
 
   if (env.nodeEnv !== 'production') {
     const debugPayload =

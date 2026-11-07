@@ -4,3 +4,10 @@ frontend/dist
 backend/.env
 backend/uploads
 *.log
+.env*
+!.env.example
+!.env.vercel.example
+!**/.env.example
+!**/.env.production.example
+.vercel
+.DS_Store

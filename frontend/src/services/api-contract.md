@@ -214,7 +214,7 @@ type Attachment = {
   fileName: string;
   mimeType: string;
   sizeBytes: number;
-  storageProvider: 'local' | 's3' | 'gcs' | 'azure' | 'other';
+  storageProvider: 'local' | 'gridfs' | 's3' | 'gcs' | 'azure' | 'other';
   storageKey: string;
   url: string;
   metadata: Record<string, unknown>;
@@ -766,7 +766,7 @@ Notes: API validation allows `OWNER`, but controller rejects direct OWNER assign
 - Trip permission: `MANAGE_ORGANIZATION`
 - Headers: `Authorization`, `Content-Type: multipart/form-data`
 - Form-data fields:
-  - `file` (required): image/* or application/pdf, max 10MB
+  - `file` (required): image/* or application/pdf, max 10 MiB locally, 4 MiB on Vercel. Oversized files return 413 (the platform may reject requests before Express).
   - `targetType` (optional, default `trip`)
   - target refs based on type: `dayId`, `activityId`, `reservationId`, `expenseId`, `commentId`
   - `metadata` (optional)

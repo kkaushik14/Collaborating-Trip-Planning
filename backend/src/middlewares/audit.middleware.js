@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 import { env } from '../config/index.js'
 import { AuditLog } from '../models/index.js'
+import { keepAlive } from '../utils/index.js'
 
 const shouldSkipAudit = (pathName) => {
   return (
@@ -21,7 +22,10 @@ const auditLogger = (req, res, next) => {
 
   const startedAt = Date.now()
 
-  res.on('finish', async () => {
+  const completion = new Promise((resolve) => {
+    res.once('finish', resolve)
+    res.once('close', resolve)
+  }).then(async () => {
     if (mongoose.connection.readyState !== 1) {
       return
     }
@@ -46,6 +50,7 @@ const auditLogger = (req, res, next) => {
       }
     }
   })
+  keepAlive(completion)
 
   next()
 }

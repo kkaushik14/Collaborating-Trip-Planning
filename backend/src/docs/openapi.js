@@ -7,8 +7,8 @@ const openApiSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:5000/api/v1',
-      description: 'Local',
+      url: '/api/v1',
+      description: 'Current deployment',
     },
   ],
   components: {

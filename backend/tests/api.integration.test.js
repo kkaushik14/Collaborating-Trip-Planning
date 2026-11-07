@@ -6,6 +6,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
 
 import { app } from '../src/app.js'
+import { drainCommentNotifications } from '../src/services/index.js'
 
 let mongoServer
 
@@ -38,11 +39,13 @@ test.before(async () => {
 })
 
 test.after(async () => {
+  await drainCommentNotifications()
   await mongoose.disconnect()
   await mongoServer.stop()
 })
 
 test.beforeEach(async () => {
+  await drainCommentNotifications()
   await mongoose.connection.db.dropDatabase()
 })
 
@@ -459,6 +462,19 @@ test('Organization flow: checklist + upload + reservation + expense + budget sum
     })
 
   assert.equal(uploadAttachmentResponse.statusCode, 201)
+
+  const uploadedFile = uploadAttachmentResponse.body.data.attachment
+  const downloadResponse = await request(app).get(uploadedFile.url)
+  assert.equal(downloadResponse.statusCode, 200)
+  assert.equal(downloadResponse.headers['content-type'], 'application/pdf')
+  assert.equal(downloadResponse.body.toString(), 'mock ticket data')
+  if (process.env.UPLOAD_STORAGE === 'gridfs') {
+    assert.equal(uploadedFile.storageProvider, 'gridfs')
+    const persistedFile = await mongoose.connection.db.collection('attachments.files')
+      .findOne({ filename: uploadedFile.storageKey })
+    assert.equal(persistedFile.length, Buffer.byteLength('mock ticket data'))
+  }
+  assert.equal((await request(app).get('/uploads/missing-file')).statusCode, 404)
 
   const reservationResponse = await request(app)
     .post(`/api/v1/trips/${tripId}/reservations`)

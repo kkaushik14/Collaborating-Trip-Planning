@@ -91,6 +91,14 @@ The project is split into:
 
 ## Setup Instructions
 
+### Vercel deployment
+
+See [the Vercel deployment guide](docs/VERCEL.md) for the single-project setup,
+environment variables, persistent uploads, and verification steps. Run
+`npm run env:vercel` at the repository root to generate a private environment file
+with unique JWT secrets. Fill in MongoDB/SMTP credentials and import it in Vercel.
+The existing EC2 deploy job is opt-in with `DEPLOY_TO_EC2=true`.
+
 ### Prerequisites
 - Node.js 20+ (recommended)
 - npm 10+

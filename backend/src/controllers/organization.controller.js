@@ -23,6 +23,8 @@ import {
   listReportSnapshots,
   syncTripBudgetSummary,
   upsertExchangeRate,
+  storeUploadedFile,
+  removeStoredFile,
 } from '../services/index.js'
 import {
   ApiError,
@@ -325,19 +327,24 @@ const uploadAttachmentFile = asyncHandler(async (req, res) => {
     body: req.body,
   })
 
-  const attachment = await Attachment.create({
-    trip: tripId,
-    uploadedBy: req.actorId,
-    targetType,
-    ...refs,
-    fileName: req.file.originalname,
-    mimeType: req.file.mimetype,
-    sizeBytes: req.file.size,
-    storageProvider: 'local',
-    storageKey: req.file.filename,
-    url: `/uploads/${req.file.filename}`,
-    metadata: metadata || {},
-  })
+  const storedFile = await storeUploadedFile(req.file)
+  let attachment
+  try {
+    attachment = await Attachment.create({
+      trip: tripId,
+      uploadedBy: req.actorId,
+      targetType,
+      ...refs,
+      fileName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      sizeBytes: req.file.size,
+      ...storedFile,
+      metadata: metadata || {},
+    })
+  } catch (error) {
+    await removeStoredFile(storedFile)
+    throw error
+  }
 
   return res
     .status(201)

@@ -7,6 +7,9 @@ on:
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'api/**'
+      - 'vercel.json'
+      - 'package.json'
       - 'scripts/deploy.sh'
       - '.github/workflows/CI.yml'
   pull_request:
@@ -15,6 +18,9 @@ on:
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'api/**'
+      - 'vercel.json'
+      - 'package.json'
       - 'scripts/deploy.sh'
       - '.github/workflows/CI.yml'
 
@@ -34,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -65,7 +71,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
@@ -77,6 +83,9 @@ jobs:
 
       - name: Integration tests
         run: npm test
+        env:
+          NODE_ENV: test
+          UPLOAD_STORAGE: gridfs
 
   deploy:
     name: Deploy to EC2
@@ -84,7 +93,7 @@ jobs:
     needs:
       - frontend
       - backend
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_TO_EC2 == 'true'
 
     env:
       EC2_HOST: ${{ vars.EC2_HOST || secrets.EC2_HOST }}

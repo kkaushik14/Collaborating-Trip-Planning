@@ -42,7 +42,7 @@ const ATTACHMENT_TARGET_TYPES = Object.freeze([
   'comment',
 ])
 
-const STORAGE_PROVIDERS = Object.freeze(['local', 's3', 'gcs', 'azure', 'other'])
+const STORAGE_PROVIDERS = Object.freeze(['local', 'gridfs', 's3', 'gcs', 'azure', 'other'])
 
 const INVITATION_STATUS = Object.freeze([
   'pending',

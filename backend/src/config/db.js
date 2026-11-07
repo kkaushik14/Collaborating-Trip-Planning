@@ -1,20 +1,21 @@
 import mongoose from 'mongoose'
 import { env } from './env.js'
 
+let connectionPromise
+
 const connectDatabase = async () => {
-  try {
-    await mongoose.connect(env.mongoUri, {
+  if (mongoose.connection.readyState === 1) return mongoose.connection
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(env.mongoUri, {
       dbName: env.mongoDbName,
-      maxPoolSize: 20,
-      minPoolSize: 2,
+      maxPoolSize: 5,
+      minPoolSize: 0,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-    })
-    console.log(`MongoDB connected: ${env.mongoDbName}`)
-  } catch (error) {
-    console.error('MongoDB connection failed:', error.message)
-    throw error
+    }).finally(() => { connectionPromise = undefined })
   }
+  await connectionPromise
+  return mongoose.connection
 }
 
 export { connectDatabase }

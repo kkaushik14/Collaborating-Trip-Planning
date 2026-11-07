@@ -40,10 +40,10 @@ const fileFilter = (_req, file, callback) => {
 }
 
 const upload = multer({
-  storage,
+  storage: env.uploadStorage === 'gridfs' ? multer.memoryStorage() : storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: env.uploadMaxBytes,
   },
 })
 

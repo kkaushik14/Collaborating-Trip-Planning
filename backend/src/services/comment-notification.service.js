@@ -6,6 +6,7 @@ import {
   TripMember,
 } from '../models/index.js'
 import { env } from '../config/index.js'
+import { keepAlive } from '../utils/index.js'
 import { sendCommentUpdateEmail } from './mail.service.js'
 
 const COMMENT_NOTIFICATION_DELAY_MS = 3000
@@ -149,18 +150,22 @@ const flushCommentNotificationJob = async ({ key, sequence }) => {
 }
 
 const queueCommentNotification = ({ tripId, targetType, dayId, activityId, commentId }) => {
-  const key = buildTargetKey({
+  const targetKey = buildTargetKey({
     tripId,
     targetType,
     dayId,
     activityId,
   })
 
+  // Each serverless invocation owns its task; never cancel another request's work.
+  const key = env.isVercel ? `${targetKey}:${commentId}` : targetKey
+
   const existingJob = pendingCommentNotificationJobs.get(key)
   const nextSequence = (existingJob?.sequence || 0) + 1
 
   if (existingJob?.timeout) {
     clearTimeout(existingJob.timeout)
+    existingJob.resolveCompletion?.()
   }
 
   const commentIds = existingJob?.commentIds || new Set()
@@ -168,13 +173,22 @@ const queueCommentNotification = ({ tripId, targetType, dayId, activityId, comme
     commentIds.add(toObjectIdString(commentId))
   }
 
-  const timeout = setTimeout(() => {
-    void flushCommentNotificationJob({ key, sequence: nextSequence })
-  }, COMMENT_NOTIFICATION_DELAY_MS)
+  let timeout
+  let resolveCompletion
+  const completion = new Promise((resolve) => {
+    resolveCompletion = resolve
+    timeout = setTimeout(async () => {
+      await flushCommentNotificationJob({ key, sequence: nextSequence })
+      resolve()
+    }, COMMENT_NOTIFICATION_DELAY_MS)
+  })
+  keepAlive(completion)
 
   pendingCommentNotificationJobs.set(key, {
     sequence: nextSequence,
     timeout,
+    completion,
+    resolveCompletion,
     commentIds,
     tripId: toObjectIdString(tripId),
     targetType,
@@ -183,7 +197,12 @@ const queueCommentNotification = ({ tripId, targetType, dayId, activityId, comme
   })
 }
 
+const drainCommentNotifications = () => Promise.all(
+  Array.from(pendingCommentNotificationJobs.values(), (job) => job.completion),
+)
+
 export {
   COMMENT_NOTIFICATION_DELAY_MS,
   queueCommentNotification,
+  drainCommentNotifications,
 }

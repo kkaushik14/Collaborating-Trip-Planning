@@ -7,7 +7,9 @@ const errorHandler = (error, _req, res, _next) => {
   if (error instanceof ApiError) {
     normalizedError = error
   } else if (error.name === 'MulterError') {
-    normalizedError = new ApiError(400, error.message || 'Invalid file upload request')
+    normalizedError = error.code === 'LIMIT_FILE_SIZE'
+      ? new ApiError(413, `File must be at most ${env.uploadMaxBytes / 1024 / 1024} MB`)
+      : new ApiError(400, error.message || 'Invalid file upload request')
   } else {
     normalizedError = new ApiError(error.statusCode || 500, error.message || 'Internal server error')
   }
