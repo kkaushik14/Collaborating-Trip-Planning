@@ -1,9 +1,17 @@
 # Deploy to Vercel
 
 Deploy this repository as **one Vercel project**, with Root Directory set to the
-repository root (not frontend or backend), Framework Preset **Other**, and Node.js
-**22.x**. The committed vercel.json installs both packages, builds frontend/dist,
-and serves Express through api/index.js. No PM2 or Docker is needed.
+repository root (not frontend or backend), Application Preset **Services**, and Node.js
+**22.x**. The root vercel.json defines two independently built services:
+`backend` (Express, entrypoint backend/index.js) and `frontend` (Vite, output dist).
+No PM2 or Docker is needed. Clear any old project-wide install/build/output overrides.
+
+The backend receives `/api/*`, `/health`, `/metrics`, and `/uploads/*` with their
+original paths. The final catch-all sends other requests to the frontend; its own
+vercel.json supplies the React Router fallback. No internal bindings are needed:
+the frontend is browser JavaScript calling the public same-origin `/api/v1` URL,
+not a server process calling a private service. Never expose an internal binding URL
+in a VITE_ variable.
 
 ## Environment setup
 
@@ -70,6 +78,7 @@ and serves Express through api/index.js. No PM2 or Docker is needed.
 5. Opt into comment emails on a second account; post a comment from the first.
 6. Check /api/v1/openapi.json and confirm unknown API paths return JSON, not HTML.
 
-References: [Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json),
+References: [Vercel Services](https://vercel.com/docs/services),
+[Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json),
 [function limits](https://vercel.com/docs/functions/limitations),
 [background tasks](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package).

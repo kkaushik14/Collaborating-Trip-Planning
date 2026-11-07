@@ -20,7 +20,7 @@ test('Vercel handler connects on cold requests and preserves API paths', async (
     CORS_ORIGIN: '',
   })
   try {
-    const { default: handler } = await import('../../api/index.js')
+    const { default: handler } = await import('../index.js')
     const responses = await Promise.all([
       request(handler).get('/health'),
       request(handler).get('/api/v1/health'),
