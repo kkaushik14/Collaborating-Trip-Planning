@@ -17,8 +17,10 @@ build tools are dev dependencies and must be installed even when the shared
 environment sets NODE_ENV=production. The backend uses `npm ci --omit=dev`.
 
 The backend receives `/api/*`, `/health`, `/metrics`, and `/uploads/*` with their
-original paths. The final catch-all sends other requests to the frontend; its own
-vercel.json supplies the React Router fallback. No internal bindings are needed:
+original paths. The final catch-all sends other requests to the frontend. Its
+service-level rewrites in the root vercel.json supply the React Router fallback;
+frontend/vercel.json retains the same fallback for standalone frontend deployments.
+No internal bindings are needed:
 the frontend is browser JavaScript calling the public same-origin `/api/v1` URL,
 not a server process calling a private service. Never expose an internal binding URL
 in a VITE_ variable.
