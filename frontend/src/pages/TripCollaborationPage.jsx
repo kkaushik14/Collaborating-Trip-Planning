@@ -73,7 +73,7 @@ const TripCollaborationPage = () => {
     const members = membersQuery.data?.members || []
 
     for (const member of members) {
-      const rawUser = member.user || member.userId
+      const rawUser = typeof member.userId === 'object' && member.userId ? member.userId : member.user || member.userId
       const id = typeof rawUser === 'object' ? rawUser?._id : rawUser
       if (!id) {
         continue
@@ -96,7 +96,7 @@ const TripCollaborationPage = () => {
     const members = membersQuery.data?.members || []
 
     return members.map((member) => {
-      const rawUser = member.user || member.userId
+      const rawUser = typeof member.userId === 'object' && member.userId ? member.userId : member.user || member.userId
       const userIdRaw = typeof rawUser === 'object' ? rawUser?._id : rawUser
       const userId = userIdRaw ? String(userIdRaw) : ''
       const knownUser = memberMap.get(userId)

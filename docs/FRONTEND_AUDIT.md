@@ -56,6 +56,13 @@ no new external email provider is needed.
 
 ## Verification
 
+- Results: 97 frontend tests and 21 backend tests passed locally; Node 26 GitHub CI
+  passed. The production backend health endpoint reports its database connected.
+- Production reset request was accepted and the recipient confirmed email receipt.
+  The password was not changed. The original light preference was restored and verified
+  after refresh. Member-display mapping prefers the populated profile over the legacy ID.
+- Landing and populated analytics were checked at 320, 375, 768, and 1280 pixels without
+  horizontal page overflow after fixing analytics grid-card minimum widths.
 - Frontend: Jest/React Testing Library regressions for recovery, auth redirects, role
   controls, date progression, forms, tokens, keyboard primitives, themes, and toasts.
 - Backend: isolated temporary MongoDB integration tests with mocked email delivery,

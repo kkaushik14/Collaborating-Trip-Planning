@@ -63,7 +63,7 @@ test('ownership selection does not transfer until explicit confirmation; preserv
   const transfer = mutation()
   hooks.useCreateTripOwnershipTransfer.mockReturnValue(transfer)
   hooks.useTripMembers.mockReturnValue(query({ members: [
-    { _id: 'm1', userId: { _id: 'other', name: 'Alex', email: 'alex@example.com' }, role: 'EDITOR', isActive: true },
+    { _id: 'm1', user: 'other', userId: { _id: 'other', name: 'Alex', email: 'alex@example.com' }, role: 'EDITOR', isActive: true },
     { _id: 'm2', user: { _id: 'owner', name: 'Owner', email: 'owner@example.com' }, role: 'OWNER', isActive: true, commentEmailOptIn: false },
   ] }))
   renderPage(TripCollaborationPage)
