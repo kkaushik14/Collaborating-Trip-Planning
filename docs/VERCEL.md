@@ -6,6 +6,15 @@ repository root (not frontend or backend), Application Preset **Services**, and 
 `backend` (Express, entrypoint backend/index.js) and `frontend` (Vite, output dist).
 No PM2 or Docker is needed. Clear any old project-wide install/build/output overrides.
 
+Function execution is pinned to **Mumbai, India (`bom1`)** by the root `regions`
+setting. Static frontend assets remain on Vercel's global CDN. Build location may
+differ from the runtime region. This does not relocate MongoDB; configure your
+Atlas cluster in Mumbai separately if database locality is required.
+
+The frontend install command is `npm ci --include=dev`: Vite, Tailwind, and other
+build tools are dev dependencies and must be installed even when the shared
+environment sets NODE_ENV=production. The backend uses `npm ci --omit=dev`.
+
 The backend receives `/api/*`, `/health`, `/metrics`, and `/uploads/*` with their
 original paths. The final catch-all sends other requests to the frontend; its own
 vercel.json supplies the React Router fallback. No internal bindings are needed:
